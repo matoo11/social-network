@@ -3,6 +3,7 @@ package router
 import (
 	"html/template"
 	"net/http"
+	"social/backend/pkg/auth"
 )
 
 func Router(w http.ResponseWriter, r *http.Request) {
@@ -10,6 +11,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
 		RenderTemplate(w, "frontend/index.html", nil)
+	case "/api/signin":
+		auth.LoginHandler(w, r)
 	default:
 		http.NotFound(w, r)
 	}

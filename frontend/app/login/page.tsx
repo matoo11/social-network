@@ -9,15 +9,24 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-
+  const username = email;
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (email === 'admin@example.com' && password === 'password123') {
-      router.push('/dashboard');
-    } else {
-      setError('Invalid credentials');
+    const res = await fetch('http://localhost:8080/api/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+      credentials: 'include',
     }
+    );
+    if (!res.ok) throw new Error('Failed to fetch users');
+    console.log(res.status);
+
+    // if (email === 'admin@example.com' && password === 'password123') {
+    //   router.push('/dashboard');
+    // } else {
+    //   setError('Invalid credentials');
+    // }
   };
 
   return (

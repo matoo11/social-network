@@ -31,10 +31,13 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, data Login) {
 		UnauthorizedAccessHandler(w, r)
 		return
 	}
-
+	
 	if r.Method == http.MethodPost {
+		fmt.Println("here")
 		username := data.Username
 		password := data.Password
+		fmt.Println(username)
+		fmt.Println(password)
 		username = strings.TrimSpace(username)
 
 		if username == "" || password == "" {
@@ -45,18 +48,19 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, data Login) {
 
 		user, err := dbConn.VerifyUserPassword(username, password)
 		if err != nil {
+			fmt.Println(err)
 			feedBack := "wrong username or password"
 			fmt.Println((feedBack))
-			w.WriteHeader(http.StatusBadRequest)
+			ErrorPage(w, http.StatusUnauthorized)
 			RenderSigninFeedback(w, feedBack)
 			return
 		}
-
+		
 		SessionHandler(w, r, user.User_ID)
-
-	} else {
-		ErrorPage(w, http.StatusMethodNotAllowed)
-	}
+		
+		} else {
+			ErrorPage(w, http.StatusMethodNotAllowed)
+		}
 }
 
 func UnauthorizedAccessHandler(w http.ResponseWriter, r *http.Request) {

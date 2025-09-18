@@ -140,7 +140,7 @@ CREATE TABLE Posts
   FOREIGN KEY (Post_Type_ID) REFERENCES Post_Types (Post_Type_ID),
   FOREIGN KEY (Image_ID) REFERENCES Images (Image_ID)
 );
-
+--remove the post-type table and make it as a field
 CREATE TABLE Private_Posts_Users
 (
   Post_ID INTEGER NOT NULL,

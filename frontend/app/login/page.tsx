@@ -1,47 +1,42 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // ✅ Correct for App Router
+import { useRouter } from 'next/navigation';
+import { loginUser } from '@/lib/api/auth';
+import styles from './page.module.css'; // CSS Module import
 
 const LoginPage = () => {
   const router = useRouter();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const username = email;
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('http://localhost:8080/api/signin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-      credentials: 'include',
-    }
-    );
-    if (!res.ok) throw new Error('Failed to fetch users');
-    else {
-      router.push('/dashboard');
-    }
-    console.log(res.status);
+    setError(''); // Clear previous errors
 
-    // if (email === 'admin@example.com' && password === 'password123') {
-    //   router.push('/dashboard');
-    // } else {
-    //   setError('Invalid credentials');
-    // }
+    try {
+      await loginUser(email, password);
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message); // Show error message on UI instead of throwing
+      } else {
+        setError('Unexpected error occurred');
+      }
+    }
   };
 
   return (
-    <div style={styles.container}>
+    <div className={styles.loginContainer}>
       <h2>Login</h2>
-      <form onSubmit={handleLogin} style={styles.form}>
+      <form onSubmit={handleLogin} className={styles.loginForm}>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={styles.input}
+          className={styles.loginInput}
           required
         />
         <input
@@ -49,11 +44,11 @@ const LoginPage = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={styles.input}
+          className={styles.loginInput}
           required
         />
-        {error && <p style={styles.error}>{error}</p>}
-        <button type="submit" style={styles.button}>
+        {error && <p className={styles.loginError}>{error}</p>}
+        <button type="submit" className={styles.loginButton}>
           Login
         </button>
       </form>
@@ -62,36 +57,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    maxWidth: '400px',
-    margin: '100px auto',
-    padding: '2rem',
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    textAlign: 'center',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-  },
-  input: {
-    padding: '0.75rem',
-    fontSize: '1rem',
-  },
-  button: {
-    padding: '0.75rem',
-    fontSize: '1rem',
-    backgroundColor: '#0070f3',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-  },
-  error: {
-    color: 'red',
-    fontSize: '0.9rem',
-  },
-};

@@ -1,6 +1,7 @@
 package dbConn
 
 import (
+	"database/sql"
 	"fmt"
 	"social/backend/pkg/db/dbHandler"
 	"time"
@@ -56,4 +57,45 @@ func CreateUser(user User) error {
 	}
 
 	return nil
+}
+
+func GetUserByID(userID int) (User, error) {
+	statement := `
+		SELECT 
+			User_ID, User_Name, Nick_Name, Password, Email, FirstName, LastName,
+			Date_of_Birth, Gender, Image_ID, About_Me, Profile_Type_ID,
+			Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, IsActive
+		FROM Users
+		WHERE User_ID = ? AND IsActive = 1
+	`
+
+	var user User
+	err := dbHandler.DB.QueryRow(statement, userID).Scan(
+		&user.User_ID,
+		&user.User_Name,
+		&user.Nick_Name,
+		&user.Password,
+		&user.Email,
+		&user.FirstName,
+		&user.LastName,
+		&user.Date_of_Birth,
+		&user.Gender,
+		&user.Image_ID,
+		&user.About_Me,
+		&user.Profile_Type_ID,
+		&user.Created_By_ID,
+		&user.Creation_Time,
+		&user.Last_Updated_By_ID,
+		&user.Last_Updated_Time,
+		&user.IsActive,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return User{}, fmt.Errorf("user does not exist: %v", err)
+		}
+		return User{}, fmt.Errorf("failed to query user: %v", err)
+	}
+
+	return user, nil
 }

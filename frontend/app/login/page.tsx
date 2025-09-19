@@ -20,6 +20,9 @@ const LoginPage = () => {
     }
     );
     if (!res.ok) throw new Error('Failed to fetch users');
+    else {
+      router.push('/dashboard');
+    }
     console.log(res.status);
 
     // if (email === 'admin@example.com' && password === 'password123') {

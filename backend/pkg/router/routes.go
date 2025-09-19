@@ -13,7 +13,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		RenderTemplate(w, "frontend/index.html", nil)
 	case "/api/signin":
 		auth.LoginHandler(w, r)
-	// case: "/api/user":
+	case "/api/signout":
+		auth.SignoutHandler(w, r)
 
 	default:
 		http.NotFound(w, r)

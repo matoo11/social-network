@@ -22,3 +22,25 @@ export async function loginUser(username: string, password: string) {
     }
   }
 }
+
+export async function logoutUser() {
+  try {
+    const res = await fetch('http://localhost:8080/api/signout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || 'Logout failed');
+    }
+
+    return res;
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      throw new Error(err.message);
+    } else {
+      throw new Error('Unexpected error occurred');
+    }
+  }
+}

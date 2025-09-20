@@ -24,7 +24,7 @@ func VerifyUserPassword(username, password string) (*User, error) {
 			&user.User_Name,
 			&user.Password,
 			&user.Email,
-			&user.IsActive,
+			&user.Is_Active,
 		)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -42,7 +42,7 @@ func VerifyUserPassword(username, password string) (*User, error) {
 					&user.User_Name,
 					&user.Password,
 					&user.Email,
-					&user.IsActive,
+					&user.Is_Active,
 				)
 			if errr != nil {
 				if err == sql.ErrNoRows {

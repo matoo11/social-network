@@ -10,18 +10,18 @@ import (
 )
 
 type User struct {
-	User_ID                                                    int
-	User_Name, Nick_Name, Password, Email, FirstName, LastName string
-	Date_of_Birth                                              time.Time
-	Gender                                                     string
-	Image_ID                                                   int
-	About_Me                                                   string
-	Profile_Type_ID                                            int
-	Created_By_ID                                              int
-	Creation_Time                                              time.Time
-	Last_Updated_By_ID                                         int
-	Last_Updated_Time                                          time.Time
-	IsActive                                                   bool
+	User_ID                                                      int
+	User_Name, Nick_Name, Password, Email, First_Name, Last_Name string
+	Date_of_Birth                                                time.Time
+	Gender                                                       string
+	Image_ID                                                     int
+	About_Me                                                     string
+	Profile_Type_ID                                              int
+	Created_By_ID                                                int
+	Creation_Time                                                time.Time
+	Last_Updated_By_ID                                           int
+	Last_Updated_Time                                            time.Time
+	Is_Active                                                    bool
 }
 
 func CreateUser(user User) error {
@@ -51,7 +51,7 @@ func CreateUser(user User) error {
 
 	currentTime := time.Now().Format("2006-01-02 15:04:05")
 
-	_, err = dbHandler.DB.Exec(statement, user.User_Name, user.Nick_Name, hashedPassword, user.Email, user.FirstName, user.LastName, user.Date_of_Birth, user.Image_ID, user.About_Me, user.Profile_Type_ID, 1, currentTime, 1, currentTime)
+	_, err = dbHandler.DB.Exec(statement, user.User_Name, user.Nick_Name, hashedPassword, user.Email, user.First_Name, user.Last_Name, user.Date_of_Birth, user.Image_ID, user.About_Me, user.Profile_Type_ID, 1, currentTime, 1, currentTime)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %v", err)
 	}
@@ -76,8 +76,8 @@ func GetUserByID(userID int) (User, error) {
 		&user.Nick_Name,
 		&user.Password,
 		&user.Email,
-		&user.FirstName,
-		&user.LastName,
+		&user.First_Name,
+		&user.Last_Name,
 		&user.Date_of_Birth,
 		&user.Gender,
 		&user.Image_ID,
@@ -87,7 +87,7 @@ func GetUserByID(userID int) (User, error) {
 		&user.Creation_Time,
 		&user.Last_Updated_By_ID,
 		&user.Last_Updated_Time,
-		&user.IsActive,
+		&user.Is_Active,
 	)
 
 	if err != nil {

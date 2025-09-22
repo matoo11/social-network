@@ -18,7 +18,7 @@ type Login struct {
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var data Login
 
-	if err := jsonDecode(w, r, &data); err != nil {
+	if err := JsonDecode(w, r, &data); err != nil {
 		ErrorPage(w, 400)
 		return
 	}
@@ -99,14 +99,14 @@ func RenderSigninFeedback(w http.ResponseWriter, feedback string) {
 	}{
 		Feedback: feedback,
 	}
-	jsonEncode(w, signUpFeedback)
+	JsonEncode(w, signUpFeedback)
 }
 
 func ErrorPage(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
-func jsonDecode(w http.ResponseWriter, r *http.Request, data interface{}) error {
+func JsonDecode(w http.ResponseWriter, r *http.Request, data interface{}) error {
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		fmt.Println("here")
@@ -118,7 +118,7 @@ func jsonDecode(w http.ResponseWriter, r *http.Request, data interface{}) error 
 	return nil
 }
 
-func jsonEncode(w http.ResponseWriter, data interface{}) error {
+func JsonEncode(w http.ResponseWriter, data interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(data)
 	if err != nil {

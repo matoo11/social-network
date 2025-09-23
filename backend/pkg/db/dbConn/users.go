@@ -12,7 +12,7 @@ import (
 type User struct {
 	User_ID                                                      int
 	User_Name, Nick_Name, Password, Email, First_Name, Last_Name string
-	Date_of_Birth                                                time.Time
+	Date_Of_Birth                                                *time.Time
 	Gender                                                       string
 	Image_ID                                                     int
 	About_Me                                                     string
@@ -25,11 +25,11 @@ type User struct {
 }
 
 func CreateUser(user User) error {
+	fmt.Println(user.Gender)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("failed to hash password: %v", err)
 	}
-
 	statement := `INSERT INTO Users 
         (
 		User_Name,
@@ -47,11 +47,11 @@ func CreateUser(user User) error {
 		Creation_Time, 
 		Last_Updated_By_ID, 
 		Last_Updated_Time)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
 	currentTime := time.Now().Format("2006-01-02 15:04:05")
 
-	_, err = dbHandler.DB.Exec(statement, user.User_Name, user.Nick_Name, hashedPassword, user.Email, user.First_Name, user.Last_Name, user.Date_of_Birth, user.Image_ID, user.About_Me, user.Profile_Type_ID, 1, currentTime, 1, currentTime)
+	_, err = dbHandler.DB.Exec(statement, user.User_Name, user.User_Name, hashedPassword, user.Email, user.First_Name, user.Last_Name, user.Date_Of_Birth,user.Gender, user.Image_ID, user.About_Me, user.Profile_Type_ID, 1, currentTime, 1, currentTime)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %v", err)
 	}
@@ -78,7 +78,7 @@ func GetUserByID(userID int) (User, error) {
 		&user.Email,
 		&user.First_Name,
 		&user.Last_Name,
-		&user.Date_of_Birth,
+		&user.Date_Of_Birth,
 		&user.Gender,
 		&user.Image_ID,
 		&user.About_Me,

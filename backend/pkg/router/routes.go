@@ -16,7 +16,9 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	case "/api/signout":
 		auth.SignoutHandler(w, r)
 	case "/api/createPost":
-		
+	case "/api/signup":
+		auth.SignupHandler(w, r)
+
 	default:
 		http.NotFound(w, r)
 	}

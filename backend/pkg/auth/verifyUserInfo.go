@@ -42,13 +42,13 @@ const (
 // VerifyUserInfo - Verifies the provided user details, ensuring they meet validation criteria.
 func VerifyUserInfo(userInfo SignupRequest) error {
 	verifications := []func() error{
-		func() error { return VerifyNickname(userInfo.Nickname) },
+		func() error { return VerifyNickname(userInfo.Username) },
 		func() error { return VerifyEmail(userInfo.Email) },
 		func() error { return VerifyPassword(userInfo.Password) },
 		func() error { return VerifyConfirmPassword(userInfo.ConfirmPassword, userInfo.Password) },
 		func() error { return VerifyName(userInfo.FirstName) },
 		func() error { return VerifyName(userInfo.LastName) },
-		func() error { return VerifyAge(userInfo.DateOfBirth) }, //TODO: change to DateOfBirth
+		func() error { return VerifyDateOfBirth(userInfo.DateOfBirth) },
 		func() error { return VerifyGender(userInfo.Gender) },
 	}
 
@@ -64,6 +64,22 @@ func VerifyUserInfo(userInfo SignupRequest) error {
 // ============================================================
 //                   Main Functions
 // ============================================================
+
+func VerifyDateOfBirth(dob *time.Time) error {
+	if dob == nil {
+		return fmt.Errorf("date of birth cannot be empty")
+	}
+	age, err := CalculateAge(dob)
+	if err != nil {
+		return err
+	}
+
+	if age < MinAge {
+		return fmt.Errorf("user must be at least %d years old", MinAge)
+	}
+
+	return nil
+}
 
 func VerifyNickname(nickname string) error {
 	if len(nickname) < MinNicknameLength {

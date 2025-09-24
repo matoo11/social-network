@@ -1,8 +1,6 @@
 package dbConn
 
 import (
-	"database/sql"
-	"fmt"
 	"social/backend/pkg/db/dbHandler"
 	"time"
 )
@@ -18,10 +16,8 @@ type Post struct {
 	IsActive        bool
 }
 
-func CreatePost(post Post, categories []string) error {
-	if len(categories) == 0 {
-		categories = append(categories, "General")
-	}
+func CreatePost(post Post) error {
+
 	statement := `INSERT INTO Posts
     (
         Post_Text,
@@ -74,42 +70,7 @@ func CreatePost(post Post, categories []string) error {
 	VALUES
     (?, ?, ?, ?, ?, ?)`
 
-	for _, category := range categories {
-		categoryID, err := GetCategoryIDFromCategoryText(category)
-		if err != nil {
-			return err
-		}
-
-		_, err = dbHandler.DB.Exec(
-			statement,
-			postID,
-			categoryID,
-			post.CreatedByID,
-			formattedCurrentTime,
-			post.LastUpdatedByID,
-			formattedCurrentTime,
-		)
-		if err != nil {
-			return err
-		}
-
-	}
 	return nil
-}
-
-func GetCategoryIDFromCategoryText(categoryText string) (int, error) {
-	statement := `SELECT Category_ID FROM Categories WHERE Category_Text = ? AND Is_Active = 1`
-
-	var CategoryID int
-	err := dbHandler.DB.QueryRow(statement, categoryText).Scan(&CategoryID)
-
-	if err == sql.ErrNoRows {
-		return 0, fmt.Errorf("no category found with text: %s", categoryText)
-	}
-	if err != nil {
-		return 0, err
-	}
-	return CategoryID, nil
 }
 
 func DeletePost(post Post) error {

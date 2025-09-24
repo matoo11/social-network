@@ -24,7 +24,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("here1")
 	data := struct {
 		Message    string   `json:"message"`
-		Catigories []string `json:"catigories"`
 	}{}
 	if err := auth.JsonDecode(w, r, &data); err != nil {
 		auth.ErrorPage(w, 400)
@@ -32,15 +31,9 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	message := data.Message
-	categories := data.Catigories
+	
 	fmt.Println(message)
-	fmt.Println(categories)
-	validCategories := map[string]bool{
-		"":        true,
-		"General": true,
-		"Sport":   true,
-		"Gaming":  true,
-	}
+	
 	if len(message) >= 600 {
 		http.Error(w, "The post length exceeded 600 characters", http.StatusBadRequest)
 		return
@@ -54,24 +47,10 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	fmt.Println(len(categories))
-	if len(categories) == 1 {
-		if categories[0] == "" {
-
-			fmt.Println("'cats'")
-			categories[0] = "General"
-		}
-	}
-	for _, category := range categories {
-		if !validCategories[category] {
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
-		}
-	}
 
 	post := dbConn.Post{
 		PostText: message,
 		UserID:   LoggedInUserID,
 	}
-	dbConn.CreatePost(post, categories)
+	dbConn.CreatePost(post)
 }

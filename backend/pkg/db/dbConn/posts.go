@@ -1,13 +1,16 @@
 package dbConn
 
 import (
+	"fmt"
 	"social/backend/pkg/db/dbHandler"
 	"time"
 )
 
 type Post struct {
 	PostID          int
+	PostTitle       string
 	PostText        string
+	PostTypeID      int
 	UserID, ImageID int
 	CreatedByID     int
 	CreationTime    time.Time
@@ -17,10 +20,12 @@ type Post struct {
 }
 
 func CreatePost(post Post) error {
-
+	fmt.Println("here19")
 	statement := `INSERT INTO Posts
     (
+		Post_Title,
         Post_Text,
+		Post_Type_ID,
         User_ID,
         Image_ID,
         Created_By_ID,
@@ -29,13 +34,15 @@ func CreatePost(post Post) error {
         Last_Updated_Time
     )
 	VALUES
-    (?, ?, ?, ?, ?, ?, ?)`
+    (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
 
 	_, err := dbHandler.DB.Exec(
 		statement,
+		post.PostTitle,
 		post.PostText,
+		post.PostTypeID,
 		post.UserID,
 		post.ImageID,
 		post.CreatedByID,
@@ -44,9 +51,9 @@ func CreatePost(post Post) error {
 		formattedCurrentTime,
 	)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
-
 	statement = `SELECT Post_ID FROM Posts
 				WHERE Is_Active = 1
 				ORDER BY Post_ID DESC
@@ -58,18 +65,7 @@ func CreatePost(post Post) error {
 		return err
 	}
 
-	statement = `INSERT INTO Post_Categories
-    (
-        Post_ID,
-        Category_ID,
-        Created_By_ID,
-        Creation_Time,
-        Last_Updated_By_ID,
-        Last_Updated_Time
-    )
-	VALUES
-    (?, ?, ?, ?, ?, ?)`
-
+	fmt.Println("here9")
 	return nil
 }
 

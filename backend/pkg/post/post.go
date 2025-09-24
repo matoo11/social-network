@@ -3,8 +3,8 @@ package post
 import (
 	"fmt"
 	"net/http"
-	"social/backend/pkg/db/dbConn"
 	"social/backend/pkg/auth"
+	"social/backend/pkg/db/dbConn"
 	"strings"
 )
 
@@ -23,7 +23,9 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("here1")
 	data := struct {
-		Message    string   `json:"message"`
+		Message    string `json:"message"`
+		Title      string `json:"title"`
+		PostTypeID int    `json:"typeId"`
 	}{}
 	if err := auth.JsonDecode(w, r, &data); err != nil {
 		auth.ErrorPage(w, 400)
@@ -31,11 +33,16 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	message := data.Message
-	
+	title := data.Title
+	typeID := data.PostTypeID
 	fmt.Println(message)
-	
+
 	if len(message) >= 600 {
 		http.Error(w, "The post length exceeded 600 characters", http.StatusBadRequest)
+		return
+	}
+	if len(title) >= 60 {
+		http.Error(w, "The post title length exceeded 60 characters", http.StatusBadRequest)
 		return
 	}
 	val := len(strings.TrimSpace(message)) == 0
@@ -49,8 +56,10 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post := dbConn.Post{
-		PostText: message,
-		UserID:   LoggedInUserID,
+		PostText:  message,
+		UserID:    LoggedInUserID,
+		PostTitle: title,
+		PostTypeID: typeID,
 	}
 	dbConn.CreatePost(post)
 }

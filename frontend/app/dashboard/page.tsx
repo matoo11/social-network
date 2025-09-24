@@ -33,6 +33,34 @@ const Dashboard = () => {
     }
   };
 
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      const res = await fetch('http://localhost:8080/api/createPost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({message: "hello how are you", typeId: 1, title: "hla"})
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to logout');
+      }
+
+    //   router.push('/login');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Unexpected error occurred');
+      }
+    }
+  };
+
+  
+
   return (
     <div className={styles.dashboardContainer}>
       <h1>Welcome to the Dashboard!</h1>
@@ -42,6 +70,12 @@ const Dashboard = () => {
           {error && <p className={styles.error}>{error}</p>}
           <button type="submit" className={styles.logoutButton}>
             Logout
+          </button>
+        </form>
+        <form onSubmit={handleCreate} className={styles.logoutForm}>
+          {error && <p className={styles.error}>{error}</p>}
+          <button type="submit" className={styles.logoutButton}>
+            post
           </button>
         </form>
       </div>

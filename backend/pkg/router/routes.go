@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"social/backend/pkg/auth"
+	"social/backend/pkg/comment"
 	"social/backend/pkg/post"
 )
 
@@ -18,6 +19,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		auth.SignoutHandler(w, r)
 	case "/api/createPost":
 		post.CreatePostHandler(w, r)
+	case "/api/createComment":
+		comment.CreateCommentHandler(w, r)
 	case "/api/signup":
 		auth.SignupHandler(w, r)
 

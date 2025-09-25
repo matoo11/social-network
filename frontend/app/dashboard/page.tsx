@@ -59,6 +59,32 @@ const Dashboard = () => {
     }
   };
 
+  const handleComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      const res = await fetch('http://localhost:8080/api/createComment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({commentText: "hello how are you", postID: 1})
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to logout');
+      }
+
+    //   router.push('/login');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Unexpected error occurred');
+      }
+    }
+  };
+
   
 
   return (
@@ -73,6 +99,12 @@ const Dashboard = () => {
           </button>
         </form>
         <form onSubmit={handleCreate} className={styles.logoutForm}>
+          {error && <p className={styles.error}>{error}</p>}
+          <button type="submit" className={styles.logoutButton}>
+            post
+          </button>
+        </form>
+        <form onSubmit={handleComment} className={styles.logoutForm}>
           {error && <p className={styles.error}>{error}</p>}
           <button type="submit" className={styles.logoutButton}>
             post

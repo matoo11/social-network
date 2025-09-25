@@ -11,7 +11,8 @@ type Post struct {
 	PostTitle       string
 	PostText        string
 	PostTypeID      int
-	UserID, ImageID int
+	UserID          int
+	ImageID         *int
 	CreatedByID     int
 	CreationTime    time.Time
 	LastUpdatedByID int

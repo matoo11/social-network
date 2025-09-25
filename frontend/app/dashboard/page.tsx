@@ -68,7 +68,7 @@ const Dashboard = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({commentText: "hello how are you", postID: 1})
+        body: JSON.stringify({commentText: "hello how are you", postID: 10})
       });
 
       if (!res.ok) {

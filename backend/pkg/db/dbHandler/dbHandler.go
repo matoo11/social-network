@@ -38,6 +38,12 @@ func OpenDB() error {
 		return fmt.Errorf("failed to open DB: %v", err)
 	}
 
+	// ✅ Enable foreign key constraints
+	_, err = DB.Exec("PRAGMA foreign_keys = ON;")
+	if err != nil {
+		return fmt.Errorf("failed to enable foreign key constraints: %v", err)
+	}
+
 	if recreatedFlag {
 		err = CreateAdminUser()
 		if err != nil {
@@ -63,6 +69,13 @@ func ReCreateDB(sqlCommandsFilePath, dbFilePath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open DB: %v", err)
 	}
+
+	// ✅ Enable foreign key constraints
+	_, err = DB.Exec("PRAGMA foreign_keys = ON;")
+	if err != nil {
+		return fmt.Errorf("failed to enable foreign key constraints: %v", err)
+	}
+
 	defer DB.Close()
 
 	// Split SQL commands and Convert it to string
@@ -96,7 +109,7 @@ func CreateAdminUser() error {
 		DateOfBirth                         time.Time
 		Gender                              string
 		ImageID, ProfileTypeID              int
-		IsActive                             bool
+		IsActive                            bool
 	}{
 		UserName:      "admin_user",
 		Nickname:      "admin",
@@ -244,4 +257,3 @@ func CreateTestUsers() error {
 
 	return nil
 }
-

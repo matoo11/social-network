@@ -39,7 +39,8 @@ CREATE TABLE Images
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Image_ID AUTOINCREMENT),
-  FOREIGN KEY (Image_Usage_Type_ID) REFERENCES Image_Usage_Types (Image_Usage_Type_ID),
+  FOREIGN KEY (Image_Usage_Type_ID) REFERENCES Image_Usage_Types (Image_Usage_Type_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   CHECK (length(Image_Filename) <= 255),
   CHECK (length(Image_Mimetype) <= 100)
 );
@@ -65,6 +66,7 @@ CREATE TABLE Users
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (User_ID AUTOINCREMENT),
   FOREIGN KEY (Profile_Type_ID) REFERENCES Profile_Types (Profile_Type_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Followers
@@ -77,8 +79,10 @@ CREATE TABLE Followers
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Follower_ID, followed_ID),
-  FOREIGN KEY (Follower_ID) REFERENCES Users (User_ID),
+  FOREIGN KEY (Follower_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   FOREIGN KEY (Followed_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Follow_Requests
@@ -93,9 +97,12 @@ CREATE TABLE Follow_Requests
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Request_ID AUTOINCREMENT),
-  FOREIGN KEY (Requester_ID) REFERENCES Users (User_ID),
-  FOREIGN KEY (Receiver_ID) REFERENCES Users (User_ID),
+  FOREIGN KEY (Requester_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Receiver_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   FOREIGN KEY (Status_ID) REFERENCES Statuses (Status_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Statuses
@@ -129,18 +136,23 @@ CREATE TABLE Posts
   Post_Text TEXT NOT NULL CHECK (length(Post_Text) <= 2000),
   User_ID   INTEGER NOT NULL,
   Post_Type_ID INTEGER NOT NULL,
-  Image_ID  INTEGER,
+  Image_ID  INTEGER DEFAULT NULL,
   Created_By_ID      INTEGER  NOT NULL,
   Creation_Time      DATETIME NOT NULL,
   Last_Updated_By_ID INTEGER  NOT NULL,
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Post_ID AUTOINCREMENT),
-  FOREIGN KEY (User_ID) REFERENCES Users (User_ID),
-  FOREIGN KEY (Post_Type_ID) REFERENCES Post_Types (Post_Type_ID),
-  FOREIGN KEY (Image_ID) REFERENCES Images (Image_ID)
+  FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Post_Type_ID) REFERENCES Post_Types (Post_Type_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (Image_ID) REFERENCES Images (Image_ID)
+    ON UPDATE CASCADE ON DELETE SET DEFAULT
 );
+
 --remove the post-type table and make it as a field
+
 CREATE TABLE Private_Posts_Users
 (
   Post_ID INTEGER NOT NULL,
@@ -151,8 +163,10 @@ CREATE TABLE Private_Posts_Users
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Post_ID, User_ID),
-  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID),
+  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Comments
@@ -166,7 +180,8 @@ CREATE TABLE Comments
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Comment_ID AUTOINCREMENT),
-  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID),
+  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   CHECK (length(Comment_Text) <= 1000)
 );
 
@@ -182,8 +197,10 @@ CREATE TABLE Post_Likes
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Post_Like_ID AUTOINCREMENT),
-  FOREIGN KEY (User_ID) REFERENCES Users (User_ID),
-  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID),
+  FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT unique_user_post UNIQUE (User_ID, Post_ID)
 );
 
@@ -200,9 +217,12 @@ CREATE TABLE Comment_Likes
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Comment_Like_ID AUTOINCREMENT),
-  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID),
-  FOREIGN KEY (User_ID) REFERENCES Users (User_ID),
-  FOREIGN KEY (Comment_ID) REFERENCES Comments (Comment_ID),
+  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Comment_ID) REFERENCES Comments (Comment_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT unique_user_post_comment UNIQUE (User_ID, Post_ID, Comment_ID)
 );
 
@@ -219,6 +239,7 @@ CREATE TABLE User_Groups
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Group_ID AUTOINCREMENT),
   FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Group_Users
@@ -231,8 +252,10 @@ CREATE TABLE Group_Users
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Group_ID, User_ID),
-  FOREIGN KEY (Group_ID) REFERENCES User_Groups (Group_ID),
+  FOREIGN KEY (Group_ID) REFERENCES User_Groups (Group_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Group_Invite_Requests
@@ -248,10 +271,14 @@ CREATE TABLE Group_Invite_Requests
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Invite_Request_ID AUTOINCREMENT),
-  FOREIGN KEY (Group_ID) REFERENCES User_Groups (Group_ID),
-  FOREIGN KEY (Inviter_ID) REFERENCES Users (User_ID),
-  FOREIGN KEY (Invitee_ID) REFERENCES Users (User_ID),
+  FOREIGN KEY (Group_ID) REFERENCES User_Groups (Group_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Inviter_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Invitee_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   FOREIGN KEY (Status_ID) REFERENCES Statuses (Status_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Events
@@ -268,6 +295,7 @@ CREATE TABLE Events
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Event_ID AUTOINCREMENT),
   FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Event_Options
@@ -293,9 +321,12 @@ CREATE TABLE Events_Users_Options
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Event_ID, User_ID),
-  FOREIGN KEY (Event_ID) REFERENCES Events (Event_ID),
-  FOREIGN KEY (Event_Option_ID) REFERENCES Event_Options (Event_Option_ID),
+  FOREIGN KEY (Event_ID) REFERENCES Events (Event_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Event_Option_ID) REFERENCES Event_Options (Event_Option_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Group_Posts
@@ -309,8 +340,10 @@ CREATE TABLE Group_Posts
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Group_Post_ID AUTOINCREMENT),
-  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID),
+  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   FOREIGN KEY (Group_ID) REFERENCES User_Groups (Group_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Group_Comments
@@ -324,7 +357,8 @@ CREATE TABLE Group_Comments
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Group_Comment_ID AUTOINCREMENT),
-  FOREIGN KEY (Group_Post_ID) REFERENCES Group_Posts (Group_Post_ID),
+  FOREIGN KEY (Group_Post_ID) REFERENCES Group_Posts (Group_Post_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   CHECK (length(Comment_Text) <= 1000)
 );
 
@@ -341,8 +375,10 @@ CREATE TABLE Messages
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Message_ID AUTOINCREMENT),
-  FOREIGN KEY (Sender_ID) REFERENCES Users (User_ID),
+  FOREIGN KEY (Sender_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   FOREIGN KEY (Receiver_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Group_Messages 
@@ -357,8 +393,10 @@ CREATE TABLE Group_Messages
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Group_Message_ID AUTOINCREMENT),
-  FOREIGN KEY (Sender_ID) REFERENCES Users (User_ID),
+  FOREIGN KEY (Sender_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   FOREIGN KEY (Group_ID) REFERENCES User_Groups (Group_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Notification_Types
@@ -387,9 +425,15 @@ CREATE TABLE Notifications
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Notification_ID AUTOINCREMENT),
-  FOREIGN KEY (Source_ID) REFERENCES Users (User_ID),
-  FOREIGN KEY (Target_ID) REFERENCES Users (User_ID),
+  FOREIGN KEY (Source_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  FOREIGN KEY (Target_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
   FOREIGN KEY (Notification_Type_ID) REFERENCES Notification_Types (Notification_Type_ID)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 );
 
 CREATE TABLE Sessions
@@ -403,5 +447,40 @@ CREATE TABLE Sessions
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Session_ID),
-  FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+  FOREIGN KEY (User_ID) REFERENCES Users (User_ID) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+INSERT INTO Profile_Types (Profile_Type_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
+('Public', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Private', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);
+
+INSERT INTO Post_Types (Post_Type_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
+('Public', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Almost Private', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Private', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);
+
+INSERT INTO Image_Usage_Types (Image_Usage_Type_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
+('Profile Image', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Post Image', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Group Post Image', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Group Profile Image', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);
+
+INSERT INTO Statuses (Status_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
+('Pending', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Accepted', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Rejected', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);
+
+INSERT INTO Notification_Types (Notification_Type_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
+('Private Message', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Group Message', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Follow Request', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Follow Accepted', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Follow Rejected', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Group Invite', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Group Invite Accepted', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Group Invite Rejected', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Event Invitation', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);   
+
+INSERT INTO EVENT_OPTIONS (Event_Option_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
+('Going', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Not Going', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);

@@ -19,11 +19,14 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		auth.SignoutHandler(w, r)
 	case "/api/createPost":
 		post.CreatePostHandler(w, r)
+	case "/api/getPublicPosts":
+		post.GetPublicPosts(w, r)
+	case "/api/getPrivatePosts":
+
 	case "/api/createComment":
 		comment.CreateCommentHandler(w, r)
 	case "/api/signup":
 		auth.SignupHandler(w, r)
-
 	default:
 		http.NotFound(w, r)
 	}

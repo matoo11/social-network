@@ -63,3 +63,27 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	dbConn.CreatePost(post)
 }
+
+func GetPublicPosts(w http.ResponseWriter, r *http.Request) {
+	// var LoggedInUserID int
+	// fmt.Println("ok")
+	_, err := dbConn.GetSessionFromCookie(r)
+	// fmt.Println("ok")
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	} else {
+		// LoggedInUserID = session.UserID
+	}
+	posts, err := dbConn.GetPublicPosts()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = auth.JsonEncode(w,posts)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}

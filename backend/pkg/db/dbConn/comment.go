@@ -18,6 +18,14 @@ type Comment struct {
 	IsActive        bool
 }
 
+type CommentDisplay struct {
+	CommentID int
+	CommentText string
+	PostID          int
+	CreatedByID     int
+	CreationTime    time.Time
+}
+
 func CreateComment(comment Comment) error {
 	statement := `INSERT INTO Comments 
 		( 
@@ -29,7 +37,7 @@ func CreateComment(comment Comment) error {
             Last_Updated_Time
         ) 
         VALUES (?, ?, ?, ?, ?, ?)`
-	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	_, err := dbHandler.DB.Exec(
 		statement,
@@ -67,11 +75,17 @@ func DeleteComment(comment Comment, loggedInUserID int) error {
 	return nil
 }
 
+// CommentID int
+// 	CommentText string
+// 	PostID          int
+// 	CreatedByID     int
+// 	CreationTime    time.Time
+
 // ===================================================================================
-func GetCommentsByPostID(postID int) ([]Comment, error) {
-	var comments []Comment
+func GetCommentsByPostID(postID int) ([]CommentDisplay, error) {
+	var comments []CommentDisplay
 	statement := `SELECT Comment_ID, Comment_Text, Post_ID, Created_By_ID, 
-		Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active 
+		Creation_Time
 		FROM Comments WHERE Post_ID = ? AND Is_Active = 1`
 	data, err := dbHandler.DB.Query(statement, postID)
 	if err != nil {
@@ -79,10 +93,9 @@ func GetCommentsByPostID(postID int) ([]Comment, error) {
 	}
 	defer data.Close()
 	for data.Next() {
-		var comment Comment
+		var comment CommentDisplay
 		err := data.Scan(&comment.CommentID, &comment.CommentText, &comment.PostID,
-			&comment.CreatedByID, &comment.CreationTime, &comment.LastUpdatedByID,
-			&comment.LastUpdatedTime, &comment.IsActive)
+			&comment.CreatedByID, &comment.CreationTime)
 		if err != nil {
 			return nil, err
 		}

@@ -126,3 +126,42 @@ func GetPublicPosts() ([]PostDisplay, error) {
 
 	return posts, nil
 }
+
+
+//this needs to fix after doing followers
+func GetPrivatePosts() ([]PostDisplay, error) {
+	statement := `SELECT Post_ID, Post_Title, Post_Text, User_ID, Post_Type_ID, Image_ID, Creation_Time FROM Posts WHERE Is_Active = 1 AND Post_Type_ID = 3 ORDER BY Creation_Time DESC`
+
+	rows, err := dbHandler.DB.Query(statement)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat messages: %v", err)
+	}
+	defer rows.Close()
+
+	var posts []PostDisplay
+	for rows.Next() {
+		var post PostDisplay
+
+		err := rows.Scan(
+			&post.PostID,
+			&post.PostTitle,
+			&post.PostText,
+			&post.UserID,
+			&post.PostTypeID,
+			&post.ImageID,
+			&post.CreationTime,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan chat message: %v", err)
+		}
+
+		post.Comments, err = GetCommentsByPostID(post.PostID)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}

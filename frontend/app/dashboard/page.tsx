@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
+import PostCard from '@/components/PostCard/PostCard';
 
 const Dashboard = () => {
   const router = useRouter();
@@ -42,14 +43,14 @@ const Dashboard = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({message: "hello how are you", typeId: 1, title: "hla"})
+        body: JSON.stringify({ message: 'hello how are you', typeId: 1, title: 'hla' }),
       });
 
       if (!res.ok) {
         throw new Error('Failed to logout');
       }
 
-    //   router.push('/login');
+      //   router.push('/login');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -68,14 +69,14 @@ const Dashboard = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({commentText: "hello how are you", postID: 10})
+        body: JSON.stringify({ commentText: 'hello how are you', postID: 10 }),
       });
 
       if (!res.ok) {
         throw new Error('Failed to logout');
       }
 
-    //   router.push('/login');
+      //   router.push('/login');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -84,8 +85,6 @@ const Dashboard = () => {
       }
     }
   };
-
-  
 
   return (
     <div className={styles.dashboardContainer}>
@@ -110,6 +109,15 @@ const Dashboard = () => {
             post
           </button>
         </form>
+        <PostCard
+          postID={123}
+          title="Hello World"
+          content="This is a sample post."
+          onLike={() => {
+            console.log('Parent received like event for post 123');
+            // Optional: make API call, update state, etc.
+          }}
+        />
       </div>
     </div>
   );

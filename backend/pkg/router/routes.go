@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"social/backend/pkg/auth"
 	"social/backend/pkg/comment"
+	"social/backend/pkg/follow"
 	"social/backend/pkg/post"
 )
 
@@ -27,6 +28,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		comment.CreateCommentHandler(w, r)
 	case "/api/signup":
 		auth.SignupHandler(w, r)
+	case "/api/addFollow":
+		follow.AddFollow(w, r)
 	default:
 		http.NotFound(w, r)
 	}

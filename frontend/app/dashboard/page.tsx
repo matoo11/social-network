@@ -85,6 +85,32 @@ const Dashboard = () => {
     }
   };
 
+  const handleFollow = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      const res = await fetch('http://localhost:8080/api/addFollow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({userID: 100})
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to logout');
+      }
+
+    //   router.push('/login');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Unexpected error occurred');
+      }
+    }
+  };
+
   
 
   return (
@@ -108,6 +134,12 @@ const Dashboard = () => {
           {error && <p className={styles.error}>{error}</p>}
           <button type="submit" className={styles.logoutButton}>
             post
+          </button>
+        </form>
+        <form onSubmit={handleFollow} className={styles.logoutForm}>
+          {error && <p className={styles.error}>{error}</p>}
+          <button type="submit" className={styles.logoutButton}>
+            follow
           </button>
         </form>
       </div>

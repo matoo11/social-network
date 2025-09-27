@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './PostCard.module.css';
+import Image from 'next/image';
 
 type PostCardUIProps = {
   postID: number;
@@ -55,7 +56,7 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
 
         {/* Header */}
         <div className={styles.postCardHeader}>
-          <img
+          <Image
             className={styles.posterProfileImage}
             src={posterProfileImageUrl}
             alt="post-creator-icon"

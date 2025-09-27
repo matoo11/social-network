@@ -60,6 +60,8 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
             className={styles.posterProfileImage}
             src={posterProfileImageUrl}
             alt="post-creator-icon"
+              width={40}
+              height={40}
           />
           <h1 className={styles.posterNickname}>{posterNickname}</h1>
           {createdAt && <p className={styles.postTime}>Posted on {createdAt}</p>}

@@ -2,6 +2,7 @@ package dbConn
 
 import (
 	"fmt"
+	"log"
 	"social/backend/pkg/db/dbHandler"
 	"time"
 )
@@ -96,4 +97,30 @@ func IsFollowing(followerID int, followedID int) (bool, error) {
 	}
 	return exists, nil
 
+}
+
+func RequestStatus(requesterID int, requestedID int) (int, error) {
+	var status int
+	err := dbHandler.DB.QueryRow(`
+        SELECT Status_ID FROM Follow_Requests
+        WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1`,
+		requesterID, requestedID).Scan(&status)
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+	return status, nil
+}
+
+func DeleteFollow(followerID int, followedID int) error {
+
+	statement := `DELETE FROM Followers WHERE Follower_ID = ? AND Followed_ID = ?`
+
+	_, err := dbHandler.DB.Exec(statement, followerID, followedID)
+	if err != nil {
+		log.Println("Error deleting follower:", err)
+		return fmt.Errorf("failed to delete follow")
+	}
+
+	return nil
 }

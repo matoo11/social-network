@@ -1,6 +1,7 @@
 package follow
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"social/backend/pkg/auth"
@@ -9,9 +10,9 @@ import (
 
 func AddFollow(w http.ResponseWriter, r *http.Request) {
 	var LoggedInUserID int
-	// fmt.Println("ok")
+
 	session, err := dbConn.GetSessionFromCookie(r)
-	// fmt.Println("ok")
+
 	if err != nil {
 		auth.ErrorPage(w, 401)
 		return
@@ -40,4 +41,54 @@ func AddFollow(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+}
+
+func FollowStatus(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
+	session, err := dbConn.GetSessionFromCookie(r)
+
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	} else {
+		LoggedInUserID = session.UserID
+	}
+
+	data := struct {
+		FollowedID int `json:"userID"`
+	}{}
+
+	if err := auth.JsonDecode(w, r, &data); err != nil {
+		auth.ErrorPage(w, http.StatusBadRequest)
+		return
+	}
+	status := 0
+	isFollowing, err := dbConn.IsFollowing(LoggedInUserID, data.FollowedID)
+	if err != nil {
+		auth.ErrorPage(w, 500)
+		return
+	}
+
+	if !isFollowing {
+		checkRequest, err := dbConn.RequestStatus(LoggedInUserID, data.FollowedID)
+		if err != nil {
+			if err != sql.ErrNoRows {
+				auth.ErrorPage(w, 500)
+				fmt.Println("here")
+				return
+			}
+			status = 3
+		} else {
+			status = checkRequest
+		}
+	} else {
+		status = 2
+	}
+
+	if err := auth.JsonEncode(w, status); err != nil {
+		fmt.Println("encode")
+		auth.ErrorPage(w, 500)
+		return
+	}
+
 }

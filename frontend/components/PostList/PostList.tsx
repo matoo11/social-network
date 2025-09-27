@@ -1,14 +1,14 @@
-// components/PostList.tsx
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import PostListUI from './PostListUI';
 import { PostListUIProps } from './types';
 
 const PostList: React.FC = () => {
-  // State holds an array of Post, not the entire PostListUIProps object
   const [posts, setPosts] = useState<PostListUIProps['posts']>([]);
 
   useEffect(() => {
-    // Replace with actual API call
+    //TODO: need to replace with actual API call
     const fetchPosts = async () => {
       const mockData: PostListUIProps['posts'] = [
         {

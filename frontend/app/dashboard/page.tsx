@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import PostCard from '@/components/PostCard/PostCard';
+import PostList from '@/components/PostList/PostList';
 
 const Dashboard = () => {
   const router = useRouter();
@@ -118,6 +119,7 @@ const Dashboard = () => {
             // Optional: make API call, update state, etc.
           }}
         />
+        <PostList />
       </div>
     </div>
   );

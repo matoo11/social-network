@@ -1,21 +1,7 @@
 import React from 'react';
 import styles from './PostCard.module.css';
 import Image from 'next/image';
-
-type PostCardUIProps = {
-  postID: number;
-  title: string;
-  content: string;
-  posterNickname?: string;
-  posterProfileImageUrl?: string;
-  createdAt?: string;
-  likesCount?: number;
-  dislikesCount?: number;
-  commentsCount?: number;
-  onLike?: () => void;
-  onDislike?: () => void;
-  onComment?: () => void;
-};
+import { PostCardUIProps } from './types';
 
 const PostCardUI: React.FC<PostCardUIProps> = ({
   postID,
@@ -60,8 +46,8 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
             className={styles.posterProfileImage}
             src={posterProfileImageUrl}
             alt="post-creator-icon"
-              width={40}
-              height={40}
+            width={40}
+            height={40}
           />
           <h1 className={styles.posterNickname}>{posterNickname}</h1>
           {createdAt && <p className={styles.postTime}>Posted on {createdAt}</p>}

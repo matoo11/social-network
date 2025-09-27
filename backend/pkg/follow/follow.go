@@ -92,3 +92,30 @@ func FollowStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func UnFollow(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
+	session, err := dbConn.GetSessionFromCookie(r)
+
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	} else {
+		LoggedInUserID = session.UserID
+	}
+
+	data := struct {
+		FollowedID int `json:"userID"`
+	}{}
+
+	if err := auth.JsonDecode(w, r, &data); err != nil {
+		auth.ErrorPage(w, http.StatusBadRequest)
+		return
+	}
+
+	err = dbConn.DeleteFollow(LoggedInUserID,data.FollowedID)
+
+	if err != nil {
+		auth.ErrorPage(w, 400)
+	}
+}

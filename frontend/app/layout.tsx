@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import Navbar from '@/components/Navbar/Navbar';
+import ChatList from '@/components/ChatList/ChatList';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,7 +35,15 @@ export default function RootLayout({
           referrerPolicy="no-referrer"
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {children}
+        <Navbar />
+
+        <ChatList
+          chats={[]}
+        />
+        <main style={{ paddingTop: '72px' }}>{children}</main>
+      </body>
     </html>
   );
 }

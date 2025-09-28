@@ -138,6 +138,61 @@ const Dashboard = () => {
         }
     };
 
+    const unfollow = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const res = await fetch('http://localhost:8080/api/unFollow', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ userID: 4 })
+            });
+
+            if (!res.ok) {
+                console.log(await res.json())
+                throw new Error('Failed to logout');
+            }
+            console.log(res.status)
+
+            //   router.push('/login');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
+    };
+
+    const getFollowers = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const res = await fetch('http://localhost:8080/api/getFollowers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ userID: 5 })
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to logout');
+            }
+            console.log(await res.json())
+
+            //   router.push('/login');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
+    };
+
 
 
     return (
@@ -173,6 +228,18 @@ const Dashboard = () => {
                     {error && <p className={styles.error}>{error}</p>}
                     <button type="submit" className={styles.logoutButton}>
                         check status
+                    </button>
+                </form>
+                <form onSubmit={unfollow} className={styles.logoutForm}>
+                    {error && <p className={styles.error}>{error}</p>}
+                    <button type="submit" className={styles.logoutButton}>
+                        unfollow
+                    </button>
+                </form>
+                <form onSubmit={getFollowers} className={styles.logoutForm}>
+                    {error && <p className={styles.error}>{error}</p>}
+                    <button type="submit" className={styles.logoutButton}>
+                        getFollowers
                     </button>
                 </form>
             </div>

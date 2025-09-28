@@ -30,8 +30,12 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		auth.SignupHandler(w, r)
 	case "/api/addFollow":
 		follow.AddFollow(w, r)
+	case "/api/unFollow":
+		follow.UnFollow(w, r)
 	case "/api/checkFollowStatus":
 		follow.FollowStatus(w, r)
+	case "/api/getFollowers":
+		follow.GetFollowers(w, r)
 	default:
 		http.NotFound(w, r)
 	}

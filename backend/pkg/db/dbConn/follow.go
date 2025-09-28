@@ -73,8 +73,8 @@ func GetFollowersByUserID(userID int) ([]FollowDisplay, error) {
 		var follow FollowDisplay
 
 		err := rows.Scan(
-			follow.FollowerID,
-			follow.FollowerID,
+			&follow.FollowerID,
+			&follow.FollowerID,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan chat message: %v", err)

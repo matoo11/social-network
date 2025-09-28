@@ -113,9 +113,42 @@ func UnFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = dbConn.DeleteFollow(LoggedInUserID,data.FollowedID)
+	err = dbConn.DeleteFollow(LoggedInUserID, data.FollowedID)
 
 	if err != nil {
 		auth.ErrorPage(w, 400)
 	}
+}
+
+func GetFollowers(w http.ResponseWriter, r *http.Request) {
+	
+	_, err := dbConn.GetSessionFromCookie(r)
+
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	} else {
+		// LoggedInUserID = session.UserID
+	}
+
+	data := struct {
+		FollowedID int `json:"userID"`
+	}{}
+
+	if err := auth.JsonDecode(w, r, &data); err != nil {
+		auth.ErrorPage(w, http.StatusBadRequest)
+		return
+	}
+
+	followers, err := dbConn.GetFollowersByUserID(data.FollowedID)
+
+	if err != nil {
+		fmt.Println(err)
+		auth.ErrorPage(w, 400)
+	}
+	if err := auth.JsonEncode(w, followers); err != nil {
+		auth.ErrorPage(w, 500)
+		return
+	}
+
 }

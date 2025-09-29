@@ -65,16 +65,6 @@ func CreatePost(post Post) error {
 		fmt.Println(err)
 		return err
 	}
-	statement = `SELECT Post_ID FROM Posts
-				WHERE Is_Active = 1
-				ORDER BY Post_ID DESC
-				LIMIT 1;`
-
-	var postID int
-	err = dbHandler.DB.QueryRow(statement).Scan(&postID)
-	if err != nil {
-		return err
-	}
 
 	fmt.Println("here9")
 	return nil
@@ -129,35 +119,29 @@ func GetPublicPosts() ([]PostDisplay, error) {
 
 
 //this needs to fix after doing followers
-func GetPrivatePosts() ([]PostDisplay, error) {
-	statement := `SELECT Post_ID, Post_Title, Post_Text, User_ID, Post_Type_ID, Image_ID, Creation_Time FROM Posts WHERE Is_Active = 1 AND Post_Type_ID = 3 ORDER BY Creation_Time DESC`
+func GetPrivateFollowedPosts(userID int) ([]Post, error) {
+	query := `
+	SELECT Post_ID, User_ID, Post_Text, Post_Type_ID
+	FROM Posts
+	WHERE Post_Type_ID = 2
+	  AND User_ID != ?
+	  AND User_ID IN (
+	      SELECT Followed_ID FROM Followers WHERE Follower_ID = ?
+	  )
+	ORDER BY Post_ID DESC
+	`
 
-	rows, err := dbHandler.DB.Query(statement)
+	rows, err := dbHandler.DB.Query(query, userID, userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get chat messages: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
-	var posts []PostDisplay
+	var posts []Post
 	for rows.Next() {
-		var post PostDisplay
-
-		err := rows.Scan(
-			&post.PostID,
-			&post.PostTitle,
-			&post.PostText,
-			&post.UserID,
-			&post.PostTypeID,
-			&post.ImageID,
-			&post.CreationTime,
-		)
+		var post Post
+		err := rows.Scan(&post.PostID, &post.UserID, &post.PostText, &post.PostTypeID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan chat message: %v", err)
-		}
-
-		post.Comments, err = GetCommentsByPostID(post.PostID)
-		if err != nil {
-			fmt.Println(err)
 			return nil, err
 		}
 		posts = append(posts, post)
@@ -165,3 +149,4 @@ func GetPrivatePosts() ([]PostDisplay, error) {
 
 	return posts, nil
 }
+

@@ -58,3 +58,17 @@ type GroupInviteDisplay struct {
 	StatusID     int
 	CreationTime time.Time
 }
+
+func HasPendingGroupInvite(groupID, inviterID, inviteeID int) (bool, error) {
+	var exists bool
+	err := dbHandler.DB.QueryRow(`
+		SELECT EXISTS(
+			SELECT 1 FROM Group_Invite_Requests
+			WHERE Group_ID = ? AND Inviter_ID = ? AND Invitee_ID = ? AND Status_ID = ? AND Is_Active = 1
+		)
+	`, groupID, inviterID, inviteeID, StatusPending).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("failed to check pending invite: %w", err)
+	}
+	return exists, nil
+}

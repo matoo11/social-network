@@ -7,122 +7,113 @@ import PostCard from '@/components/PostCard/PostCard';
 import PostList from '@/components/PostList/PostList';
 
 const Dashboard = () => {
-  const router = useRouter();
-  const [error, setError] = useState('');
+    const router = useRouter();
+    const [error, setError] = useState('');
 
-  const handleLogout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+    const handleLogout = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
 
-    try {
-      const res = await fetch('http://localhost:8080/api/signout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
+        try {
+            const res = await fetch('http://localhost:8080/api/signout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+            });
 
-      if (!res.ok) {
-        throw new Error('Failed to logout');
-      }
+            if (!res.ok) {
+                throw new Error('Failed to logout');
+            }
 
-      router.push('/login');
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Unexpected error occurred');
-      }
-    }
-  };
+            router.push('/login');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
+    };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+    const handleCreate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
 
-    try {
-      const res = await fetch('http://localhost:8080/api/createPost', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ message: 'hello how are you', typeId: 1, title: 'hla' }),
-      });
+        try {
+            const res = await fetch('http://localhost:8080/api/createPost', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ message: 'hello how are you', typeId: 1, title: 'hla' }),
+            });
 
-      if (!res.ok) {
-        throw new Error('Failed to logout');
-      }
+            if (!res.ok) {
+                throw new Error('Failed to logout');
+            }
 
-      //   router.push('/login');
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Unexpected error occurred');
-      }
-    }
-  };
+            //   router.push('/login');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
+    };
 
-  const handleComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+    const handleComment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
 
-    try {
-      const res = await fetch('http://localhost:8080/api/createComment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ commentText: 'hello how are you', postID: 10 }),
-      });
+        try {
+            const res = await fetch('http://localhost:8080/api/createComment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ commentText: 'hello how are you', postID: 10 }),
+            });
 
-      if (!res.ok) {
-        throw new Error('Failed to logout');
-      }
+            if (!res.ok) {
+                throw new Error('Failed to logout');
+            }
 
-      //   router.push('/login');
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Unexpected error occurred');
-      }
-    }
-  };
+            //   router.push('/login');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
+    };
 
-  return (
-    <div className={styles.dashboardContainer}>
-      <h1>Welcome to the Dashboard!</h1>
-      <div className={styles.logoutContainer}>
-        <h2>Logout Form</h2>
-        <form onSubmit={handleLogout} className={styles.logoutForm}>
-          {error && <p className={styles.error}>{error}</p>}
-          <button type="submit" className={styles.logoutButton}>
-            Logout
-          </button>
-        </form>
-        <form onSubmit={handleCreate} className={styles.logoutForm}>
-          {error && <p className={styles.error}>{error}</p>}
-          <button type="submit" className={styles.logoutButton}>
-            post
-          </button>
-        </form>
-        <form onSubmit={handleComment} className={styles.logoutForm}>
-          {error && <p className={styles.error}>{error}</p>}
-          <button type="submit" className={styles.logoutButton}>
-            post
-          </button>
-        </form>
-        <PostCard
-          postID={123}
-          title="Hello World"
-          content="This is a sample post."
-          onLike={() => {
-            console.log('Parent received like event for post 123');
-            // Optional: make API call, update state, etc.
-          }}
-        />
-        <PostList />
-      </div>
-    </div>
-  );
+    return (
+        <div className={styles.dashboardContainer}>
+            <h1>Welcome to the Dashboard!</h1>
+            <div className={styles.logoutContainer}>
+                <h2>Logout Form</h2>
+                <form onSubmit={handleLogout} className={styles.logoutForm}>
+                    {error && <p className={styles.error}>{error}</p>}
+                    <button type="submit" className={styles.logoutButton}>
+                        Logout
+                    </button>
+                </form>
+                <form onSubmit={handleCreate} className={styles.logoutForm}>
+                    {error && <p className={styles.error}>{error}</p>}
+                    <button type="submit" className={styles.logoutButton}>
+                        post
+                    </button>
+                </form>
+                <form onSubmit={handleComment} className={styles.logoutForm}>
+                    {error && <p className={styles.error}>{error}</p>}
+                    <button type="submit" className={styles.logoutButton}>
+                        post
+                    </button>
+                </form>
+            </div>
+                <PostList />
+        </div>
+    );
 };
 
 export default Dashboard;

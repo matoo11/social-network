@@ -64,7 +64,7 @@ func GetFollowersByUserID(userID int) ([]FollowDisplay, error) {
 
 	rows, err := dbHandler.DB.Query(statement, userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get chat messages: %v", err)
+		return nil, fmt.Errorf("failed to get followers: %v", err)
 	}
 	defer rows.Close()
 
@@ -74,10 +74,10 @@ func GetFollowersByUserID(userID int) ([]FollowDisplay, error) {
 
 		err := rows.Scan(
 			&follow.FollowerID,
-			&follow.FollowerID,
+			&follow.FollowedID,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan chat message: %v", err)
+			return nil, fmt.Errorf("failed to scan follower record: %v", err)
 		}
 		follows = append(follows, follow)
 	}

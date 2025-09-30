@@ -86,3 +86,35 @@ func HasPendingInviteForUser(groupID, inviteeID int) (bool, error) {
 	}
 	return exists, nil
 }
+
+func CreateGroup(title, description string, ownerID int) (int, error) {
+	statement := `INSERT INTO User_Groups (
+		Group_Title,
+		Gruop_Description,
+		User_ID,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	) VALUES (?, ?, ?, ?, ?, ?, ?, 1)`
+
+	now := formattedNow()
+	res, err := dbHandler.DB.Exec(statement, title, description, ownerID, ownerID, now, ownerID, now)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create group: %w", err)
+	}
+
+	groupID64, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to fetch group id: %w", err)
+	}
+	groupID := int(groupID64)
+
+	if err := AddUserToGroup(groupID, ownerID, ownerID); err != nil {
+		return 0, err
+	}
+
+	return groupID, nil
+}
+

@@ -22,6 +22,14 @@ type GroupPostDisplay struct {
 	Comments []GroupComment
 }
 
+type GroupComment struct {
+	CommentID    int
+	GroupPostID  int
+	CommentText  string
+	AuthorID     int
+	CreationTime time.Time
+}
+
 func CreateGroupPost(groupID, authorID int, title, text string) (GroupPost, error) {
 	postStatement := `INSERT INTO Posts (
 		Post_Title,
@@ -120,4 +128,82 @@ func GetGroupPosts(groupID int) ([]GroupPostDisplay, error) {
 	}
 
 	return posts, nil
+}
+
+func GetGroupIDForGroupPost(groupPostID int) (int, error) {
+	var groupID int
+	err := dbHandler.DB.QueryRow(`SELECT Group_ID FROM Group_Posts WHERE Group_Post_ID = ? AND Is_Active = 1`, groupPostID).Scan(&groupID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, fmt.Errorf("group post not found")
+		}
+		return 0, fmt.Errorf("failed to fetch group post: %w", err)
+	}
+	return groupID, nil
+}
+
+func CreateGroupComment(groupPostID, authorID int, text string) (GroupComment, error) {
+	statement := `INSERT INTO Group_Comments (
+		Comment_Text,
+		Group_Post_ID,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	) VALUES (?, ?, ?, ?, ?, ?, 1)`
+
+	now := formattedNow()
+	res, err := dbHandler.DB.Exec(statement, text, groupPostID, authorID, now, authorID, now)
+	if err != nil {
+		return GroupComment{}, fmt.Errorf("failed to create group comment: %w", err)
+	}
+
+	commentID64, err := res.LastInsertId()
+	if err != nil {
+		return GroupComment{}, fmt.Errorf("failed to fetch comment id: %w", err)
+	}
+
+	createdAt, _ := time.Parse("2006-01-02 15:04:05", now)
+
+	return GroupComment{
+		CommentID:    int(commentID64),
+		GroupPostID:  groupPostID,
+		CommentText:  text,
+		AuthorID:     authorID,
+		CreationTime: createdAt,
+	}, nil
+}
+
+func GetGroupComments(groupPostID int) ([]GroupComment, error) {
+	statement := `
+		SELECT Group_Comment_ID,
+		       Comment_Text,
+		       Group_Post_ID,
+		       Created_By_ID,
+		       Creation_Time
+		FROM Group_Comments
+		WHERE Group_Post_ID = ? AND Is_Active = 1
+		ORDER BY Creation_Time ASC`
+
+	rows, err := dbHandler.DB.Query(statement, groupPostID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch group comments: %w", err)
+	}
+	defer rows.Close()
+
+	var comments []GroupComment
+	for rows.Next() {
+		var comment GroupComment
+		var creationTimeStr string
+		err := rows.Scan(&comment.CommentID, &comment.CommentText, &comment.GroupPostID, &comment.AuthorID, &creationTimeStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan group comment: %w", err)
+		}
+		if parsed, parseErr := time.Parse("2006-01-02 15:04:05", creationTimeStr); parseErr == nil {
+			comment.CreationTime = parsed
+		}
+		comments = append(comments, comment)
+	}
+	return comments, nil
 }

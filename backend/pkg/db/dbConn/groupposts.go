@@ -17,6 +17,11 @@ type GroupPost struct {
 	CreationTime time.Time
 }
 
+type GroupPostDisplay struct {
+	GroupPost
+	Comments []GroupComment
+}
+
 func CreateGroupPost(groupID, authorID int, title, text string) (GroupPost, error) {
 	postStatement := `INSERT INTO Posts (
 		Post_Title,
@@ -74,4 +79,45 @@ func CreateGroupPost(groupID, authorID int, title, text string) (GroupPost, erro
 		AuthorID:     authorID,
 		CreationTime: createdAt,
 	}, nil
+}
+
+func GetGroupPosts(groupID int) ([]GroupPostDisplay, error) {
+	statement := `
+		SELECT gp.Group_Post_ID,
+		       gp.Group_ID,
+		       gp.Post_ID,
+		       p.Post_Title,
+		       p.Post_Text,
+		       p.User_ID,
+		       p.Creation_Time
+		FROM Group_Posts gp
+		JOIN Posts p ON gp.Post_ID = p.Post_ID
+		WHERE gp.Group_ID = ? AND gp.Is_Active = 1 AND p.Is_Active = 1
+		ORDER BY p.Creation_Time DESC`
+
+	rows, err := dbHandler.DB.Query(statement, groupID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch group posts: %w", err)
+	}
+	defer rows.Close()
+
+	var posts []GroupPostDisplay
+	for rows.Next() {
+		var gp GroupPost
+		var creationTimeStr string
+		err := rows.Scan(&gp.GroupPostID, &gp.GroupID, &gp.PostID, &gp.Title, &gp.Text, &gp.AuthorID, &creationTimeStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan group post: %w", err)
+		}
+		if parsed, parseErr := time.Parse("2006-01-02 15:04:05", creationTimeStr); parseErr == nil {
+			gp.CreationTime = parsed
+		}
+		comments, err := GetGroupComments(gp.GroupPostID)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, GroupPostDisplay{GroupPost: gp, Comments: comments})
+	}
+
+	return posts, nil
 }

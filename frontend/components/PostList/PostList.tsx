@@ -4,43 +4,46 @@ import React, { useEffect, useState } from 'react';
 import PostListUI from './PostListUI';
 import { PostListUIProps } from './types';
 
+
+const fetchposts = async () => {
+    const res = await fetch('http://localhost:8080/api/getPublicPosts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+    });
+
+    if (!res.ok) {
+        throw new Error('Failed to logout');
+    }
+    return res.json();
+}
+
 const PostList: React.FC = () => {
-  const [posts, setPosts] = useState<PostListUIProps['posts']>([]);
+    const [posts, setPosts] = useState<PostListUIProps['posts']>([]);
 
-  useEffect(() => {
-    //TODO: need to replace with actual API call
-    const fetchPosts = async () => {
-      const mockData: PostListUIProps['posts'] = [
-        {
-          postID: 1,
-          title: 'First Post',
-          content: 'This is a mock post',
-          posterNickname: 'Alice',
-          posterProfileImageUrl: '/images/alice.jpg',
-          createdAt: '2025-09-27',
-          likesCount: 5,
-          dislikesCount: 1,
-          commentsCount: 3,
-        },
-        {
-          postID: 2,
-          title: 'Second Post',
-          content: 'More mock content here.',
-          posterNickname: 'Bob',
-          posterProfileImageUrl: '/images/bob.jpg',
-          createdAt: '2025-09-26',
-          likesCount: 2,
-          dislikesCount: 0,
-          commentsCount: 1,
-        },
-      ];
-      setPosts(mockData);
-    };
+    useEffect(() => {
+        //TODO: need to replace with actual API call
+        const fetchPosts = async () => {
+            const mockData: PostListUIProps['posts'] = (await fetchposts()).map((p: any) => ({
+                postID: p.PostID,
+                title: p.PostTitle,
+                content: p.PostText,
+                posterNickname: `User ${p.UserID}`,
+                posterProfileImageUrl: p.ImageID ?? '/images/default.jpg',
+                createdAt: p.CreationTime,
+                likesCount: 0,        // backend doesn’t provide yet
+                dislikesCount: 0,     // backend doesn’t provide yet
+                commentsCount: p.Comments ? p.Comments.length : 0,
+            }));
 
-    fetchPosts();
-  }, []);
 
-  return <PostListUI posts={posts} />;
+            setPosts(mockData);
+        };
+
+        fetchPosts();
+    }, []);
+
+    return <PostListUI posts={posts} />;
 };
 
 export default PostList;

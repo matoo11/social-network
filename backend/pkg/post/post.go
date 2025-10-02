@@ -56,24 +56,21 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post := dbConn.Post{
-		PostText:  message,
-		UserID:    LoggedInUserID,
-		PostTitle: title,
+		PostText:   message,
+		UserID:     LoggedInUserID,
+		PostTitle:  title,
 		PostTypeID: typeID,
 	}
 	dbConn.CreatePost(post)
 }
 
 func GetPublicPosts(w http.ResponseWriter, r *http.Request) {
-	// var LoggedInUserID int
-	// fmt.Println("ok")
+
 	_, err := dbConn.GetSessionFromCookie(r)
-	// fmt.Println("ok")
+
 	if err != nil {
 		auth.ErrorPage(w, 401)
 		return
-	} else {
-		// LoggedInUserID = session.UserID
 	}
 	posts, err := dbConn.GetPublicPosts()
 	if err != nil {
@@ -81,9 +78,82 @@ func GetPublicPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = auth.JsonEncode(w,posts)
+	err = auth.JsonEncode(w, posts)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+}
+
+func GetPrivatePosts(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
+
+	session, err := dbConn.GetSessionFromCookie(r)
+
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	} else {
+		LoggedInUserID = session.UserID
+	}
+
+	posts, err := dbConn.GetPrivateFollowedPosts(LoggedInUserID)
+	if err != nil {
+		auth.ErrorPage(w, 500)
+	}
+
+	pposts, err := dbConn.GetPrivateCustomPosts(LoggedInUserID)
+
+	if err != nil {
+		auth.ErrorPage(w, 500)
+	}
+
+	posts = append(posts, pposts...)
+
+	err = auth.JsonEncode(w, posts)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+func GrantAccessToPost(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
+
+	session, err := dbConn.GetSessionFromCookie(r)
+
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	} else {
+		LoggedInUserID = session.UserID
+	}
+
+	data := struct {
+		Users  []int `json:"users"`
+		PostID int   `json:"postID"`
+	}{}
+	if err := auth.JsonDecode(w, r, &data); err != nil {
+		auth.ErrorPage(w, 400)
+		return
+	}
+
+	check, err := dbConn.IsPostOwner(data.PostID,LoggedInUserID)
+
+	if err != nil {
+		auth.ErrorPage(w, 500)
+		return
+	}
+
+	if !check {
+		auth.ErrorPage(w, 400)
+		fmt.Println("this is not the owner of the post")
+	}
+	err = dbConn.GrantPostAccessToUsers(data.PostID, data.Users, LoggedInUserID)
+
+	if err != nil {
+		auth.ErrorPage(w, 500)
+		return
+	}
+	fmt.Println("access granted successfully")
 }

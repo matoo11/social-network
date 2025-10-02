@@ -21,13 +21,14 @@ type Post struct {
 }
 
 type PostDisplay struct {
-	PostID          int
-	PostTitle       string
-	PostText        string
-	PostTypeID      int
-	UserID, ImageID int
-	CreationTime    time.Time
-	Comments        []CommentDisplay
+	PostID       int
+	PostTitle    string
+	PostText     string
+	PostTypeID   int
+	UserID       int
+	ImageID      *int
+	CreationTime time.Time
+	Comments     []CommentDisplay
 }
 
 func CreatePost(post Post) error {
@@ -117,8 +118,6 @@ func GetPublicPosts() ([]PostDisplay, error) {
 	return posts, nil
 }
 
-
-//this needs to fix after doing followers
 func GetPrivateFollowedPosts(userID int) ([]Post, error) {
 	query := `
 	SELECT Post_ID, User_ID, Post_Text, Post_Type_ID
@@ -148,5 +147,94 @@ func GetPrivateFollowedPosts(userID int) ([]Post, error) {
 	}
 
 	return posts, nil
+}
+
+func GetPrivateCustomPosts(userID int) ([]Post, error) {
+	query := `
+	SELECT Post_ID, User_ID, Post_Text, Post_Type_ID
+	FROM Posts
+	WHERE Post_Type_ID = 3
+	  AND User_ID != ?
+	  AND Post_ID IN (
+	      SELECT Post_ID FROM Private_Posts_Users WHERE User_ID = ?
+	  )
+	ORDER BY Post_ID DESC
+	`
+
+	rows, err := dbHandler.DB.Query(query, userID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		err := rows.Scan(&post.PostID, &post.UserID, &post.PostText, &post.PostTypeID)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
+
+func GrantPostAccessToUsers(postID int, userIDs []int, createdBy int) error {
+	statement := `INSERT OR IGNORE INTO Private_Posts_Users
+	(
+		Post_ID,
+		User_ID,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	)
+	VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+
+	tx, err := dbHandler.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(statement)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, uid := range userIDs {
+		_, err = stmt.Exec(
+			postID,
+			uid,
+			createdBy,
+			formattedCurrentTime,
+			createdBy,
+			formattedCurrentTime,
+			true,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func IsPostOwner(postID int, userID int) (bool, error) {
+	var ownerID int
+	err := dbHandler.DB.QueryRow("SELECT User_ID FROM Posts WHERE Post_ID = ?", postID).Scan(&ownerID)
+	if err != nil {
+		return false, err
+	}
+	return ownerID == userID, nil
 }
 

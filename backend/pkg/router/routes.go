@@ -23,7 +23,7 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	case "/api/getPublicPosts":
 		post.GetPublicPosts(w, r)
 	case "/api/getPrivatePosts":
-
+		post.GetPrivatePosts(w, r)
 	case "/api/createComment":
 		comment.CreateCommentHandler(w, r)
 	case "/api/signup":

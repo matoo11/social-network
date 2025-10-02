@@ -44,7 +44,7 @@ const Dashboard = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ message: 'hello how are you', typeId: 1, title: 'hla' }),
+                body: JSON.stringify({ message: 'private post', typeId: 2, title: 'hla' }),
             });
 
             if (!res.ok) {
@@ -86,6 +86,57 @@ const Dashboard = () => {
             }
         }
     };
+    const handleFollow = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const res = await fetch('http://localhost:8080/api/addFollow', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ userID: 1 }),
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to logout');
+            }
+
+            //   router.push('/login');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
+    };
+
+    const unfollow = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const res = await fetch('http://localhost:8080/api/unFollow', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ userID: 1 }),
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to logout');
+            }
+
+            //   router.push('/login');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
+    };
 
     return (
         <div className={styles.dashboardContainer}>
@@ -110,8 +161,20 @@ const Dashboard = () => {
                         post
                     </button>
                 </form>
+                <form onSubmit={handleFollow} className={styles.logoutForm}>
+                    {error && <p className={styles.error}>{error}</p>}
+                    <button type="submit" className={styles.logoutButton}>
+                        follow
+                    </button>
+                </form>
+                <form onSubmit={unfollow} className={styles.logoutForm}>
+                    {error && <p className={styles.error}>{error}</p>}
+                    <button type="submit" className={styles.logoutButton}>
+                        unfollow
+                    </button>
+                </form>
             </div>
-                <PostList />
+            <PostList />
         </div>
     );
 };

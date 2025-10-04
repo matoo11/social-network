@@ -1,77 +1,159 @@
 package post
 
-// import (
-// 	"fmt"
-// 	"net/http"
-// 	"social/backend/pkg/db/dbConn"
-// 	"social/backend/pkg/auth"
-// 	"strings"
-// )
+import (
+	"fmt"
+	"net/http"
+	"social/backend/pkg/auth"
+	"social/backend/pkg/db/dbConn"
+	"strings"
+)
 
-// func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-// 	var LoggedInUserID int
+func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
 
-// 	session, err := dbConn.GetSessionFromCookie(r)
-// 	if err != nil {
-// 		LoggedInUserID = 0
-// 		http.Redirect(w, r, "/", http.StatusFound)
-// 		return
-// 	} else {
+	session, err := dbConn.GetSessionFromCookie(r)
+	if err != nil {
+		LoggedInUserID = 0
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	} else {
 
-// 		LoggedInUserID = session.UserID
-// 	}
+		LoggedInUserID = session.UserID
+	}
 
-// 	fmt.Println("here1")
-// 	data := struct {
-// 		Message    string   `json:"message"`
-// 		Catigories []string `json:"catigories"`
-// 	}{}
-// 	if err := auth.jsonDecode(w, r, &data); err != nil {
-// 		ErrorPage(w, 400)
-// 		return
-// 	}
+	fmt.Println("here1")
+	data := struct {
+		Message    string `json:"message"`
+		Title      string `json:"title"`
+		PostTypeID int    `json:"typeId"`
+	}{}
+	if err := auth.JsonDecode(w, r, &data); err != nil {
+		auth.ErrorPage(w, 400)
+		return
+	}
 
-// 	message := data.Message
-// 	categories := data.Catigories
-// 	fmt.Println(message)
-// 	fmt.Println(categories)
-// 	validCategories := map[string]bool{
-// 		"":        true,
-// 		"General": true,
-// 		"Sport":   true,
-// 		"Gaming":  true,
-// 	}
-// 	if len(message) >= 600 {
-// 		http.Error(w, "The post length exceeded 600 characters", http.StatusBadRequest)
-// 		return
-// 	}
-// 	val := len(strings.TrimSpace(message)) == 0
-// 	if val {
-// 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-// 		return
-// 	}
-// 	if message == "" {
-// 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-// 		return
-// 	}
-// 	fmt.Println(len(categories))
-// 	if len(categories) == 1 {
-// 		if categories[0] == "" {
+	message := data.Message
+	title := data.Title
+	typeID := data.PostTypeID
+	fmt.Println(message)
 
-// 			fmt.Println("'cats'")
-// 			categories[0] = "General"
-// 		}
-// 	}
-// 	for _, category := range categories {
-// 		if !validCategories[category] {
-// 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-// 			return
-// 		}
-// 	}
+	if len(message) >= 600 {
+		http.Error(w, "The post length exceeded 600 characters", http.StatusBadRequest)
+		return
+	}
+	if len(title) >= 60 {
+		http.Error(w, "The post title length exceeded 60 characters", http.StatusBadRequest)
+		return
+	}
+	val := len(strings.TrimSpace(message)) == 0
+	if val {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	if message == "" {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
 
-// 	post := dbConn.Post{
-// 		PostText: message,
-// 		UserID:   LoggedInUserID,
-// 	}
-// 	dbConn.CreatePost(post, categories)
-// }
+	post := dbConn.Post{
+		PostText:   message,
+		UserID:     LoggedInUserID,
+		PostTitle:  title,
+		PostTypeID: typeID,
+	}
+	dbConn.CreatePost(post)
+}
+
+func GetPublicPosts(w http.ResponseWriter, r *http.Request) {
+
+	_, err := dbConn.GetSessionFromCookie(r)
+
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	}
+	posts, err := dbConn.GetPublicPosts()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = auth.JsonEncode(w, posts)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+func GetPrivatePosts(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
+
+	session, err := dbConn.GetSessionFromCookie(r)
+
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	} else {
+		LoggedInUserID = session.UserID
+	}
+
+	posts, err := dbConn.GetPrivateFollowedPosts(LoggedInUserID)
+	if err != nil {
+		auth.ErrorPage(w, 500)
+	}
+
+	pposts, err := dbConn.GetPrivateCustomPosts(LoggedInUserID)
+
+	if err != nil {
+		auth.ErrorPage(w, 500)
+	}
+
+	posts = append(posts, pposts...)
+
+	err = auth.JsonEncode(w, posts)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+func GrantAccessToPost(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
+
+	session, err := dbConn.GetSessionFromCookie(r)
+
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	} else {
+		LoggedInUserID = session.UserID
+	}
+
+	data := struct {
+		Users  []int `json:"users"`
+		PostID int   `json:"postID"`
+	}{}
+	if err := auth.JsonDecode(w, r, &data); err != nil {
+		auth.ErrorPage(w, 400)
+		return
+	}
+
+	check, err := dbConn.IsPostOwner(data.PostID,LoggedInUserID)
+
+	if err != nil {
+		auth.ErrorPage(w, 500)
+		return
+	}
+
+	if !check {
+		auth.ErrorPage(w, 400)
+		fmt.Println("this is not the owner of the post")
+	}
+	err = dbConn.GrantPostAccessToUsers(data.PostID, data.Users, LoggedInUserID)
+
+	if err != nil {
+		auth.ErrorPage(w, 500)
+		return
+	}
+	fmt.Println("access granted successfully")
+}

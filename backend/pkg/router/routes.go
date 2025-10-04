@@ -4,6 +4,10 @@ import (
 	"html/template"
 	"net/http"
 	"social/backend/pkg/auth"
+	"social/backend/pkg/comment"
+	"social/backend/pkg/follow"
+	"social/backend/pkg/group"
+	"social/backend/pkg/post"
 )
 
 func Router(w http.ResponseWriter, r *http.Request) {
@@ -16,9 +20,55 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	case "/api/signout":
 		auth.SignoutHandler(w, r)
 	case "/api/createPost":
+		post.CreatePostHandler(w, r)
+	case "/api/getPublicPosts":
+		post.GetPublicPosts(w, r)
+	case "/api/getPrivatePosts":
+		post.GetPrivatePosts(w, r)
+	case "/api/grantAccessToPost":
+		post.GrantAccessToPost(w, r)
+	case "/api/createComment":
+		comment.CreateCommentHandler(w, r)
 	case "/api/signup":
 		auth.SignupHandler(w, r)
-
+	case "/api/addFollow":
+		follow.AddFollow(w, r)
+	case "/api/unFollow":
+		follow.UnFollow(w, r)
+	case "/api/checkFollowStatus":
+		follow.FollowStatus(w, r)
+	case "/api/getFollowers":
+		follow.GetFollowers(w, r)
+	case "/api/groups/create":
+		group.CreateGroupHandler(w, r)
+	case "/api/groups/all":
+		group.GetAllGroupsHandler(w, r)
+	case "/api/groups/mine":
+		group.GetMyGroupsHandler(w, r)
+	case "/api/groups/invite":
+		group.InviteToGroupHandler(w, r)
+	case "/api/groups/invite/pending":
+		group.GetPendingInvitesHandler(w, r)
+	case "/api/groups/invite/respond":
+		group.RespondToInviteHandler(w, r)
+	case "/api/groups/request":
+		group.RequestToJoinGroupHandler(w, r)
+	case "/api/groups/request/pending":
+		group.GetPendingRequestsHandler(w, r)
+	case "/api/groups/posts/create":
+		group.CreateGroupPostHandler(w, r)
+	case "/api/groups/posts":
+		group.GetGroupPostsHandler(w, r)
+	case "/api/groups/comments/create":
+		group.CreateGroupCommentHandler(w, r)
+	case "/api/groups/comments":
+		group.GetGroupCommentsHandler(w, r)
+	case "/api/groups/events/create":
+		group.CreateGroupEventHandler(w, r)
+	case "/api/groups/events":
+		group.GetGroupEventsHandler(w, r)
+	case "/api/groups/events/respond":
+		group.RespondToEventHandler(w, r)
 	default:
 		http.NotFound(w, r)
 	}

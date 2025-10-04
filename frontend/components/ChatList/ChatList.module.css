@@ -1,0 +1,64 @@
+/* app/components/Chat/ChatList.module.css */
+
+.chatList {
+  position: fixed;
+  top: 72px; /* height of the navbar */
+  left: 0;
+  width: 300px;
+  height: calc(100vh - 72px); /* fill the remaining vertical space */
+  background-color: #fff;
+  border-right: 1px solid #ddd;
+  padding: 1rem;
+  overflow-y: auto;
+  z-index: 998;
+}
+
+.chatListTitle {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.chatListItems {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chatListItem {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.chatListItem:hover {
+  background-color: #f0f0f0;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-right: 0.75rem;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+.chatInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.chatName {
+  font-weight: 500;
+  color: #222;
+}
+
+.lastMessage {
+  font-size: 0.85rem;
+  color: #666;
+}

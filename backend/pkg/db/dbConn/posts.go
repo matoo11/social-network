@@ -1,1 +1,240 @@
 package dbConn
+
+import (
+	"fmt"
+	"social/backend/pkg/db/dbHandler"
+	"time"
+)
+
+type Post struct {
+	PostID          int
+	PostTitle       string
+	PostText        string
+	PostTypeID      int
+	UserID          int
+	ImageID         *int
+	CreatedByID     int
+	CreationTime    time.Time
+	LastUpdatedByID int
+	LastUpdatedTime time.Time
+	IsActive        bool
+}
+
+type PostDisplay struct {
+	PostID       int
+	PostTitle    string
+	PostText     string
+	PostTypeID   int
+	UserID       int
+	ImageID      *int
+	CreationTime time.Time
+	Comments     []CommentDisplay
+}
+
+func CreatePost(post Post) error {
+	fmt.Println("here19")
+	statement := `INSERT INTO Posts
+    (
+		Post_Title,
+        Post_Text,
+		Post_Type_ID,
+        User_ID,
+        Image_ID,
+        Created_By_ID,
+        Creation_Time,
+        Last_Updated_By_ID,
+        Last_Updated_Time
+    )
+	VALUES
+    (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+
+	_, err := dbHandler.DB.Exec(
+		statement,
+		post.PostTitle,
+		post.PostText,
+		post.PostTypeID,
+		post.UserID,
+		post.ImageID,
+		post.CreatedByID,
+		formattedCurrentTime,
+		post.LastUpdatedByID,
+		formattedCurrentTime,
+	)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	fmt.Println("here9")
+	return nil
+}
+
+func DeletePost(post Post) error {
+	statement := "DELETE FROM Posts WHERE Post_ID = ?"
+
+	_, err := dbHandler.DB.Exec(statement, post.PostID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetPublicPosts() ([]PostDisplay, error) {
+	statement := `SELECT Post_ID, Post_Title, Post_Text, User_ID, Post_Type_ID, Image_ID, Creation_Time FROM Posts WHERE Is_Active = 1 AND Post_Type_ID = 1 ORDER BY Creation_Time DESC`
+
+	rows, err := dbHandler.DB.Query(statement)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat messages: %v", err)
+	}
+	defer rows.Close()
+
+	var posts []PostDisplay
+	for rows.Next() {
+		var post PostDisplay
+
+		err := rows.Scan(
+			&post.PostID,
+			&post.PostTitle,
+			&post.PostText,
+			&post.UserID,
+			&post.PostTypeID,
+			&post.ImageID,
+			&post.CreationTime,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan chat message: %v", err)
+		}
+
+		post.Comments, err = GetCommentsByPostID(post.PostID)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
+
+func GetPrivateFollowedPosts(userID int) ([]Post, error) {
+	query := `
+	SELECT Post_ID, User_ID, Post_Text, Post_Type_ID
+	FROM Posts
+	WHERE Post_Type_ID = 2
+	  AND User_ID != ?
+	  AND User_ID IN (
+	      SELECT Followed_ID FROM Followers WHERE Follower_ID = ?
+	  )
+	ORDER BY Post_ID DESC
+	`
+
+	rows, err := dbHandler.DB.Query(query, userID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		err := rows.Scan(&post.PostID, &post.UserID, &post.PostText, &post.PostTypeID)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
+
+func GetPrivateCustomPosts(userID int) ([]Post, error) {
+	query := `
+	SELECT Post_ID, User_ID, Post_Text, Post_Type_ID
+	FROM Posts
+	WHERE Post_Type_ID = 3
+	  AND User_ID != ?
+	  AND Post_ID IN (
+	      SELECT Post_ID FROM Private_Posts_Users WHERE User_ID = ?
+	  )
+	ORDER BY Post_ID DESC
+	`
+
+	rows, err := dbHandler.DB.Query(query, userID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		err := rows.Scan(&post.PostID, &post.UserID, &post.PostText, &post.PostTypeID)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
+
+func GrantPostAccessToUsers(postID int, userIDs []int, createdBy int) error {
+	statement := `INSERT OR IGNORE INTO Private_Posts_Users
+	(
+		Post_ID,
+		User_ID,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	)
+	VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+
+	tx, err := dbHandler.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(statement)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, uid := range userIDs {
+		_, err = stmt.Exec(
+			postID,
+			uid,
+			createdBy,
+			formattedCurrentTime,
+			createdBy,
+			formattedCurrentTime,
+			true,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func IsPostOwner(postID int, userID int) (bool, error) {
+	var ownerID int
+	err := dbHandler.DB.QueryRow("SELECT User_ID FROM Posts WHERE Post_ID = ?", postID).Scan(&ownerID)
+	if err != nil {
+		return false, err
+	}
+	return ownerID == userID, nil
+}
+

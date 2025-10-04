@@ -18,14 +18,21 @@ type Response struct {
 	Data json.RawMessage `json:"data"`
 }
 
+type Conn struct {
+	Conn *websocket.Conn
+	Lock sync.Mutex
+}
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
 }
 
-var Clients map[int]*websocket.Conn
-var connLock sync.Mutex
+var clients = make(map[int]*Conn)
+
+var clientsLock sync.Mutex
+var ConnLock sync.Mutex
 
 func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -45,7 +52,7 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	conn, err := upgrader.Upgrade(w, r, nil)
+	con, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Failed to upgrade: %v", err)
 		return
@@ -53,18 +60,20 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 
 		// clients[LoggedInUserID].Close()
-		conn.Close()
+		con.Close()
 	}()
 
 	time.Sleep(100 * time.Millisecond)
-
+	conn := &Conn{Conn: con}
 	clients[LoggedInUserID] = conn
 	log.Println("Client connected")
 
 	// updateOnlineUsers()
 	for {
 		var msg Response
-		err := conn.ReadJSON(&msg)
+		conn.Lock.Lock()
+		err := conn.Conn.ReadJSON(&msg)
+		conn.Lock.Unlock()
 		if err != nil {
 			log.Printf("Read error: %v", err)
 			break
@@ -109,8 +118,9 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 					Type: "chat",
 					Data: chatJson,
 				}
-
-				conn.WriteJSON(response)
+				conn.Lock.Lock()
+				conn.Conn.WriteJSON(response)
+				conn.Lock.Unlock()
 
 			} else if len(strings.TrimSpace(message)) == 0 || len(message) == 0 {
 				chat := ChatData{
@@ -121,11 +131,12 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 					Type: "chat",
 					Data: hrar,
 				}
-
-				conn.WriteJSON(response)
+				conn.Lock.Lock()
+				conn.Conn.WriteJSON(response)
+				conn.Lock.Unlock()
 
 			} else {
-				sendChatMessage(LoggedInUserID, LoggedInUsername, sento, message)
+				SendChatMessage(LoggedInUserID, LoggedInUsername, sento, message)
 
 			}
 		case "notification":
@@ -136,9 +147,14 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Printf("Received: %+v", msg.Data)
 
 	log.Println("Client disconnected")
-	conn.Close()
+	conn.Lock.Lock()
+	conn.Conn.Close()
+	conn.Lock.Unlock()
 }
 
-func GetClientConn(userID int) {
-
+func GetClientConn(userID int) *Conn {
+	clientsLock.Lock()
+	conn := clients[userID]
+	clientsLock.Unlock()
+	return conn
 }

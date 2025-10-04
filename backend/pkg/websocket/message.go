@@ -1,9 +1,9 @@
-package message
+package websocket
 
 import (
 	"encoding/json"
 	"fmt"
-	"social/backend/pkg/websocket"
+	"social/backend/pkg/db/dbConn"
 	"time"
 )
 
@@ -18,11 +18,11 @@ type ChatData struct {
 
 func SendChatMessage(owner int, ownerUsername string, sento int, message string) {
 
-	sentoConn := websocket.Clients[sento]
+	sentoConn := GetClientConn(sento)
 	if sentoConn == nil {
 		fmt.Println("the user is not online")
-		conn := websocket.Clients[owner]
-		if conn == nil {
+		conn := GetClientConn(owner)
+		if conn.Conn == nil {
 			fmt.Println("fuck error")
 			return
 		}
@@ -31,14 +31,14 @@ func SendChatMessage(owner int, ownerUsername string, sento int, message string)
 			Message: "user is not online",
 		}
 		jsonChat, _ := json.Marshal(chat)
-		response := websocket.Response{
+		response := Response{
 			Type: "chat",
 			Data: jsonChat,
 		}
-		// conn.Mu.Lock()
-		conn.WriteJSON(response)
-		// conn.Mu.Unlock()
-
+		
+		conn.Lock.Lock()
+		conn.Conn.WriteJSON(response)
+		conn.Lock.Unlock()
 		return
 	}
 	chat := ChatData{
@@ -47,19 +47,20 @@ func SendChatMessage(owner int, ownerUsername string, sento int, message string)
 		SenderID:       owner,
 		SenderUsername: ownerUsername,
 	}
-	dbchat := dbConn.Chat{
+	dbchat := dbConn.Message{
 		SenderID:    chat.SenderID,
 		ReceiverID:  chat.RecieverID,
 		MessageText: chat.Message,
 		CreatedByID: chat.SenderID,
 	}
 	dbConn.CreateChatMessage(dbchat)
-	response := websocket.Response{
+	chatJson, _ := json.Marshal(chat)
+	response := Response{
 		Type: "chat",
-		Data: chat,
+		Data: chatJson,
 	}
-	// sentoConn.Mu.Lock()
-	sentoConn.WriteJSON(response)
-	// sentoConn.Mu.Unlock()
-
+	
+	sentoConn.Lock.Lock()
+	sentoConn.Conn.WriteJSON(response)
+	sentoConn.Lock.Unlock()
 }

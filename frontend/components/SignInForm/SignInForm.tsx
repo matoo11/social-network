@@ -10,7 +10,7 @@ import SignInFormUI from './SignInFormUI';
 const SignInForm: React.FC = () => {
     const router = useRouter();
 
-    const [email, setEmail] = useState('');
+    const [userIdentifier, setUserIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
@@ -19,7 +19,7 @@ const SignInForm: React.FC = () => {
         setError('');
 
         try {
-            await loginUser(email, password);
+            await loginUser(userIdentifier, password);
             router.push('/dashboard');
         } catch (err: unknown) {
             if (err instanceof Error) {
@@ -32,10 +32,10 @@ const SignInForm: React.FC = () => {
 
     return (
         <SignInFormUI
-            userIdentifier={email}
+            userIdentifier={userIdentifier}
             password={password}
             error={error}
-            onEmailChange={(e) => setEmail(e.target.value)}
+            onUserIdentifierChange={(e) => setUserIdentifier(e.target.value)}
             onPasswordChange={(e) => setPassword(e.target.value)}
             onSubmit={handleSubmit}
         />

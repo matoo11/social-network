@@ -24,7 +24,7 @@ const InputField: React.FC<InputFieldProps> = ({
     isRequired = false,
 }) => {
     return (
-        <div>
+        <div className="relative z-0 w-full mb-5 group">
             <label
                 htmlFor={htmlFor}
                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"

@@ -44,7 +44,7 @@ const Dashboard = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ message: 'private post', typeId: 2, title: 'hla' }),
+                body: JSON.stringify({ message: 'private post', typeId: 1, title: 'hla' }),
             });
 
             if (!res.ok) {

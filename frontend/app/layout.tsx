@@ -41,8 +41,6 @@ export default function RootLayout({
             >
                 {children}
                 <Navbar />
-
-                <ChatList chats={[]} />
             </body>
         </html>
     );

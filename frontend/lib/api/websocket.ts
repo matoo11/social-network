@@ -3,9 +3,9 @@ let ws: WebSocket;
 let forceDisconnect = false;
 import { UpdateUserList } from "../../components/UserList/UserList";
 
-export function initWebSocket() {
+export function InitWebSocket() {
     console.log('fuck')
-    ws = new WebSocket('/api/ws');
+    ws = new WebSocket('ws://localhost:8080/api/ws');
 
     ws.onopen = function () {
         console.log('Websocket Connected Successfully');
@@ -13,9 +13,11 @@ export function initWebSocket() {
 
     ws.onmessage = function (event) {
         const msg = JSON.parse(event.data);
-
-        if (msg.type === "user list") {
-            UpdateUserList(msg);
+        console.log("here10")
+        // console.log(msg)
+        if (msg.Type === "userlist") {
+            UpdateUserList(msg.Users);
+            console.log("here")
         }
     };
 
@@ -24,12 +26,10 @@ export function initWebSocket() {
             return;
         }
         console.log('Websocket disconnected')
-
-
     }
 
     ws.onerror = () => {
-
+        console.log('fuck error')
     }
 
 

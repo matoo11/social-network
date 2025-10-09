@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar/Navbar';
+import WebSocketInit from "./WebSocketInit";
 import ChatList from '@/components/ChatList/ChatList';
 
 const geistSans = Geist({
@@ -39,6 +40,7 @@ export default function RootLayout({
                 style={{ paddingTop: '150px' }}
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
+                <WebSocketInit />
                 {children}
                 <Navbar />
             </body>

@@ -39,17 +39,14 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	var LoggedInUserID int
 	var LoggedInUsername string
 	session, err := dbConn.GetSessionFromCookie(r)
+
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
+
 	} else {
 		LoggedInUserID = session.UserID
-		_, err := dbConn.GetUserByID(LoggedInUserID)
-		if err != nil {
-			fmt.Println("super fuck error")
-			return
-		}
-
+		fmt.Println(LoggedInUserID)
 	}
 
 	con, err := upgrader.Upgrade(w, r, nil)
@@ -59,7 +56,6 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer func() {
 
-		// clients[LoggedInUserID].Close()
 		con.Close()
 	}()
 
@@ -68,7 +64,8 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	clients[LoggedInUserID] = conn
 	log.Println("Client connected")
 
-	// updateOnlineUsers()
+	UpdateUserList()
+
 	for {
 		var msg Response
 		conn.Lock.Lock()
@@ -87,6 +84,7 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			LoggedInUserID = session.UserID
 			User, err := dbConn.GetUserByID(LoggedInUserID)
 			if err != nil {
+				fmt.Println("fuck2")
 				fmt.Println("super fuck error")
 				break
 			}
@@ -157,4 +155,29 @@ func GetClientConn(userID int) *Conn {
 	conn := clients[userID]
 	clientsLock.Unlock()
 	return conn
+}
+
+func BroadCast(response any) {
+	for _, value := range clients {
+		value.Lock.Lock()
+		value.Conn.WriteJSON(response)
+		value.Lock.Unlock()
+	}
+}
+
+func UpdateUserList() {
+	users, err := dbConn.GetAllUsers()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	response := struct {
+		Type  string
+		Users []dbConn.UserDisplay
+	}{
+		Type: "userlist",
+		Users: users,
+	}
+
+	BroadCast(response)
 }

@@ -8,6 +8,7 @@ import (
 	"social/backend/pkg/follow"
 	"social/backend/pkg/group"
 	"social/backend/pkg/post"
+	"social/backend/pkg/websocket"
 )
 
 func Router(w http.ResponseWriter, r *http.Request) {
@@ -15,6 +16,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
 		RenderTemplate(w, "frontend/index.html", nil)
+	case "/api/ws":
+		websocket.WebsocketHandler(w, r)
 	case "/api/signin":
 		auth.LoginHandler(w, r)
 	case "/api/signout":

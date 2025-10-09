@@ -1,3 +1,8 @@
+"use client";
+import { createRoot } from "react-dom/client";
+import FollowButton from "../FollowButton/FollowButton";
+import { UNSTABLE_REVALIDATE_RENAME_ERROR } from "next/dist/lib/constants";
+
 export default function UserList() {
   return (
     <div
@@ -10,7 +15,9 @@ export default function UserList() {
       }}
       className="z-10 hidden bg-white rounded-lg shadow-sm w-60 dark:bg-gray-700"
     >
-      <ul className="h-48 py-2 overflow-y-auto text-gray-700 dark:text-gray-200" />
+      {/* The list will be rendered here dynamically */}
+      <ul className="h-48 py-2 overflow-y-auto text-gray-700 dark:text-gray-200" id="user-list"></ul>
+
       <a
         href="#"
         className="flex items-center p-3 text-sm font-medium text-blue-600 border-t border-gray-200 rounded-b-lg bg-gray-50 dark:border-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-blue-500 hover:underline"
@@ -30,16 +37,41 @@ export default function UserList() {
   );
 }
 
+// 🔹 This function is called by the WebSocket
 export function UpdateUserList(msg: any) {
-    const container = document.querySelector("#dropdownUsers ul");
-            if (!container) return;
+  console.log("UpdateUserList", msg);
 
-            container.innerHTML = msg.users.map((user: any) => `
-        <li>
-            <a href="#" class="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                <img class="w-6 h-6 me-2 rounded-full" src="${user.avatar}" alt="${user.name}" />
-                ${user.name}
-            </a>
+  const container = document.getElementById("user-list");
+  if (!container) return;
+
+  // If there's already a React root, use it; otherwise create one.
+  let root = (container as any)._reactRoot;
+  if (!root) {
+    root = createRoot(container);
+    (container as any)._reactRoot = root;
+  }
+
+  // Render React components dynamically
+  root.render(
+    <>
+      {msg.map((user: any) => (
+        <li key={user.ID}>
+          <a
+            href="#"
+            className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+          >
+            <div className="flex items-center">
+              <img
+                className="w-6 h-6 me-2 rounded-full"
+                src={user.Avatar || "hello"}
+                alt={user.User_Name}
+              />
+              {user.User_Name}
+            </div>
+            <FollowButton userID={user.User_ID} /> {/* ✅ Real React component */}
+          </a>
         </li>
-    `).join("");
+      ))}
+    </>
+  );
 }

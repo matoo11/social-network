@@ -24,6 +24,15 @@ type User struct {
 	Is_Active                                                    bool
 }
 
+type UserDisplay struct {
+	User_ID                                                      int
+	User_Name, Nick_Name, Password, Email, First_Name, Last_Name string
+	Gender                                                       string
+	Image_ID                                                     int
+	About_Me                                                     string
+	Profile_Type_ID                                              int
+}
+
 func CreateUser(user User) error {
 	fmt.Println(user.Gender)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -98,4 +107,33 @@ func GetUserByID(userID int) (User, error) {
 	}
 
 	return user, nil
+}
+
+func GetAllUsers() ([]UserDisplay, error) {
+	var users []UserDisplay
+	statement := `SELECT User_ID, User_Name,
+	First_Name, Last_Name FROM Users`
+	data, err := dbHandler.DB.Query(statement)
+	if err != nil {
+		fmt.Println("fuck2")
+		return nil, err
+	}
+	defer data.Close()
+	for data.Next() {
+		var user UserDisplay
+		err := data.Scan(&user.User_ID,
+			&user.User_Name,
+			&user.First_Name,
+			&user.Last_Name)
+		if err != nil {
+			fmt.Println("fuck4")
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err := data.Err(); err != nil {
+		fmt.Println("fuck3")
+		return nil, err
+	}
+	return users, nil
 }

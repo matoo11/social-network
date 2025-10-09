@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import PostList from '@/components/PostList/PostList';
 import FollowButton from '@/components/FollowButton/FollowButton';
+import UserList from '@/components/UserList/UserList';
+import UserListButton from '@/components/UserList/UserListButton';
 
 const Dashboard = () => {
     const router = useRouter();
@@ -167,10 +169,12 @@ const Dashboard = () => {
 
     return (
         <div className={styles.dashboardContainer}>
+            <UserList/>
             <h1>Welcome to the Dashboard!</h1>
             <div className={styles.logoutContainer}>
                 <h2>Logout Form</h2>
                 <FollowButton userID={5}/>
+                
                 <form onSubmit={handleLogout} className={styles.logoutForm}>
                     {error && <p className={styles.error}>{error}</p>}
                     <button type="submit" className={styles.logoutButton}>

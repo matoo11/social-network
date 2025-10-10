@@ -30,7 +30,7 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
 }) => {
     return (
         <div className="mx-auto w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
-            <form className="max-w-md mx-auto">
+            <form onSubmit={onSubmit} className="max-w-md mx-auto">
                 <InputField
                     htmlFor="username"
                     labelText="Your username"
@@ -123,6 +123,8 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                                     type="radio"
                                     name="gender"
                                     value="M"
+                                    checked={formData.gender === 'M'}
+                                    onChange={onInputChange('gender')}
                                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                 />
                                 <span className="ml-2 text-sm text-gray-900 dark:text-gray-300">
@@ -134,6 +136,8 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                                     type="radio"
                                     name="gender"
                                     value="F"
+                                    checked={formData.gender === 'F'}
+                                    onChange={onInputChange('gender')}
                                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                 />
                                 <span className="ml-2 text-sm text-gray-900 dark:text-gray-300">

@@ -30,7 +30,7 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
 }) => {
     return (
         <div className="mx-auto w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
-            <form onSubmit={onSubmit} className="max-w-md mx-auto">
+            <form onSubmit={onSubmit} className="max-w-md mx-auto space-y-4 md:space-y-6">
                 <InputField
                     htmlFor="username"
                     labelText="Your username"
@@ -165,6 +165,15 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                 >
                     Create account
                 </button>
+                <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+                    Already have an account?{' '}
+                    <a
+                        href="/login"
+                        className="font-medium text-primary-600 hover:underline dark:text-primary-500"
+                    >
+                        Login here
+                    </a>
+                </p>
             </form>
         </div>
     );

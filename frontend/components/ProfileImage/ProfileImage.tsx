@@ -1,0 +1,26 @@
+import Image from 'next/image';
+import React from 'react';
+
+type ProfileImageProps = {
+    imageUrl: string;
+    altText?: string;
+    link?: string;
+};
+
+const ProfileImage = ({ imageUrl, altText = 'profile Image', link = '' }: ProfileImageProps) => {
+    const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+        if (!link) {
+            event.preventDefault();
+        }
+    };
+
+    return (
+        <div className="relative w-full h-full p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500 overflow-hidden">
+            <a href={link} onClick={handleClick} className='relative block w-full h-full'>
+                <Image className="object-cover rounded-full" src={imageUrl} alt={altText} fill />
+            </a>
+        </div>
+    );
+};
+
+export default ProfileImage;

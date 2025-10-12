@@ -9,6 +9,7 @@ import UserList from '@/components/UserList/UserList';
 import UserListButton from '@/components/UserList/UserListButton';
 import PostImage from '@/components/PostImage/PostImage';
 import ProfileImage from '@/components/ProfileImage/ProfileImage';
+import ChatPopup from '@/components/ChatPopup/ChatPopup';
 
 const Dashboard = () => {
     const router = useRouter();
@@ -171,6 +172,7 @@ const Dashboard = () => {
 
     return (
         <div className={styles.dashboardContainer}>
+            <ChatPopup/>
             <UserList />
             <h1>Welcome to the Dashboard!</h1>
             <div className={styles.logoutContainer}>

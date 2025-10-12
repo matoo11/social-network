@@ -21,6 +21,14 @@ const Navbar = () => {
                                 menu.classList.toggle("hidden");
                             }
                         }}>User list</li>
+                    <li
+                        onClick={() => {
+                            const menu = document.getElementById("openchat");
+                            if (menu) {
+                                console.log("here")
+                                menu.classList.toggle("hidden");
+                            }
+                        }}>open chat</li>
                     <li><Link href="/about">About (Not-working)</Link></li>
                     <li><Link href="/dashboard">Dashboard</Link></li>
                 </ul>

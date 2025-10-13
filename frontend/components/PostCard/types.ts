@@ -4,6 +4,7 @@ export type Post = {
   content: string;
   posterNickname?: string;
   posterProfileImageUrl?: string;
+  postImageUrl?: string;
   createdAt?: string;
   likesCount?: number;
   dislikesCount?: number;

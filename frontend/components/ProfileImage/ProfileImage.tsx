@@ -13,11 +13,17 @@ const ProfileImage = ({ imageUrl, altText = 'profile Image', link = '' }: Profil
             event.preventDefault();
         }
     };
+    console.log('ProfileImage URL:', imageUrl);
+    imageUrl = imageUrl.trim();
+
+    // if (!imageUrl) {
+    //     imageUrl = 'http://localhost:3000/uploads/default-profile.jpg';
+    // }
 
     return (
         <div className="relative w-full h-full p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500 overflow-hidden">
             <a href={link} onClick={handleClick} className='relative block w-full h-full'>
-                <Image className="object-cover rounded-full" src={imageUrl} alt={altText} fill />
+                <Image className="object-cover rounded-full" src={imageUrl || 'http://localhost:3000/uploads/default-profile.jpg'} alt={altText} fill />
             </a>
         </div>
     );

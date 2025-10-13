@@ -2,13 +2,20 @@ import React from 'react';
 import styles from './PostCard.module.css';
 import Image from 'next/image';
 import { PostCardUIProps } from './types';
+import CreationTime from '../CreationTime/CreationTime';
+import ProfileImage from '../ProfileImage/ProfileImage';
+import PostImage from '../PostImage/PostImage';
+import Username from '../Username/Username';
+import Title from '../Title/Title';
+import TextElement from '../TextElement/TextElement';
 
 const PostCardUI: React.FC<PostCardUIProps> = ({
     postID,
     title,
     content,
     posterNickname = 'Anonymous',
-    posterProfileImageUrl = '/default-profile.png',
+    posterProfileImageUrl = '',
+    postImageUrl = '',
     createdAt,
     likesCount = 0,
     dislikesCount = 0,
@@ -36,60 +43,33 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
     };
 
     return (
-        <div className={styles['post-content']}>
-            <div className={styles['post-container']}>
-                <img
-                    src={posterProfileImageUrl}
-                    alt="user"
-                    className={styles['profile-photo-md'] + ' pull-left'}
-                />
-                <div className={styles['post-detail']}>
-                    <div className={styles['user-info']}>
-                        <h3>
-                            <b>{posterNickname}</b>
-                        </h3>
-                        <p className={styles['text-muted']}>
-                            Posted on 
-                            {createdAt}
-                        </p>
-                    </div>
-                    <div className={styles['post-text']}>
-                        <p>{content}</p>
-                    </div>
-                    <div className={styles['reaction']}>
-                        <form
-                            id="post_like-${d.postID}"
-                            method="POST"
-                            className={styles['reaction-form']}
-                        >
-                            <input type="hidden" name="postID" value="${d.postID}" />
-                            <button className={`${styles['btn']} ${styles['text-gray']}`}>
-                                <i className='fa fa-thumbs-up'>
-                                    {likesCount}
-                                </i>
-                            </button>
-                        </form>
-                        <form
-                            id="post_dislike-${d.postID}"
-                            method="POST"
-                            className={styles['reaction-form']}
-                        >
-                            <input type="hidden" name="postID" value="${d.postID}" />
-                            <button className={`${styles['btn']} ${styles['text-gray']}`}>
-                                <i className='fa fa-thumbs-down'>
-                                    {dislikesCount}
-                                </i>
-                            </button>
-                        </form>
-                    </div>
-                    <div className={styles['line-divider']}></div>
-                    <button
-                        className={styles['post-submit'] + ' toggle-comments-btn'}
-                        data-post-id="${d.postID}"
-                    >
-                        Show Comments ({commentsCount})
-                    </button>
+        <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+            {/* Profile Section */}
+            <div className="flex items-center gap-3 p-4">
+                <div className="w-12 h-12 overflow-hidden rounded-none">
+                    <ProfileImage
+                        imageUrl={posterProfileImageUrl}
+                        altText={`${posterNickname}'s profile`}
+                    />
                 </div>
+
+                <div>
+                    <Username text={posterNickname} />
+                    <CreationTime time={String(createdAt)} />
+                </div>
+            </div>
+
+            {/* Post Image */}
+            {postImageUrl && (
+                <div className="mt-4">
+                    <PostImage imageUrl={postImageUrl} />
+                </div>
+            )}
+
+            {/* Title & Additional Content */}
+            <div className="p-5">
+                <Title text={title} />
+                <TextElement text={content} />
             </div>
         </div>
     );

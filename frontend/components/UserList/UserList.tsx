@@ -122,10 +122,10 @@ export function UpdateUserList(msg: any) {
     if (!container) return;
 
     // If there's already a React root, use it; otherwise create one.
-    let root = (container as any)._reactRoot;
+    let root = (container as any)._userListRoot;
     if (!root) {
         root = createRoot(container);
-        (container as any)._reactRoot = root;
+        (container as any)._userListRoot = root;
     }
 
     // Get current search term (preserves user's search while updating)

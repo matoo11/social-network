@@ -37,7 +37,7 @@ export default function RootLayout({
                 />
             </head>
             <body
-                style={{ paddingTop: '150px' }}
+                style={{ paddingTop: '5rem' }}
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
                 <WebSocketInit />

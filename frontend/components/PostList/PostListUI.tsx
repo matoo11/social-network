@@ -6,7 +6,7 @@ import styles from './PostList.module.css';
 
 const PostListUI: React.FC<PostListUIProps> = ({ posts }) => {
   return (
-    <div className={styles['posts-list']}>
+    <div className="flex flex-col items-center min-h-screen px-15 gap-5">
       {posts.map((post) => (
         <PostCard key={post.postID} {...post} />
       ))}

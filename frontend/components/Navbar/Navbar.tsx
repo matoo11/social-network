@@ -31,6 +31,7 @@ const Navbar = () => {
                         }}>open chat</li>
                     <li><Link href="/about">About (Not-working)</Link></li>
                     <li><Link href="/dashboard">Dashboard</Link></li>
+                    <li><Link href="/social-feed">Social Feed</Link></li>
                 </ul>
             </div>
         </nav>

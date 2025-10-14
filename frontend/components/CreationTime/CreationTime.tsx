@@ -12,7 +12,7 @@ const CreationTime: React.FC<{ time: string }> = ({ time }) => {
     hour12: true,
   });
 
-  return <p className="text-base mb-2">Posted on {formattedTime}</p>;
+  return <p className="text-sm text-gray-500 truncate dark:text-gray-400">Posted on {formattedTime}</p>;
 };
 
 export default CreationTime;

@@ -19,6 +19,7 @@ export function InitWebSocket() {
             UpdateUserList(msg.Users);
             console.log("here")
         }
+        console.log(msg)
     };
 
     ws.onclose = () => {
@@ -38,6 +39,6 @@ export function InitWebSocket() {
 export function sendMessage(type: string, data: any) {
 
     console.log('sent')
-
+    console.log(data)
     ws.send(JSON.stringify({ type: type, data: data }));
 }

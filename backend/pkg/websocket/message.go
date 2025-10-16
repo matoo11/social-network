@@ -19,28 +19,28 @@ type ChatData struct {
 func SendChatMessage(owner int, ownerUsername string, sento int, message string) {
 
 	sentoConn := GetClientConn(sento)
-	if sentoConn == nil {
-		fmt.Println("the user is not online")
-		conn := GetClientConn(owner)
-		if conn.Conn == nil {
-			fmt.Println("fuck error")
-			return
-		}
+	// if sentoConn == nil {
+	// 	fmt.Println("the user is not online")
+	// 	conn := GetClientConn(owner)
+	// 	if conn.Conn == nil {
+	// 		fmt.Println("fuck error")
+	// 		return
+	// 	}
 
-		chat := ChatData{
-			Message: "user is not online",
-		}
-		jsonChat, _ := json.Marshal(chat)
-		response := Response{
-			Type: "chat",
-			Data: jsonChat,
-		}
-		
-		conn.Lock.Lock()
-		conn.Conn.WriteJSON(response)
-		conn.Lock.Unlock()
-		return
-	}
+	// 	chat := ChatData{
+	// 		Message: "user is not online",
+	// 	}
+	// 	jsonChat, _ := json.Marshal(chat)
+	// 	response := Response{
+	// 		Type: "chat",
+	// 		Data: jsonChat,
+	// 	}
+
+	// 	conn.Lock.Lock()
+	// 	conn.Conn.WriteJSON(response)
+	// 	conn.Lock.Unlock()
+	// 	return
+	// }
 	chat := ChatData{
 		Message:        message,
 		RecieverID:     sento,
@@ -53,14 +53,17 @@ func SendChatMessage(owner int, ownerUsername string, sento int, message string)
 		MessageText: chat.Message,
 		CreatedByID: chat.SenderID,
 	}
-	dbConn.CreateChatMessage(dbchat)
+	if err := dbConn.CreateChatMessage(dbchat); err != nil {
+		fmt.Println(err)
+	}
 	chatJson, _ := json.Marshal(chat)
 	response := Response{
 		Type: "chat",
 		Data: chatJson,
 	}
-	
-	sentoConn.Lock.Lock()
-	sentoConn.Conn.WriteJSON(response)
-	sentoConn.Lock.Unlock()
+	if sentoConn != nil {
+		sentoConn.Lock.Lock()
+		sentoConn.Conn.WriteJSON(response)
+		sentoConn.Lock.Unlock()
+	}
 }

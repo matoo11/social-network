@@ -71,14 +71,15 @@ func CreateUser(user User) error {
 func GetUserByID(userID int) (User, error) {
 	statement := `
 		SELECT 
-			User_ID, User_Name, Nick_Name, Password, Email, FirstName, LastName,
+			User_ID, User_Name, Nick_Name, Password, Email, First_Name, Last_Name,
 			Date_of_Birth, Gender, Image_ID, About_Me, Profile_Type_ID,
-			Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, IsActive
+			Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active
 		FROM Users
-		WHERE User_ID = ? AND IsActive = 1
+		WHERE User_ID = ? AND Is_Active = 1
 	`
 
 	var user User
+	var aboutMe sql.NullString
 	err := dbHandler.DB.QueryRow(statement, userID).Scan(
 		&user.User_ID,
 		&user.User_Name,
@@ -90,7 +91,7 @@ func GetUserByID(userID int) (User, error) {
 		&user.Date_Of_Birth,
 		&user.Gender,
 		&user.Image_ID,
-		&user.About_Me,
+		&aboutMe,
 		&user.Profile_Type_ID,
 		&user.Created_By_ID,
 		&user.Creation_Time,
@@ -98,6 +99,10 @@ func GetUserByID(userID int) (User, error) {
 		&user.Last_Updated_Time,
 		&user.Is_Active,
 	)
+
+	if aboutMe.Valid {
+		user.About_Me = aboutMe.String
+	}
 
 	if err != nil {
 		if err == sql.ErrNoRows {

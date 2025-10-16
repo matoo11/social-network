@@ -86,6 +86,7 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				fmt.Println("fuck2")
 				fmt.Println("super fuck error")
+				fmt.Println(err)
 				break
 			}
 			LoggedInUsername = User.User_Name
@@ -99,14 +100,15 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			}{}
 
 			if err := json.Unmarshal(msg.Data, &data); err != nil {
-				// fmt.Println("chat from", chatMsg.User, ":", chatMsg.Message)
+				
 				fmt.Println("unmarshal error 1")
 				continue
 			}
 			// fmt.Println("sento: " + sentom)
-
+			fmt.Println(data)
 			sento := data.UserID
 			message := data.Message
+			fmt.Println(message)
 			if len(message) >= 100 {
 				chat := ChatData{
 					Message: "The message is too long",

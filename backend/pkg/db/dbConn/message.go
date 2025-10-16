@@ -18,6 +18,7 @@ type Message struct {
 }
 
 func CreateChatMessage(message Message) error {
+	
 	statement := `INSERT INTO Messages
     (
         Sender_ID,
@@ -26,10 +27,12 @@ func CreateChatMessage(message Message) error {
         Is_Read,
         Created_By_ID,
         Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
         Is_Active
     )
     VALUES
-    (?, ?, ?, ?, ?, ?, ?)`
+    (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	_, err := dbHandler.DB.Exec(
@@ -40,12 +43,14 @@ func CreateChatMessage(message Message) error {
 		message.IsRead,
 		message.CreatedByID,
 		formattedCurrentTime,
+		formattedCurrentTime,
+		formattedCurrentTime,
 		message.IsActive,
 	)
 	if err != nil {
+		fmt.Println("create error")
 		return fmt.Errorf("failed to create chat message: %v", err)
 	}
-
 	return nil
 }
 

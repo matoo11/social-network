@@ -106,7 +106,7 @@ func RequestStatus(requesterID int, requestedID int) (int, error) {
         WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1`,
 		requesterID, requestedID).Scan(&status)
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		return 0, err
 	}
 	return status, nil

@@ -62,6 +62,7 @@ func SendChatMessage(owner int, ownerUsername string, sento int, message string)
 		Data: chatJson,
 	}
 	if sentoConn != nil {
+		fmt.Println("worked")
 		sentoConn.Lock.Lock()
 		sentoConn.Conn.WriteJSON(response)
 		sentoConn.Lock.Unlock()

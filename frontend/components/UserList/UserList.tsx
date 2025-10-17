@@ -65,7 +65,7 @@ function renderUsers(root: any, searchTerm: string = "") {
         <>
             {filteredUsers.length > 0 ? (
                 filteredUsers.map((user: any) => (
-                    <li key={user.ID} className="px-3 py-1">
+                    <li key={user.User_ID} className="px-3 py-1">
                         <div className="flex items-center justify-between px-4 py-4 rounded-xl transition-all duration-300 hover:bg-white dark:hover:bg-gray-700 hover:shadow-md group cursor-pointer border border-transparent hover:border-blue-200 dark:hover:border-blue-800">
                             <div className="flex items-center gap-4 min-w-0 flex-1">
                                 <div className="relative flex-shrink-0">

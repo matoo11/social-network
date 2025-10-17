@@ -68,9 +68,9 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		var msg Response
-		conn.Lock.Lock()
+		
 		err := conn.Conn.ReadJSON(&msg)
-		conn.Lock.Unlock()
+		
 		if err != nil {
 			log.Printf("Read error: %v", err)
 			break
@@ -100,7 +100,7 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			}{}
 
 			if err := json.Unmarshal(msg.Data, &data); err != nil {
-				
+
 				fmt.Println("unmarshal error 1")
 				continue
 			}
@@ -145,6 +145,11 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// log.Printf("Received: %+v", msg.Data)
+	clientsLock.Lock()
+	if storedConn, ok := clients[LoggedInUserID]; ok && storedConn == conn {
+		delete(clients, LoggedInUserID)
+	}
+	clientsLock.Unlock()
 
 	log.Println("Client disconnected")
 	conn.Lock.Lock()
@@ -177,7 +182,7 @@ func UpdateUserList() {
 		Type  string
 		Users []dbConn.UserDisplay
 	}{
-		Type: "userlist",
+		Type:  "userlist",
 		Users: users,
 	}
 

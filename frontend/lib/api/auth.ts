@@ -64,6 +64,7 @@ export async function logoutUser() {
         const res = await fetch('http://localhost:8080/api/signout', {
             method: 'POST',
             credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
         });
 
         if (!res.ok) {

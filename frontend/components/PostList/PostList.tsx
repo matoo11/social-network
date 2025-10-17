@@ -29,7 +29,7 @@ const PostList: React.FC = () => {
                 title: p.PostTitle,
                 content: p.PostText,
                 posterNickname: `User ${p.UserID}`,
-                posterProfileImageUrl: p.ImageID ?? '/images/default.jpg',
+                posterProfileImageUrl: p.ImageID ?? '',
                 createdAt: p.CreationTime,
                 likesCount: 0,        // backend doesn’t provide yet
                 dislikesCount: 0,     // backend doesn’t provide yet

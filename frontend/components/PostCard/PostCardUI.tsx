@@ -46,9 +46,9 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden dark:bg-gray-800 dark:border-gray-700 w-full min-w-sm">
             {/* Profile Section */}
             <div className="flex items-center gap-3 px-5 py-3">
-                <div className="w-10 h-10 overflow-hidden rounded-none">
+                <div className="flex w-10 h-10 rounded-none items-center justify-center">
                     <ProfileImage
-                        imageUrl={posterProfileImageUrl}
+                        imageUrl={posterProfileImageUrl || ''}
                         altText={`${posterNickname}'s profile`}
                     />
                 </div>

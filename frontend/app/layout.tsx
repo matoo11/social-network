@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar/Navbar';
-import WebSocketInit from "./WebSocketInit";
+import WebSocketInit from './WebSocketInit';
 import ChatList from '@/components/ChatList/ChatList';
 
 const geistSans = Geist({
@@ -36,10 +36,7 @@ export default function RootLayout({
                     referrerPolicy="no-referrer"
                 />
             </head>
-            <body
-                style={{ paddingTop: '5rem' }}
-                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
+            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <WebSocketInit />
                 {children}
                 <Navbar />

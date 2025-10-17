@@ -1,53 +1,41 @@
-// app/components/Chat/ChatList.tsx
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
-import styles from './ChatList.module.css';
+import ChatCard from '../ChatCard/ChatCard';
+import Title from '../Title/Title';
 
 type ChatItem = {
-  id: string;
-  name: string;
-  lastMessage?: string;
-  avatarUrl?: string;
+    id: string;
+    name: string;
+    lastMessage?: string;
+    avatarUrl?: string;
 };
 
 type ChatListProps = {
-  chats: ChatItem[];
-  onSelectChat?: (chatId: string) => void;
+    chats: ChatItem[];
+    onSelectChat?: (chatId: string) => void;
 };
 
 const ChatList: React.FC<ChatListProps> = ({ chats, onSelectChat }) => {
-  return (
-    <div className={styles.chatList}>
-      <h3 className={styles.chatListTitle}>Chats</h3>
-      <ul className={styles.chatListItems}>
-        {chats.map((chat) => (
-          <li
-            key={chat.id}
-            className={styles.chatListItem}
-            onClick={() => onSelectChat?.(chat.id)}
-          >
-            {chat.avatarUrl && (
-              <Image
-                src={chat.avatarUrl}
-                alt={chat.name}
-                className={styles.avatar}
-                width={36}
-                height={36}
-              />
-            )}
-            <div className={styles.chatInfo}>
-              <span className={styles.chatName}>{chat.name}</span>
-              {chat.lastMessage && (
-                <span className={styles.lastMessage}>{chat.lastMessage}</span>
-              )}
+    return (
+        <div className="border-3 border-gray-300 h-full shadow-sm overflow-hidden dark:bg-gray-700">
+            <div className="flex justify-center items-center h-[7.5%] pt-2 border-b-3 border-gray-300 shadow-sm overflow-hidden dark:bg-gray-800">
+                <Title text="Chats" />
             </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+            <div className='h-[92.5%] overflow-y-auto hide-scrollbar'>
+            <div className="flex flex-col gap-2 p-4 ">
+                {chats.map((chat) => (
+                    <ChatCard
+                        key={chat.id}
+                        username={chat.name}
+                        lastMessage={chat.lastMessage}
+                        avatarUrl={chat.avatarUrl}
+                    />
+                ))}
+            </div>
+            </div>
+        </div>
+    );
 };
 
 export default ChatList;

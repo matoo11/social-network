@@ -1,11 +1,14 @@
+'use client';
+
 import ChatList from '@/components/ChatList/ChatList';
 import PostList from '@/components/PostList/PostList';
+import Reaction from '@/components/Reaction/Reaction';
 
 export default function SocialFeed() {
     return (
-        <div className="flex w-full h-screen mt-[10vh]">
+        <div className="flex w-full h-full mt-[10vh]">
             {/* Left column - 17.5% */}
-            <div className="w-[17.5%] bg-blue-400 flex flex-col gap-2 fixed h-[90%]">
+            <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
                 <ChatList
                     chats={[
                         { id: '1', name: 'Alice', lastMessage: 'Hello!' },
@@ -29,13 +32,14 @@ export default function SocialFeed() {
             </div>
 
             {/* Middle column - 52.5% */}
-            <div className="w-[52.5%] bg-red-400 p-4 ml-[17.5%]">
-                Middle (52.5%)
+            <div className="w-[52.5%] bg-gray-900 ml-[17.5%] fixed h-[90%]">
                 <PostList />
             </div>
 
             {/* Right column - 30% */}
-            <div className="w-[30%] bg-green-400 p-4 fixed h-[90%] right-0">Right (30%)</div>
+            <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
+
+            </div>
         </div>
     );
 }

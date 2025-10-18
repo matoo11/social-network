@@ -18,8 +18,8 @@ type ChatListProps = {
 
 const ChatList: React.FC<ChatListProps> = ({ chats, onSelectChat }) => {
     return (
-        <div className="border-3 border-gray-300 h-full shadow-sm overflow-hidden dark:bg-gray-700">
-            <div className="flex justify-center items-center h-[7.5%] pt-2 border-b-3 border-gray-300 shadow-sm overflow-hidden dark:bg-gray-800">
+        <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
+            <div className="flex justify-center items-center h-[7.5%] pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
                 <Title text="Chats" />
             </div>
             <div className='h-[92.5%] overflow-y-auto hide-scrollbar'>

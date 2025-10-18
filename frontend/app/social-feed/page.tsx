@@ -3,6 +3,7 @@
 import ChatList from '@/components/ChatList/ChatList';
 import PostList from '@/components/PostList/PostList';
 import Reaction from '@/components/Reaction/Reaction';
+import Popup from '@/components/Popup/Popup';
 
 export default function SocialFeed() {
     return (
@@ -37,9 +38,14 @@ export default function SocialFeed() {
             </div>
 
             {/* Right column - 30% */}
-            <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
-
-            </div>
+            <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0"></div>
+            {/* <Popup
+                isOpen={true}
+                onClose={() => {}}
+                children={<div>This is a profile popup content.</div>}
+                title="Profile"
+                positionStyle={{ top: '20%', left: '50%', transform: 'translateX(-50%)' }}
+            ></Popup> */}
         </div>
     );
 }

@@ -2,10 +2,12 @@
 
 import ChatList from '@/components/ChatList/ChatList';
 import PostList from '@/components/PostList/PostList';
-import Reaction from '@/components/Reaction/Reaction';
 import Popup from '@/components/Popup/Popup';
+import { useState } from 'react';
 
 export default function SocialFeed() {
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+
     return (
         <div className="flex w-full h-full mt-[10vh]">
             {/* Left column - 17.5% */}
@@ -29,23 +31,20 @@ export default function SocialFeed() {
                         { id: '15', name: 'Oscar', lastMessage: 'Can we reschedule?' },
                         { id: '16', name: 'Paula', lastMessage: 'See you at the event.' },
                     ]}
+                    popupHandler={() => setIsPopupOpen(true)}
                 />
             </div>
 
             {/* Middle column - 52.5% */}
             <div className="w-[52.5%] bg-gray-900 ml-[17.5%] fixed h-[90%]">
-                <PostList />
+                <PostList popupHandler={() => setIsPopupOpen(true)} />
             </div>
 
             {/* Right column - 30% */}
             <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0"></div>
-            {/* <Popup
-                isOpen={true}
-                onClose={() => {}}
-                children={<div>This is a profile popup content.</div>}
-                title="Profile"
-                positionStyle={{ top: '20%', left: '50%', transform: 'translateX(-50%)' }}
-            ></Popup> */}
+            <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
+                <PostList popupHandler={() => setIsPopupOpen(true)}></PostList>
+            </Popup>
         </div>
     );
 }

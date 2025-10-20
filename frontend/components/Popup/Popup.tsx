@@ -5,14 +5,10 @@ import React from 'react';
 type PopupProps = {
     isOpen: boolean;
     onClose: () => void;
-    children: React.ReactNode;
-
+    children?: React.ReactNode;
     title?: string;
     showCloseButton?: boolean;
-
-    positionStyle?: React.CSSProperties;
     className?: string;
-    style?: React.CSSProperties;
 };
 
 const Popup: React.FC<PopupProps> = ({
@@ -21,25 +17,22 @@ const Popup: React.FC<PopupProps> = ({
     children,
     title,
     showCloseButton = true,
-    positionStyle,
     className = '',
-    style = {},
 }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed h-[100vh] w-[100vw] inset-0 z-50 flex items-center justify-center">
             {/* Blurred background */}
             <div
-                className="absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"
+                className="fixed h-full w-full backdrop-blur-sm bg-white/10"
                 onClick={onClose}
             />
 
             {/* Popup container */}
             <div
-                className={`relative bg-white dark:bg-gray-800 rounded-md shadow-lg p-4 ${className}`}
-                style={{ position: 'absolute', ...positionStyle, ...style }}
-                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+                className={`relative h-[80%] w-[80%] max-h-xl mt-[10vh] bg-white dark:bg-gray-800 rounded-md shadow-lg p-4 flex flex-col ${className}`}
+                onClick={(e) => e.stopPropagation()}
             >
                 {/* Optional close button */}
                 {showCloseButton && (
@@ -48,15 +41,17 @@ const Popup: React.FC<PopupProps> = ({
                         onClick={onClose}
                         aria-label="Close"
                     >
-                        ×
+                        X
                     </button>
                 )}
 
                 {/* Optional title */}
                 {title && <h3 className="text-lg font-semibold mb-3">{title}</h3>}
 
-                {/* Content */}
-                <div>{children}</div>
+                {/* Content (scrollable) */}
+                <div className="flex-1 overflow-y-auto mt-5">
+                    {children}
+                </div>
             </div>
         </div>
     );

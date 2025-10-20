@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import PostListUI from './PostListUI';
-import { PostListUIProps } from './types';
+import { PostListUIProps } from './PostListUI';
 
 
 const fetchposts = async () => {
@@ -18,7 +18,11 @@ const fetchposts = async () => {
     return res.json();
 }
 
-const PostList: React.FC = () => {
+type PostListProps = {
+  popupHandler: () => void;
+};
+
+const PostList: React.FC<PostListProps> = ({ popupHandler }) => {
     const [posts, setPosts] = useState<PostListUIProps['posts']>([]);
 
     useEffect(() => {
@@ -43,7 +47,7 @@ const PostList: React.FC = () => {
         fetchPosts();
     }, []);
 
-    return <PostListUI posts={posts} />;
+    return <PostListUI posts={posts} popupHandler={popupHandler} />;
 };
 
 export default PostList;

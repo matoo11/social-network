@@ -4,6 +4,7 @@ import ChatList from '@/components/ChatList/ChatList';
 import PostList from '@/components/PostList/PostList';
 import Popup from '@/components/Popup/Popup';
 import { useState } from 'react';
+import PostForm from '@/components/PostForm/PostForm';
 
 export default function SocialFeed() {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -43,7 +44,7 @@ export default function SocialFeed() {
             {/* Right column - 30% */}
             <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0"></div>
             <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
-                <PostList popupHandler={() => setIsPopupOpen(true)}></PostList>
+                <PostForm />
             </Popup>
         </div>
     );

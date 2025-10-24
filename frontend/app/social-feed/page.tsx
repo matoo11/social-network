@@ -5,9 +5,12 @@ import PostList from '@/components/PostList/PostList';
 import Popup from '@/components/Popup/Popup';
 import { useState } from 'react';
 import PostForm from '@/components/PostForm/PostForm';
+import EventsList from '@/components/EventsList/EventsList';
 
 export default function SocialFeed() {
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);
+    const [isChatListPopupOpen, setIsChatListPopupOpen] = useState(false); // TODO: Need to Create ChatList Popup
+    const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false); // TODO: Need to Create EventsList Popup
 
     return (
         <div className="flex w-full h-full mt-[10vh]">
@@ -32,18 +35,22 @@ export default function SocialFeed() {
                         { id: '15', name: 'Oscar', lastMessage: 'Can we reschedule?' },
                         { id: '16', name: 'Paula', lastMessage: 'See you at the event.' },
                     ]}
-                    popupHandler={() => setIsPopupOpen(true)}
+                    popupHandler={() => setIsChatListPopupOpen(false)}
                 />
             </div>
 
             {/* Middle column - 52.5% */}
             <div className="w-[52.5%] bg-gray-900 ml-[17.5%] fixed h-[90%]">
-                <PostList popupHandler={() => setIsPopupOpen(true)} />
+                <PostList popupHandler={() => setIsPostFormPopupOpen(true)} />
             </div>
 
             {/* Right column - 30% */}
-            <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0"></div>
-            <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
+            <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
+                <EventsList popupHandler={() => setIsEventsListPopupOpen(false)} />
+            </div>
+
+            {/* Popups */}
+            <Popup isOpen={isPostFormPopupOpen} onClose={() => setIsPostFormPopupOpen(false)}>
                 <PostForm />
             </Popup>
         </div>

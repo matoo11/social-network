@@ -17,7 +17,7 @@ const PostForm: React.FC = () => {
     const [error, setError] = useState('');
 
     const handleInputChange =
-        (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        (field: string | number) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
             setFormData((prev) => ({
                 ...prev,
                 [field]: e.target.value,

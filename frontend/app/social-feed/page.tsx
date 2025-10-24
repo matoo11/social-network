@@ -49,8 +49,10 @@ export default function SocialFeed() {
                 <EventsList popupHandler={() => setIsEventsListPopupOpen(false)} />
             </div>
 
+            
+
             {/* Popups */}
-            <Popup isOpen={isPostFormPopupOpen} onClose={() => setIsPostFormPopupOpen(false)}>
+            <Popup isOpen={isPostFormPopupOpen} onClose={() => setIsPostFormPopupOpen(false)} className='max-w-6xl'>
                 <PostForm />
             </Popup>
         </div>

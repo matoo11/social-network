@@ -20,7 +20,7 @@ type PostFormUIProps = {
     error: string;
     onInputChange: (
         field: string | number,
-    ) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+    ) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 };
 
@@ -31,6 +31,7 @@ const selectInputOptions = [
 ];
 
 const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange, onSubmit }) => {
+    const [isVisible, setIsVisible] = useState(false);
 
     return (
         <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
@@ -45,9 +46,12 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
                                 selectOptions={selectInputOptions}
                                 selectedOption={selectInputOptions[0]}
                                 onChange={(option) => {
-                                    console.log(option);
+                                    formData.postType = option.optionValue;
+                                    onInputChange('postType');
+                                    setIsVisible(formData.postType === 3);
                                 }}
                             />
+                            {isVisible && <div> Hidden Element</div>}
                         </div>
 
                         {/* Separator */}
@@ -80,6 +84,8 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
                                     id="message"
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white resize-none h-[90%]"
                                     placeholder="Your post content..."
+                                    value={formData.content}
+                                    onChange={onInputChange('content')}
                                 ></textarea>
                             </div>
                         </div>

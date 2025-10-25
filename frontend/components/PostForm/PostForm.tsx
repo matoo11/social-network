@@ -11,13 +11,13 @@ const PostForm: React.FC = () => {
         title: '',
         content: '',
         imgageUrl: '',
-        postType: 0,
+        postType: 1,
         privateUsers: [] as number[],
     });
     const [error, setError] = useState('');
 
     const handleInputChange =
-        (field: string | number) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        (field: string | number) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
             setFormData((prev) => ({
                 ...prev,
                 [field]: e.target.value,

@@ -1,66 +1,63 @@
-// 'use client';
+'use client';
 
-// import React from 'react';
+import React from 'react';
+import { useState } from 'react';
 
-// interface Option {
-//     label: string;
-//     value: number;
-// }
+type SelectOption = {
+    optionText: string;
+    optionValue: number;
+};
 
-// interface SelectInputProps {
-//     id?: string;
-//     label?: string;
-//     options: Option[];
-//     selectedValue?: number;
-//     onChange?: (selectedValue: number) => void;
-//     placeholder?: string;
-//     className?: string;
-// }
+type SelectInputProps = {
+    id?: string;
+    selectLabel?: string;
+    selectOptions: SelectOption[];
+    selectedOption: SelectOption;
+    onChange?: (option: SelectOption) => void;
+};
 
-// const SelectInput: React.FC<SelectInputProps> = ({
-//     id,
-//     label,
-//     options,
-//     selectedValue,
-//     onChange,
-//     placeholder = 'Select an option',
-//     className = '',
-// }) => {
-//     return (
-//         <div className={`max-w-sm mx-auto ${className}`}>
-//             {label && (
-//                 <label
-//                     htmlFor={id}
-//                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-//                 >
-//                     {label}
-//                 </label>
-//             )}
-//             <select
-//                 id={id}
-//                 value={selectedValue ?? ''}
-//                 onChange={(e) => {
-//                     const selected = Number(e.target.value);
-//                     if (!isNaN(selected)) onChange?.(selected);
-//                 }}
-//                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-//                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
-//                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-//                    dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-//             >
-//                 {placeholder && (
-//                     <option value="" disabled>
-//                         {placeholder}
-//                     </option>
-//                 )}
-//                 {options.map((option) => (
-//                     <option key={option.value} value={option.value}>
-//                         {option.label}
-//                     </option>
-//                 ))}
-//             </select>
-//         </div>
-//     );
-// };
+const SelectInput: React.FC<SelectInputProps> = ({
+    id = 'select-option',
+    selectLabel = 'Select an option',
+    selectOptions,
+    selectedOption = { optionText: 'Public', optionValue: 1 },
+    onChange,
+}) => {
 
-// export default SelectInput;
+    const [currentSelection , setCurrentSelection] = useState(selectedOption);
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = selectOptions.find(
+      (opt) => opt.optionValue === Number(e.target.value)
+    );
+    if (selected) {
+      setCurrentSelection(selected); // update internal state
+      onChange?.(selected); // notify parent (optional)
+    }
+  };
+    return (
+        <div className="max-w-sm mx-auto">
+            <label
+                htmlFor={id}
+                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >
+                {selectLabel}
+            </label>
+
+            <select
+                id={id}
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                value={currentSelection?.optionValue}
+                onChange={handleChange}
+            >
+                {selectOptions.map((option) => (
+                    <option key={option.optionValue} value={option.optionValue}>
+                        {option.optionText}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+};
+
+export default SelectInput

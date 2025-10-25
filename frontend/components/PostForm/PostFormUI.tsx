@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Title from '../Title/Title';
 import InputField from '../InputField/InputField';
 import ImageInputField from '../ImageInputField/ImageInputField';
-
+import SelectInput from '../SelectInput/SelectInput';
 
 type FormData = {
     title: string;
@@ -24,7 +24,14 @@ type PostFormUIProps = {
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 };
 
+const selectInputOptions = [
+    { optionText: 'Public', optionValue: 1 },
+    { optionText: 'Followers Only', optionValue: 2 },
+    { optionText: 'Private', optionValue: 3 },
+];
+
 const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange, onSubmit }) => {
+
     return (
         <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
             <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
@@ -33,8 +40,14 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
             <div className="h-[92.5%] overflow-y-auto hide-scrollbar p-6">
                 <form onSubmit={onSubmit} className="flex flex-col w-full h-full">
                     <div className="flex flex-col md:flex-row gap-6 h-full">
-                        <div className="flex-1 h-[90%] bg-white">
-
+                        <div className="flex-1 h-[90%] bg-gray-900">
+                            <SelectInput
+                                selectOptions={selectInputOptions}
+                                selectedOption={selectInputOptions[0]}
+                                onChange={(option) => {
+                                    console.log(option);
+                                }}
+                            />
                         </div>
 
                         {/* Separator */}

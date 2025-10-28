@@ -6,6 +6,8 @@ import Title from '../Title/Title';
 import InputField from '../InputField/InputField';
 import ImageInputField from '../ImageInputField/ImageInputField';
 import SelectInput from '../SelectInput/SelectInput';
+import SearchInput from '../SearchInput/SearchInput';
+import FollowerCard from '../FollowerCard/FollowerCard';
 
 type FormData = {
     title: string;
@@ -33,6 +35,59 @@ const selectInputOptions = [
 const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange, onSubmit }) => {
     const [isVisible, setIsVisible] = useState(false);
 
+    const followers = [
+        { id: 1, username: 'John Doe', description: 'Follows you', avatarUrl: '/avatars/john.jpg' },
+        {
+            id: 2,
+            username: 'Jane Smith',
+            description: 'Follows you',
+            avatarUrl: '/avatars/jane.jpg',
+        },
+        {
+            id: 3,
+            username: 'Alice Johnson',
+            description: 'Follows you',
+            avatarUrl: '/avatars/alice.jpg',
+        },
+        { id: 4, username: 'Bob Brown', description: 'Follows you', avatarUrl: '/avatars/bob.jpg' },
+        {
+            id: 5,
+            username: 'Charlie Davis',
+            description: 'Follows you',
+            avatarUrl: '/avatars/charlie.jpg',
+        },
+        {
+            id: 6,
+            username: 'Emily Wilson',
+            description: 'Follows you',
+            avatarUrl: '/avatars/emily.jpg',
+        },
+        {
+            id: 7,
+            username: 'Frank Miller',
+            description: 'Follows you',
+            avatarUrl: '/avatars/frank.jpg',
+        },
+        {
+            id: 8,
+            username: 'Grace Lee',
+            description: 'Follows you',
+            avatarUrl: '/avatars/grace.jpg',
+        },
+        {
+            id: 9,
+            username: 'Henry Scott',
+            description: 'Follows you',
+            avatarUrl: '/avatars/henry.jpg',
+        },
+        {
+            id: 10,
+            username: 'Ivy Adams',
+            description: 'Follows you',
+            avatarUrl: '/avatars/ivy.jpg',
+        },
+    ];
+
     return (
         <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
             <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
@@ -51,7 +106,33 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
                                     setIsVisible(formData.postType === 3);
                                 }}
                             />
-                            {isVisible && <div> Hidden Element</div>}
+                            <div>
+                                {isVisible && (
+                                    <div>
+                                        <SearchInput
+                                            onSearch={(query) => {
+                                                console.log('Searching for:', query);
+                                            }}
+                                        />
+                                        <div className="max-w-md mx-auto mt-5 space-y-2">
+                                            {followers.map((follower) => (
+                                                <FollowerCard
+                                                    key={follower.id}
+                                                    username={follower.username}
+                                                    description={follower.description}
+                                                    avatarUrl={follower.avatarUrl}
+                                                    onCheckChange={(checked) =>
+                                                        console.log(
+                                                            `${follower.username} checked:`,
+                                                            checked,
+                                                        )
+                                                    }
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Separator */}
@@ -82,7 +163,7 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
                                 </label>
                                 <textarea
                                     id="message"
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white resize-none h-[90%]"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white resize-none h-[90%]"
                                     placeholder="Your post content..."
                                     value={formData.content}
                                     onChange={onInputChange('content')}

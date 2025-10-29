@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"social/backend/pkg/db/dbHandler"
+	"strings"
 )
 
 type ProfileUserDetails struct {
@@ -20,7 +21,11 @@ type ProfileUserDetails struct {
 	ProfileTypeID int
 }
 
-var ErrUserProfileNotFound = fmt.Errorf("user profile not found")
+var (
+	ErrUserProfileNotFound = fmt.Errorf("user profile not found")
+	ErrProfileTypeNotFound  = fmt.Errorf("profile type not found")
+)
+
 func GetUserProfileDetails(userID int) (ProfileUserDetails, error) {
 	statement := `
 		SELECT
@@ -39,7 +44,7 @@ func GetUserProfileDetails(userID int) (ProfileUserDetails, error) {
 		WHERE User_ID = ? AND Is_Active = 1`
 
 	var (
-		hrer ProfileUserDetails
+		hrer    ProfileUserDetails
 		dob     sql.NullString
 		aboutMe sql.NullString
 	)
@@ -74,4 +79,28 @@ func GetUserProfileDetails(userID int) (ProfileUserDetails, error) {
 	}
 
 	return hrer, nil
+}
+
+func GetProfileTypeIDByName(name string) (int, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return 0, fmt.Errorf("profile type name cannot be empty")
+	}
+
+	var id int
+	err := dbHandler.DB.QueryRow(
+		`SELECT Profile_Type_ID
+		 FROM Profile_Types
+		 WHERE LOWER(Profile_Type_Name) = LOWER(?)
+		   AND Is_Active = 1
+		 LIMIT 1`,
+		name,
+	).Scan(&id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, ErrProfileTypeNotFound
+		}
+		return 0, fmt.Errorf("failed to fetch profile type %q: %w", name, err)
+	}
+	return id, nil
 }

@@ -105,6 +105,24 @@ func GetProfileTypeIDByName(name string) (int, error) {
 	return id, nil
 }
 
+func GetProfileTypeNameByID(id int) (string, error) {
+	var name string
+	err := dbHandler.DB.QueryRow(
+		`SELECT Profile_Type_Name
+		 FROM Profile_Types
+		 WHERE Profile_Type_ID = ?
+		   AND Is_Active = 1
+		 LIMIT 1`,
+		id,
+	).Scan(&name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", ErrProfileTypeNotFound
+		}
+		return "", fmt.Errorf("failed to fetch profile type id %d: %w", id, err)
+	}
+	return name, nil
+}
 
 func UpdateUserProfileType(userID, profileTypeID, updatedBy int) error {
 	statement := `
@@ -126,3 +144,4 @@ func UpdateUserProfileType(userID, profileTypeID, updatedBy int) error {
 	}
 	return nil
 }
+

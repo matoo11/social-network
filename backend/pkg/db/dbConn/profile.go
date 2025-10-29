@@ -104,3 +104,25 @@ func GetProfileTypeIDByName(name string) (int, error) {
 	}
 	return id, nil
 }
+
+
+func UpdateUserProfileType(userID, profileTypeID, updatedBy int) error {
+	statement := `
+		UPDATE Users
+		SET Profile_Type_ID = ?,
+		    Last_Updated_By_ID = ?,
+		    Last_Updated_Time = ?
+		WHERE User_ID = ?`
+
+	now := formattedNow()
+	result, err := dbHandler.DB.Exec(statement, profileTypeID, updatedBy, now, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update profile type: %w", err)
+	}
+
+	affected, err := result.RowsAffected()
+	if err == nil && affected == 0 {
+		return fmt.Errorf("user not found")
+	}
+	return nil
+}

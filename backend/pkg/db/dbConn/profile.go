@@ -202,3 +202,48 @@ func GetFollowingDetailed(userID int) ([]FollowUserDetails, error) {
 
 	return following, nil
 }
+
+func GetFollowersDetailed(userID int) ([]FollowUserDetails, error) {
+	statement := `
+		SELECT
+			u.User_ID,
+			u.User_Name,
+			u.Nick_Name,
+			u.First_Name,
+			u.Last_Name,
+			u.Image_ID
+		FROM Followers f
+		JOIN Users u ON f.Follower_ID = u.User_ID
+		WHERE f.Followed_ID = ?
+		  AND f.Is_Active = 1
+		  AND u.Is_Active = 1
+		ORDER BY f.Creation_Time DESC`
+
+	rows, err := dbHandler.DB.Query(statement, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch followers: %w", err)
+	}
+	defer rows.Close()
+
+	var followers []FollowUserDetails
+	for rows.Next() {
+		var follower FollowUserDetails
+		if err := rows.Scan(
+			&follower.UserID,
+			&follower.UserName,
+			&follower.NickName,
+			&follower.FirstName,
+			&follower.LastName,
+			&follower.ImageID,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan follower: %w", err)
+		}
+		followers = append(followers, follower)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate followers: %w", err)
+	}
+
+	return followers, nil
+}

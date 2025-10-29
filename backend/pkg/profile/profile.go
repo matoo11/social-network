@@ -98,6 +98,10 @@ func GetProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	viewerID := session.UserID
 
+	if r.Method == http.MethodPost {
+		r.Body = http.MaxBytesReader(w, r.Body, maxProfilePayloadBytes)
+	}
+
 	request, err := parseProfileRequest(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -112,10 +116,14 @@ func GetProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	privateTypeID, err := dbConn.GetProfileTypeIDByName("Private")
+	publicTypeID, privateTypeID, err := fetchVisibilityOptions()
 	if err != nil {
 		handleVisibilityLookupError(w, err)
 		return
+	}
+
+	if profileTypeName == "" {
+		profileTypeName = visibilityName(profileDetails.ProfileTypeID, publicTypeID, privateTypeID)
 	}
 
 	isOwner := viewerID == targetUserID

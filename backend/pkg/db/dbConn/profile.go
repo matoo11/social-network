@@ -1,0 +1,77 @@
+package dbConn
+
+import (
+	"database/sql"
+	"fmt"
+	"social/backend/pkg/db/dbHandler"
+)
+
+type ProfileUserDetails struct {
+	UserID        int
+	UserName      string
+	NickName      string
+	Email         string
+	FirstName     string
+	LastName      string
+	DateOfBirth   *string
+	Gender        string
+	ImageID       int
+	AboutMe       *string
+	ProfileTypeID int
+}
+
+var ErrUserProfileNotFound = fmt.Errorf("user profile not found")
+func GetUserProfileDetails(userID int) (ProfileUserDetails, error) {
+	statement := `
+		SELECT
+			User_ID,
+			User_Name,
+			Nick_Name,
+			Email,
+			First_Name,
+			Last_Name,
+			Date_of_Birth,
+			Gender,
+			Image_ID,
+			About_Me,
+			Profile_Type_ID
+		FROM Users
+		WHERE User_ID = ? AND Is_Active = 1`
+
+	var (
+		hrer ProfileUserDetails
+		dob     sql.NullString
+		aboutMe sql.NullString
+	)
+
+	err := dbHandler.DB.QueryRow(statement, userID).Scan(
+		&hrer.UserID,
+		&hrer.UserName,
+		&hrer.NickName,
+		&hrer.Email,
+		&hrer.FirstName,
+		&hrer.LastName,
+		&dob,
+		&hrer.Gender,
+		&hrer.ImageID,
+		&aboutMe,
+		&hrer.ProfileTypeID,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return ProfileUserDetails{}, ErrUserProfileNotFound
+		}
+		return ProfileUserDetails{}, fmt.Errorf("failed to fetch user profile: %w", err)
+	}
+
+	if dob.Valid {
+		value := dob.String
+		hrer.DateOfBirth = &value
+	}
+	if aboutMe.Valid {
+		value := aboutMe.String
+		hrer.AboutMe = &value
+	}
+
+	return hrer, nil
+}

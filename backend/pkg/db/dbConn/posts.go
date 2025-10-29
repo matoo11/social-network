@@ -31,6 +31,13 @@ type PostDisplay struct {
 	Comments     []CommentDisplay
 }
 
+func boolToInt(value bool) int {
+	if value {
+		return 1
+	}
+	return 0
+}
+
 func CreatePost(post Post) error {
 	fmt.Println("here19")
 	statement := `INSERT INTO Posts
@@ -238,3 +245,75 @@ func IsPostOwner(postID int, userID int) (bool, error) {
 	return ownerID == userID, nil
 }
 
+func GetPostsByUserForViewer(ownerID, viewerID int) ([]PostDisplay, error) {
+	isOwner := viewerID != 0 && viewerID == ownerID
+	isFollower := false
+
+	if !isOwner && viewerID > 0 {
+		var err error
+		isFollower, err = IsFollowing(viewerID, ownerID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to check follow relationship: %w", err)
+		}
+	}
+
+	query := `
+		SELECT
+			p.Post_ID,
+			p.Post_Title,
+			p.Post_Text,
+			p.Post_Type_ID,
+			p.User_ID,
+			p.Image_ID,
+			p.Creation_Time
+		FROM Posts p
+		WHERE p.User_ID = ?
+		  AND p.Is_Active = 1
+		  AND (
+		        ? = 1
+		     OR p.Post_Type_ID = 1
+		     OR (? = 1 AND p.Post_Type_ID = 2)
+		     OR (
+		        p.Post_Type_ID = 3 AND EXISTS (
+		            SELECT 1 FROM Private_Posts_Users pru
+		            WHERE pru.Post_ID = p.Post_ID AND pru.User_ID = ?
+		        )
+		     )
+		  )
+		ORDER BY p.Creation_Time DESC`
+
+	rows, err := dbHandler.DB.Query(query, ownerID, boolToInt(isOwner), boolToInt(isFollower), viewerID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch user posts: %w", err)
+	}
+	defer rows.Close()
+
+	var posts []PostDisplay
+	for rows.Next() {
+		var post PostDisplay
+		if err := rows.Scan(
+			&post.PostID,
+			&post.PostTitle,
+			&post.PostText,
+			&post.PostTypeID,
+			&post.UserID,
+			&post.ImageID,
+			&post.CreationTime,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan user post: %w", err)
+		}
+
+		post.Comments, err = GetCommentsByPostID(post.PostID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch comments for post %d: %w", post.PostID, err)
+		}
+
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate user posts: %w", err)
+	}
+
+	return posts, nil
+}

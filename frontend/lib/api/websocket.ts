@@ -2,6 +2,7 @@
 let ws: WebSocket;
 let forceDisconnect = false;
 import { UpdateUserList } from "../../components/UserList/UserList";
+import { AddChatBubble } from "@/components/ChatPopup/ChatPopup";
 
 export function InitWebSocket() {
     console.log('fuck')
@@ -18,8 +19,13 @@ export function InitWebSocket() {
         if (msg.Type === "userlist") {
             UpdateUserList(msg.Users);
             console.log("here")
+        } else if (msg.type === "chat") {
+            console.log(msg.data.message)
+            AddChatBubble(msg.data, false)
+        } else {
+
+            console.log(msg)
         }
-        console.log(msg)
     };
 
     ws.onclose = () => {

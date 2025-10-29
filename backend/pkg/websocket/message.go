@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"social/backend/pkg/db/dbConn"
+	"strings"
 	"time"
 )
 
@@ -16,31 +17,80 @@ type ChatData struct {
 	Time             time.Time `json:"time"`
 }
 
+func ChatHandler(sento int, message string, conn *Conn, LoggedInUserID int, LoggedInUsername string, Type int) {
+	if len(message) >= 100 {
+		chat := ChatData{
+			Message: "The message is too long",
+		}
+		chatJson, _ := json.Marshal(chat)
+		response := Response{
+			Type: "chat",
+			Data: chatJson,
+		}
+		conn.Lock.Lock()
+		conn.Conn.WriteJSON(response)
+		conn.Lock.Unlock()
+
+	} else if len(strings.TrimSpace(message)) == 0 || len(message) == 0 {
+		chat := ChatData{
+			Message: "Enter a valid message",
+		}
+		hrar, _ := json.Marshal(chat)
+		response := Response{
+			Type: "chat",
+			Data: hrar,
+		}
+		conn.Lock.Lock()
+		conn.Conn.WriteJSON(response)
+		conn.Lock.Unlock()
+
+	} else {
+		SendChatMessage(LoggedInUserID, LoggedInUsername, sento, message)
+
+	}
+}
+
+func PrivateChat(sento int, message string, conn *Conn, LoggedInUserID int, LoggedInUsername string) {
+	if len(message) >= 100 {
+		chat := ChatData{
+			Message: "The message is too long",
+		}
+		chatJson, _ := json.Marshal(chat)
+		response := Response{
+			Type: "chat",
+			Data: chatJson,
+		}
+		conn.Lock.Lock()
+		conn.Conn.WriteJSON(response)
+		conn.Lock.Unlock()
+
+	} else if len(strings.TrimSpace(message)) == 0 || len(message) == 0 {
+		chat := ChatData{
+			Message: "Enter a valid message",
+		}
+		hrar, _ := json.Marshal(chat)
+		response := Response{
+			Type: "chat",
+			Data: hrar,
+		}
+		conn.Lock.Lock()
+		conn.Conn.WriteJSON(response)
+		conn.Lock.Unlock()
+
+	} else {
+		SendChatMessage(LoggedInUserID, LoggedInUsername, sento, message)
+
+	}
+}
+
+func groupChat() {
+
+}
+
 func SendChatMessage(owner int, ownerUsername string, sento int, message string) {
 
 	sentoConn := GetClientConn(sento)
-	// if sentoConn == nil {
-	// 	fmt.Println("the user is not online")
-	// 	conn := GetClientConn(owner)
-	// 	if conn.Conn == nil {
-	// 		fmt.Println("fuck error")
-	// 		return
-	// 	}
 
-	// 	chat := ChatData{
-	// 		Message: "user is not online",
-	// 	}
-	// 	jsonChat, _ := json.Marshal(chat)
-	// 	response := Response{
-	// 		Type: "chat",
-	// 		Data: jsonChat,
-	// 	}
-
-	// 	conn.Lock.Lock()
-	// 	conn.Conn.WriteJSON(response)
-	// 	conn.Lock.Unlock()
-	// 	return
-	// }
 	chat := ChatData{
 		Message:        message,
 		RecieverID:     sento,

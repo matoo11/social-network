@@ -1,4 +1,8 @@
-export default function ChatBubble({ isSender = false, text = "" }: { isSender?: boolean, text: string }) {
+export default function ChatBubble({ isSender = false, data }: { isSender?: boolean, data: {
+    message: string,
+    senderUsername: string
+} }) {
+    console.log(data)
     return (
         <div className={`flex items-start gap-2.5 mb-4 ${isSender ? 'flex-row-reverse justify-end' : ''}`}>
             <img className="w-8 h-8 rounded-full" src="/docs/images/people/profile-picture-3.jpg" alt="Jese image" />
@@ -6,11 +10,11 @@ export default function ChatBubble({ isSender = false, text = "" }: { isSender?:
                 }`}>
                 {!isSender && (
                     <div className="flex items-center space-x-2 rtl:space-x-reverse mb-2">
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">Bonnie Green</span>
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">{data.senderUsername}</span>
                     </div>
                 )}
                 <p className={`text-sm font-normal text-gray-900 dark:text-white ${isSender ? 'text-right' : ''}`}>
-                    {text}
+                    {data.message}
                 </p>
                 <div className={`flex mt-1 ${isSender ? 'justify-end' : ''}`}>
                     <span className="text-xs font-normal text-gray-500 dark:text-gray-400">11:46</span>

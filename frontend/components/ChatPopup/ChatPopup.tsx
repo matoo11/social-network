@@ -2,6 +2,11 @@ import ChatBubble from "./ChatBubble";
 import { createRoot } from "react-dom/client";
 import { sendMessage } from '@/lib/api/websocket'
 
+let chatID: number
+let chatType: number
+
+chatID = 2
+chatType = 1
 export default function ChatPopup() {
     return (
         <>
@@ -21,7 +26,9 @@ export default function ChatPopup() {
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                         </svg>
-                        Chat name
+                        <span id="chatName">
+                            Chat name
+                        </span>
                     </h3>
                     <p className="text-xs text-blue-100 mt-1">Discover and connect</p>
                 </div>
@@ -42,8 +49,12 @@ export default function ChatPopup() {
                                 if (e.key === "Enter") {
                                     const input = e.target as HTMLInputElement;
                                     if (input.value.trim() !== "") {
-                                        AddChatBubble(input.value.trim());
-                                        SendChatMessage(2, input.value.trim())
+                                        const data = {
+                                            message: input.value.trim(),
+                                            senderUsername: "hello",
+                                        };
+                                        AddChatBubble(data, true);
+                                        SendChatMessage(chatID, data.message, chatType)
                                         input.value = "";
                                     }
                                 }
@@ -54,7 +65,12 @@ export default function ChatPopup() {
                             onClick={() => {
                                 const input = document.getElementById("chatInput") as HTMLInputElement | null;
                                 if (input && input.value.trim() !== "") {
-                                    AddChatBubble(input.value.trim());
+                                    const data = {
+                                        message: input.value.trim(),
+                                        senderUsername: "hello",
+                                    };
+                                    AddChatBubble(data, true);
+                                    SendChatMessage(chatID, data.message, chatType)
                                     input.value = "";
                                 }
                             }}
@@ -70,23 +86,45 @@ export default function ChatPopup() {
     );
 }
 
-export function AddChatBubble(text: string) {
+export function AddChatBubble(data: { message: string, senderUsername: string }, isSender: boolean) {
     const container = document.getElementById("chatarea");
     if (!container) return;
 
     const newDiv = document.createElement("div");
 
     const root = createRoot(newDiv);
-    root.render(<ChatBubble text={text} />);
+    root.render(<ChatBubble data={data} isSender={isSender} />);
 
 
     container.appendChild(newDiv);
 }
 
-export function SendChatMessage(userID: number, text: string) {
+export function SendChatMessage(chatID: number, text: string, type: number) {
     const data = {
-        userID: userID,
+        type: type,
+        chatID: chatID,
         message: text
     }
     sendMessage("chat", data)
+}
+
+export function ClearChat() {
+    const container = document.getElementById("chatarea");
+    if (!container) return;
+
+    container.innerHTML = "";
+}
+
+//chat id if group and user id if private chat
+//1 if private chat 2 if group chat
+export function SetChatConf(id: number, type: number, chatName: string) {
+    chatID = id
+    chatType = type
+    ClearChat()
+    const name = document.getElementById("chatName")
+    if (!name)  {
+        return;
+    }
+    name.innerText = chatName;
+    
 }

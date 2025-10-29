@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"social/backend/pkg/db/dbConn"
-	"strings"
 	"sync"
 	"time"
 
@@ -37,7 +36,6 @@ var ConnLock sync.Mutex
 func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	var LoggedInUserID int
-	var LoggedInUsername string
 	session, err := dbConn.GetSessionFromCookie(r)
 
 	if err != nil {
@@ -68,9 +66,9 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		var msg Response
-		
+		var LoggedInUsername string
 		err := conn.Conn.ReadJSON(&msg)
-		
+
 		if err != nil {
 			log.Printf("Read error: %v", err)
 			break
@@ -90,13 +88,13 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			LoggedInUsername = User.User_Name
-
 		}
 		switch msg.Type {
 		case "chat":
 			data := struct {
 				Message string `json:"message"`
-				UserID  int    `json:"userID"`
+				ChatID  int    `json:"chatID"`
+				Type    int    `json:"type"`
 			}{}
 
 			if err := json.Unmarshal(msg.Data, &data); err != nil {
@@ -106,39 +104,11 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			// fmt.Println("sento: " + sentom)
 			fmt.Println(data)
-			sento := data.UserID
+			sento := data.ChatID
 			message := data.Message
 			fmt.Println(message)
-			if len(message) >= 100 {
-				chat := ChatData{
-					Message: "The message is too long",
-				}
-				chatJson, _ := json.Marshal(chat)
-				response := Response{
-					Type: "chat",
-					Data: chatJson,
-				}
-				conn.Lock.Lock()
-				conn.Conn.WriteJSON(response)
-				conn.Lock.Unlock()
+			ChatHandler(sento, message, conn, LoggedInUserID, LoggedInUsername, data.Type)
 
-			} else if len(strings.TrimSpace(message)) == 0 || len(message) == 0 {
-				chat := ChatData{
-					Message: "Enter a valid message",
-				}
-				hrar, _ := json.Marshal(chat)
-				response := Response{
-					Type: "chat",
-					Data: hrar,
-				}
-				conn.Lock.Lock()
-				conn.Conn.WriteJSON(response)
-				conn.Lock.Unlock()
-
-			} else {
-				SendChatMessage(LoggedInUserID, LoggedInUsername, sento, message)
-
-			}
 		case "notification":
 
 		}

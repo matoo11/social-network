@@ -83,7 +83,7 @@ func PrivateChat(sento int, message string, conn *Conn, LoggedInUserID int, Logg
 	}
 }
 
-func groupChat() {
+func GroupChat() {
 
 }
 

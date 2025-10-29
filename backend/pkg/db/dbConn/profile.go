@@ -20,6 +20,19 @@ type ProfileUserDetails struct {
 	AboutMe       *string
 	ProfileTypeID int
 }
+type ProfileType struct {
+	ID   int
+	Name string
+}
+
+type FollowUserDetails struct {
+	UserID    int
+	UserName  string
+	NickName  string
+	FirstName string
+	LastName  string
+	ImageID   int
+}
 
 var (
 	ErrUserProfileNotFound = fmt.Errorf("user profile not found")
@@ -145,3 +158,47 @@ func UpdateUserProfileType(userID, profileTypeID, updatedBy int) error {
 	return nil
 }
 
+func GetFollowingDetailed(userID int) ([]FollowUserDetails, error) {
+	statement := `
+		SELECT
+			u.User_ID,
+			u.User_Name,
+			u.Nick_Name,
+			u.First_Name,
+			u.Last_Name,
+			u.Image_ID
+		FROM Followers f
+		JOIN Users u ON f.Followed_ID = u.User_ID
+		WHERE f.Follower_ID = ?
+		  AND f.Is_Active = 1
+		  AND u.Is_Active = 1
+		ORDER BY f.Creation_Time DESC`
+
+	rows, err := dbHandler.DB.Query(statement, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch following users: %w", err)
+	}
+	defer rows.Close()
+
+	var following []FollowUserDetails
+	for rows.Next() {
+		var fol FollowUserDetails
+		if err := rows.Scan(
+			&fol.UserID,
+			&fol.UserName,
+			&fol.NickName,
+			&fol.FirstName,
+			&fol.LastName,
+			&fol.ImageID,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan following user: %w", err)
+		}
+		following = append(following, fol)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate following users: %w", err)
+	}
+
+	return following, nil
+}

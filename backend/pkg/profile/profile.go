@@ -3,6 +3,7 @@ package profile
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -11,6 +12,12 @@ import (
 
 	"social/backend/pkg/auth"
 	"social/backend/pkg/db/dbConn"
+)
+
+const (
+	profileVisibilityPublic  = "public"
+	profileVisibilityPrivate = "private"
+	maxProfilePayloadBytes   = 1 << 20
 )
 
 type profileRequest struct {
@@ -39,14 +46,14 @@ type profileUser struct {
 }
 
 type profilePost struct {
-	PostID        int                 `json:"postID"`
-	Title         string              `json:"title"`
-	Content       string              `json:"content"`
-	PostTypeID    int                 `json:"postTypeId"`
-	ImageID       *int                `json:"imageID,omitempty"`
-	CreatedAt     string              `json:"createdAt"`
+	PostID        int              `json:"postID"`
+	Title         string           `json:"title"`
+	Content       string           `json:"content"`
+	PostTypeID    int              `json:"postTypeId"`
+	ImageID       *int             `json:"imageID,omitempty"`
+	CreatedAt     string           `json:"createdAt"`
 	Comments      []profileComment `json:"comments"`
-	CommentsCount int                 `json:"commentsCount"`
+	CommentsCount int              `json:"commentsCount"`
 }
 
 type profileComment struct {
@@ -71,15 +78,15 @@ type profileResponse struct {
 	Posts           []profilePost   `json:"posts"`
 	Followers       []profileFollow `json:"followers"`
 	Following       []profileFollow `json:"following"`
-	FollowersCount  int                `json:"followersCount"`
-	FollowingCount  int                `json:"followingCount"`
-	IsOwner         bool               `json:"isOwner"`
-	IsFollower      bool               `json:"isFollower"`
-	ProfileTypeName string             `json:"profileTypeName"`
+	FollowersCount  int             `json:"followersCount"`
+	FollowingCount  int             `json:"followingCount"`
+	IsOwner         bool            `json:"isOwner"`
+	IsFollower      bool            `json:"isFollower"`
+	ProfileTypeName string          `json:"profileTypeName"`
 }
 
 func GetProfileHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet && r.Method != http.MethodPost {
+	if !methodAllowed(r.Method, http.MethodGet, http.MethodPost) {
 		auth.ErrorPage(w, http.StatusMethodNotAllowed)
 		return
 	}
@@ -97,36 +104,22 @@ func GetProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	targetUserID := viewerID
-	if request.UserID != nil {
-		targetUserID = *request.UserID
-	}
+	targetUserID := targetOrViewerID(request.UserID, viewerID)
 
-	profileDetails, err := dbConn.GetUserProfileDetails(targetUserID)
+	profileDetails, profileTypeName, err := loadProfileDetails(targetUserID)
 	if err != nil {
-		if errors.Is(err, dbConn.ErrUserProfileNotFound) {
-			auth.ErrorPage(w, http.StatusNotFound)
-			return
-		}
-		auth.ErrorPage(w, http.StatusInternalServerError)
+		handleProfileLoadError(w, err)
 		return
 	}
 
 	privateTypeID, err := dbConn.GetProfileTypeIDByName("Private")
-	if err != nil && !errors.Is(err, dbConn.ErrProfileTypeNotFound) {
-		auth.ErrorPage(w, http.StatusInternalServerError)
-		return
-	}
-
-	profileTypeName, err := dbConn.GetProfileTypeNameByID(profileDetails.ProfileTypeID)
-	if err != nil && !errors.Is(err, dbConn.ErrProfileTypeNotFound) {
-		auth.ErrorPage(w, http.StatusInternalServerError)
+	if err != nil {
+		handleVisibilityLookupError(w, err)
 		return
 	}
 
 	isOwner := viewerID == targetUserID
 	isFollower := false
-
 	if !isOwner {
 		isFollower, err = dbConn.IsFollowing(viewerID, targetUserID)
 		if err != nil {
@@ -140,19 +133,7 @@ func GetProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := dbConn.GetPostsByUserForViewer(targetUserID, viewerID)
-	if err != nil {
-		auth.ErrorPage(w, http.StatusInternalServerError)
-		return
-	}
-
-	followers, err := dbConn.GetFollowersDetailed(targetUserID)
-	if err != nil {
-		auth.ErrorPage(w, http.StatusInternalServerError)
-		return
-	}
-
-	following, err := dbConn.GetFollowingDetailed(targetUserID)
+	posts, followers, following, err := loadProfileActivity(targetUserID, viewerID)
 	if err != nil {
 		auth.ErrorPage(w, http.StatusInternalServerError)
 		return
@@ -174,7 +155,7 @@ func GetProfileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ToggleProfileVisibilityHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
+	if !methodAllowed(r.Method, http.MethodPost) {
 		auth.ErrorPage(w, http.StatusMethodNotAllowed)
 		return
 	}
@@ -185,6 +166,8 @@ func ToggleProfileVisibilityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userID := session.UserID
+
+	r.Body = http.MaxBytesReader(w, r.Body, maxProfilePayloadBytes)
 
 	var payload toggleVisibilityRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
@@ -202,14 +185,9 @@ func ToggleProfileVisibilityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	publicTypeID, err := dbConn.GetProfileTypeIDByName("Public")
-	if err != nil && !errors.Is(err, dbConn.ErrProfileTypeNotFound) {
-		auth.ErrorPage(w, http.StatusInternalServerError)
-		return
-	}
-	privateTypeID, err := dbConn.GetProfileTypeIDByName("Private")
-	if err != nil && !errors.Is(err, dbConn.ErrProfileTypeNotFound) {
-		auth.ErrorPage(w, http.StatusInternalServerError)
+	publicTypeID, privateTypeID, err := fetchVisibilityOptions()
+	if err != nil {
+		handleVisibilityLookupError(w, err)
 		return
 	}
 
@@ -354,9 +332,9 @@ func resolveVisibilityTarget(payload toggleVisibilityRequest) (int, error) {
 
 	if visibility := strings.TrimSpace(strings.ToLower(payload.Visibility)); visibility != "" {
 		switch visibility {
-		case "public":
+		case profileVisibilityPublic:
 			return dbConn.GetProfileTypeIDByName("Public")
-		case "private":
+		case profileVisibilityPrivate:
 			return dbConn.GetProfileTypeIDByName("Private")
 		default:
 			return 0, errors.New("visibility must be either 'public' or 'private'")
@@ -375,4 +353,96 @@ func visibilityName(profileTypeID, publicTypeID, privateTypeID int) string {
 	default:
 		return ""
 	}
+}
+
+func methodAllowed(method string, allowed ...string) bool {
+	for _, candidate := range allowed {
+		if method == candidate {
+			return true
+		}
+	}
+	return false
+}
+
+func targetOrViewerID(target *int, fallback int) int {
+	if target != nil {
+		return *target
+	}
+	return fallback
+}
+
+func loadProfileDetails(userID int) (dbConn.ProfileUserDetails, string, error) {
+	details, err := dbConn.GetUserProfileDetails(userID)
+	if err != nil {
+		return dbConn.ProfileUserDetails{}, "", err
+	}
+
+	typeName, err := dbConn.GetProfileTypeNameByID(details.ProfileTypeID)
+	if err != nil && !errors.Is(err, dbConn.ErrProfileTypeNotFound) {
+		return dbConn.ProfileUserDetails{}, "", err
+	}
+
+	return details, typeName, nil
+}
+
+func loadProfileActivity(targetUserID, viewerID int) ([]dbConn.PostDisplay, []dbConn.FollowUserDetails, []dbConn.FollowUserDetails, error) {
+	posts, err := dbConn.GetPostsByUserForViewer(targetUserID, viewerID)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to load posts: %w", err)
+	}
+
+	followers, err := dbConn.GetFollowersDetailed(targetUserID)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to load followers: %w", err)
+	}
+
+	following, err := dbConn.GetFollowingDetailed(targetUserID)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to load following: %w", err)
+	}
+
+	return posts, followers, following, nil
+}
+
+func fetchVisibilityOptions() (int, int, error) {
+	publicTypeID, err := dbConn.GetProfileTypeIDByName("Public")
+	if err != nil {
+		if errors.Is(err, dbConn.ErrProfileTypeNotFound) {
+			return 0, 0, errors.New("public profile type not configured")
+		}
+		return 0, 0, err
+	}
+
+	privateTypeID, err := dbConn.GetProfileTypeIDByName("Private")
+	if err != nil {
+		if errors.Is(err, dbConn.ErrProfileTypeNotFound) {
+			return 0, 0, errors.New("private profile type not configured")
+		}
+		return 0, 0, err
+	}
+
+	return publicTypeID, privateTypeID, nil
+}
+
+func handleProfileLoadError(w http.ResponseWriter, err error) {
+	if errors.Is(err, dbConn.ErrUserProfileNotFound) {
+		auth.ErrorPage(w, http.StatusNotFound)
+		return
+	}
+	auth.ErrorPage(w, http.StatusInternalServerError)
+}
+
+func handleVisibilityLookupError(w http.ResponseWriter, err error) {
+	if err == nil {
+		return
+	}
+	if strings.Contains(err.Error(), "not configured") {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if errors.Is(err, dbConn.ErrProfileTypeNotFound) {
+		http.Error(w, "profile type not found", http.StatusInternalServerError)
+		return
+	}
+	auth.ErrorPage(w, http.StatusInternalServerError)
 }

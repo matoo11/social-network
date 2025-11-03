@@ -1,7 +1,8 @@
 'use client'
 
 import React from "react"
-import { useState } from "react"
+import { useState ,useEffect} from "react"
+import FollowerCard from "../FollowerCard/FollowerCard"
 
 type FollowersListProps = {
 }
@@ -23,17 +24,53 @@ async function fetchFollowers() {
     return output;
 }
 
-const FollowersList: React.FC<FollowersListProps> = () => {
-    const [checkedList, setCheckedList] = useState<number[]>([])
-
-    const followersListData = fetchFollowers();
-
-
-    return (<div>
-            {}
-        </div>
-    )
-
+interface Follower {
+  FollowerID: number;
+  FollowerUsername: string;
+  FollowerAvatarURL: string;
 }
+
+const FollowersList: React.FC = () => {
+  const [followersListData, setFollowersListData] = useState<Follower[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [checkedList, setCheckedList] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchFollowers(); // wait for the async function
+        setFollowersListData(data);
+      } catch (error) {
+        console.error("Failed to fetch followers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData(); // call the async function inside useEffect
+  }, []); // empty deps array → runs only once after first render
+
+  if (loading) {
+    return <div>Loading followers...</div>;
+  }
+
+  return (
+    <div>
+      {followersListData.map((follower) => (
+        console.log(follower.FollowerID),
+        <FollowerCard
+          key={follower.FollowerID}
+          userID={follower.FollowerID}
+          username={follower.FollowerUsername}
+          avatarUrl={follower.FollowerAvatarURL}
+          onCheckChange={(checked) =>
+            console.log(`${follower.FollowerID} checked:`, checked)
+          }
+        />
+      ))}
+    </div>
+  );
+};
+
 
 export default FollowersList

@@ -33,7 +33,7 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
         const newValue = e.target.checked;
         setIsChecked(newValue);
         onCheckChange?.(newValue); // notify parent if callback provided
-        console.log('Checkbox state for', userID, ':', newValue);
+        // console.log('Checkbox state for', userID, ':', newValue);
     };
 
     return (

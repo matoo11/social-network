@@ -8,6 +8,7 @@ import ImageInputField from '../ImageInputField/ImageInputField';
 import SelectInput from '../SelectInput/SelectInput';
 import SearchInput from '../SearchInput/SearchInput';
 import FollowerCard from '../FollowerCard/FollowerCard';
+import FollowersList from '../FollowersList/FollowersList';
 
 type FormData = {
     title: string;
@@ -36,55 +37,25 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
     const [isVisible, setIsVisible] = useState(false);
 
     const followers = [
-        { id: 1, username: 'John Doe', description: 'Follows you', avatarUrl: '/avatars/john.jpg' },
+        { userID: 1, username: 'John Doe', description: 'Follows you', avatarUrl: '/avatars/john.jpg' },
         {
-            id: 2,
+            userID: 2,
             username: 'Jane Smith',
             description: 'Follows you',
             avatarUrl: '/avatars/jane.jpg',
         },
         {
-            id: 3,
+            userID: 3,
             username: 'Alice Johnson',
             description: 'Follows you',
             avatarUrl: '/avatars/alice.jpg',
         },
-        { id: 4, username: 'Bob Brown', description: 'Follows you', avatarUrl: '/avatars/bob.jpg' },
+        { userID: 4, username: 'Bob Brown', description: 'Follows you', avatarUrl: '/avatars/bob.jpg' },
         {
-            id: 5,
+            userID: 5,
             username: 'Charlie Davis',
             description: 'Follows you',
             avatarUrl: '/avatars/charlie.jpg',
-        },
-        {
-            id: 6,
-            username: 'Emily Wilson',
-            description: 'Follows you',
-            avatarUrl: '/avatars/emily.jpg',
-        },
-        {
-            id: 7,
-            username: 'Frank Miller',
-            description: 'Follows you',
-            avatarUrl: '/avatars/frank.jpg',
-        },
-        {
-            id: 8,
-            username: 'Grace Lee',
-            description: 'Follows you',
-            avatarUrl: '/avatars/grace.jpg',
-        },
-        {
-            id: 9,
-            username: 'Henry Scott',
-            description: 'Follows you',
-            avatarUrl: '/avatars/henry.jpg',
-        },
-        {
-            id: 10,
-            username: 'Ivy Adams',
-            description: 'Follows you',
-            avatarUrl: '/avatars/ivy.jpg',
         },
     ];
 
@@ -115,9 +86,11 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
                                             }}
                                         />
                                         <div className="max-w-md mx-auto mt-5 space-y-2">
+                                            <FollowersList />
                                             {followers.map((follower) => (
                                                 <FollowerCard
-                                                    key={follower.id}
+                                                    key={follower.userID}
+                                                    userID={follower.userID}
                                                     username={follower.username}
                                                     description={follower.description}
                                                     avatarUrl={follower.avatarUrl}

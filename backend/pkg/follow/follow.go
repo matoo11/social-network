@@ -121,7 +121,7 @@ func UnFollow(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetFollowers(w http.ResponseWriter, r *http.Request) {
-	
+
 	_, err := dbConn.GetSessionFromCookie(r)
 
 	if err != nil {
@@ -145,6 +145,17 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		auth.ErrorPage(w, 400)
+		fmt.Println("here333")
+	}
+	for i, follower := range followers {
+		user, err := dbConn.GetUserByID(follower.FollowerID)
+		if err != nil {
+			fmt.Println(err)
+			// auth.ErrorPage(w, 500)
+			return
+		}
+		follower.FollowerUsername = user.User_Name
+		followers[i] = follower
 	}
 	if err := auth.JsonEncode(w, followers); err != nil {
 		auth.ErrorPage(w, 500)

@@ -16,6 +16,8 @@ type Follow struct {
 
 type FollowDisplay struct {
 	FollowerID int
+	FollowerUsername string
+	FollowerAvatarURL  string
 	FollowedID int
 }
 

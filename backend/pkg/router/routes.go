@@ -8,6 +8,7 @@ import (
 	"social/backend/pkg/follow"
 	"social/backend/pkg/group"
 	"social/backend/pkg/post"
+	"social/backend/pkg/profile"
 	"social/backend/pkg/websocket"
 )
 
@@ -42,6 +43,10 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		follow.FollowStatus(w, r)
 	case "/api/getFollowers":
 		follow.GetFollowers(w, r)
+	case "/api/profile/get":
+		profile.GetProfileHandler(w, r)
+	case "/api/profile/toggle":
+		profile.ToggleProfileVisibilityHandler(w, r)
 	case "/api/groups/create":
 		group.CreateGroupHandler(w, r)
 	case "/api/groups/all":

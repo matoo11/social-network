@@ -126,3 +126,53 @@ func DeleteFollow(followerID int, followedID int) error {
 
 	return nil
 }
+
+func MakeFollowRequest(requesterID int, receiverID int, userID int) error {
+	
+	var exists bool
+	err := dbHandler.DB.QueryRow(`
+		SELECT EXISTS(
+			SELECT 1 FROM Follow_Requests
+			WHERE Requester_ID = ? AND Receiver_ID = ?
+		)
+	`, requesterID, receiverID).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("failed to check follow request: %v", err)
+	}
+	if exists {
+		return fmt.Errorf("follow request already exists")
+	}
+
+	statement := `
+		INSERT INTO Follow_Requests
+		(
+			Requester_ID,
+			Receiver_ID,
+			Status_ID,
+			Created_By_ID,
+			Creation_Time,
+			Last_Updated_By_ID,
+			Last_Updated_Time,
+			Is_Active
+		)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+	`
+
+	currentTime := time.Now().Format("2006-01-02 15:04:05")
+
+	_, err = dbHandler.DB.Exec(statement,
+		requesterID,
+		receiverID,
+		1, 
+		userID,
+		currentTime,
+		userID,
+		currentTime,
+		true,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create follow request: %v", err)
+	}
+
+	return nil
+}

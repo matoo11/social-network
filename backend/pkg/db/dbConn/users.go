@@ -142,3 +142,24 @@ func GetAllUsers() ([]UserDisplay, error) {
 	}
 	return users, nil
 }
+
+func IsPrivate(userID int) (bool, error) {
+	statement := `
+		SELECT Profile_Type_ID
+		FROM Users
+		WHERE User_ID = ?
+	`
+
+	var profileTypeID int
+	err := dbHandler.DB.QueryRow(statement, userID).Scan(&profileTypeID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, fmt.Errorf("user not found: %v", err)
+		}
+		return false, fmt.Errorf("failed to check profile type: %v", err)
+	}
+
+	// Assuming: 1 = Public, 2 = Private
+	isPrivate := profileTypeID == 2
+	return isPrivate, nil
+}

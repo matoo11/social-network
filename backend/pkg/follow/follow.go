@@ -28,6 +28,20 @@ func AddFollow(w http.ResponseWriter, r *http.Request) {
 		auth.ErrorPage(w, http.StatusBadRequest)
 		return
 	}
+	isPrivate, err := dbConn.IsPrivate(data.FollowedID)
+	if err != nil {
+		fmt.Println(err, "hrar")
+		return
+	}
+	if isPrivate {
+		err = dbConn.MakeFollowRequest(LoggedInUserID, data.FollowedID, LoggedInUserID)
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		return
+	}
 	follow := dbConn.Follow{
 		FollowerID: LoggedInUserID,
 		FollowedID: data.FollowedID,

@@ -35,6 +35,17 @@ const FollowersList: React.FC = () => {
     const [followersListData, setFollowersListData] = useState<Follower[]>([]);
     const [loading, setLoading] = useState(true);
     const [checkedList, setCheckedList] = useState<number[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleCheckChange = (followerID: number, checked: boolean) => {
+        setCheckedList((prev) => {
+            if (checked) {
+                return [...prev, followerID]; // add to list
+            } else {
+                return prev.filter((id) => id !== followerID); // remove from list
+            }
+        });
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -55,6 +66,10 @@ const FollowersList: React.FC = () => {
         return <div>Loading followers...</div>;
     }
 
+    const filteredFollowers = followersListData.filter((follower) =>
+        follower.FollowerUsername.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
     return (
         <div className="flex flex-col h-full">
             <div className="h-[15%] flex-shrink-0 mb-10">
@@ -64,26 +79,28 @@ const FollowersList: React.FC = () => {
                 <SearchInput
                     className="mt-2"
                     onSearch={(query) => {
-                        console.log('Searching for:', query);
+                        setSearchQuery(query);
                     }}
                 />
             </div>
             <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-2 hide-scrollbar">
-                {followersListData.map(
-                    (follower) => (
-                        console.log(follower.FollowerID),
-                        (
-                            <FollowerCard
-                                key={follower.FollowerID}
-                                userID={follower.FollowerID}
-                                username={follower.FollowerUsername}
-                                avatarUrl={follower.FollowerAvatarURL}
-                                onCheckChange={(checked) =>
-                                    console.log(`${follower.FollowerID} checked:`, checked)
-                                }
-                            />
-                        )
-                    ),
+                {filteredFollowers.length > 0 ? (
+                    filteredFollowers.map((follower) => (
+                        <FollowerCard
+                            key={follower.FollowerID}
+                            userID={follower.FollowerID}
+                            username={follower.FollowerUsername}
+                            avatarUrl={follower.FollowerAvatarURL}
+                            checked={checkedList.includes(follower.FollowerID)}
+                            onCheckChange={(checked) =>
+                                handleCheckChange(follower.FollowerID, checked)
+                            }
+                        />
+                    ))
+                ) : (
+                    <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+                        No followers found.
+                    </p>
                 )}
             </div>
         </div>

@@ -11,6 +11,13 @@ export default function SocialFeed() {
     const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);
     const [isChatListPopupOpen, setIsChatListPopupOpen] = useState(false); // TODO: Need to Create ChatList Popup
     const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false); // TODO: Need to Create EventsList Popup
+    const [postListRefreshFn, setPostListRefreshFn] = useState<() => void>();
+
+    const handleNewPostCreated = () => {
+        if (postListRefreshFn) {
+            postListRefreshFn(); // refresh PostList
+        }
+    };
 
     return (
         <div className="flex w-full h-full mt-[10vh]">
@@ -41,7 +48,10 @@ export default function SocialFeed() {
 
             {/* Middle column - 52.5% */}
             <div className="w-[52.5%] bg-gray-900 ml-[17.5%] fixed h-[90%]">
-                <PostList popupHandler={() => setIsPostFormPopupOpen(true)} />
+                <PostList
+                    popupHandler={() => setIsPostFormPopupOpen(true)}
+                    onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
+                />
             </div>
 
             {/* Right column - 30% */}
@@ -49,11 +59,18 @@ export default function SocialFeed() {
                 <EventsList popupHandler={() => setIsEventsListPopupOpen(false)} />
             </div>
 
-            
-
             {/* Popups */}
-            <Popup isOpen={isPostFormPopupOpen} onClose={() => setIsPostFormPopupOpen(false)} className='max-w-6xl'>
-                <PostForm />
+            <Popup
+                isOpen={isPostFormPopupOpen}
+                onClose={() => setIsPostFormPopupOpen(false)}
+                className="max-w-6xl"
+            >
+                <PostForm
+                    onSubmit={() => {
+                        setIsPostFormPopupOpen(false);
+                        handleNewPostCreated();
+                    }}
+                />
             </Popup>
         </div>
     );

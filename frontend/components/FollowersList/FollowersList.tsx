@@ -6,7 +6,9 @@ import FollowerCard from '../FollowerCard/FollowerCard';
 import SearchInput from '../SearchInput/SearchInput';
 import Title from '../Title/Title';
 
-type FollowersListProps = {};
+type FollowersListProps = {
+    onSelectionChange?: (selectedFollowerIDs: number[]) => void;
+};
 
 async function fetchFollowers() {
     const res = await fetch('http://localhost:8080/api/getFollowers', {
@@ -31,7 +33,7 @@ interface Follower {
     FollowerAvatarURL: string;
 }
 
-const FollowersList: React.FC = () => {
+const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
     const [followersListData, setFollowersListData] = useState<Follower[]>([]);
     const [loading, setLoading] = useState(true);
     const [checkedList, setCheckedList] = useState<number[]>([]);
@@ -46,6 +48,12 @@ const FollowersList: React.FC = () => {
             }
         });
     };
+
+    useEffect(() => {
+        if (onSelectionChange) {
+            onSelectionChange(checkedList);
+        }
+    }, [checkedList, onSelectionChange]);
 
     useEffect(() => {
         const fetchData = async () => {

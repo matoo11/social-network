@@ -36,29 +36,6 @@ const selectInputOptions = [
 const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange, onSubmit }) => {
     const [isVisible, setIsVisible] = useState(false);
 
-    const followers = [
-        { userID: 1, username: 'John Doe', description: 'Follows you', avatarUrl: '/avatars/john.jpg' },
-        {
-            userID: 2,
-            username: 'Jane Smith',
-            description: 'Follows you',
-            avatarUrl: '/avatars/jane.jpg',
-        },
-        {
-            userID: 3,
-            username: 'Alice Johnson',
-            description: 'Follows you',
-            avatarUrl: '/avatars/alice.jpg',
-        },
-        { userID: 4, username: 'Bob Brown', description: 'Follows you', avatarUrl: '/avatars/bob.jpg' },
-        {
-            userID: 5,
-            username: 'Charlie Davis',
-            description: 'Follows you',
-            avatarUrl: '/avatars/charlie.jpg',
-        },
-    ];
-
     return (
         <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
             <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
@@ -71,33 +48,22 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
                             <SelectInput
                                 selectOptions={selectInputOptions}
                                 selectedOption={selectInputOptions[0]}
-                                selectLabel='Post Type'
-                                className='h-[15%] w-full'
+                                selectLabel="Post Type"
+                                className="h-[15%] w-full"
                                 onChange={(option) => {
                                     formData.postType = option.optionValue;
                                     onInputChange('postType');
                                     setIsVisible(formData.postType === 3);
                                 }}
                             />
-                            <div className='h-[80%] max-w-md mx-auto mt-5 space-y-2 flex flex-col w-full'>
+                            <div className="h-[80%] max-w-md mx-auto mt-5 space-y-2 flex flex-col w-full">
                                 {isVisible && (
-                                    <div className='h-full'>
-                                            <FollowersList />
-                                            {/* {followers.map((follower) => (
-                                                <FollowerCard
-                                                    key={follower.userID}
-                                                    userID={follower.userID}
-                                                    username={follower.username}
-                                                    description={follower.description}
-                                                    avatarUrl={follower.avatarUrl}
-                                                    onCheckChange={(checked) =>
-                                                        console.log(
-                                                            `${follower.username} checked:`,
-                                                            checked,
-                                                        )
-                                                    }
-                                                />
-                                            ))} */}
+                                    <div className="h-full">
+                                        <FollowersList
+                                            onSelectionChange={(selectedIDs) => {
+                                                formData.privateUsers = selectedIDs;
+                                            }}
+                                        />
                                     </div>
                                 )}
                             </div>

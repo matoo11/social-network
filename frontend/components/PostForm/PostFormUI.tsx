@@ -66,7 +66,7 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
             </div>
             <div className="h-[92.5%] p-6">
                 <form onSubmit={onSubmit} className="flex flex-col w-full h-full">
-                    <div className="flex flex-col md:flex-row gap-6 h-full">
+                    <div className="flex flex-col md:flex-row gap-6 h-[90%]">
                         <div className="flex-1 flex flex-col h-[90%] bg-gray-900">
                             <SelectInput
                                 selectOptions={selectInputOptions}
@@ -79,7 +79,7 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
                                     setIsVisible(formData.postType === 3);
                                 }}
                             />
-                            <div className='max-h-[85%] max-w-md mx-auto mt-5 space-y-2 flex flex-col w-full'>
+                            <div className='h-[80%] max-w-md mx-auto mt-5 space-y-2 flex flex-col w-full'>
                                 {isVisible && (
                                     <div className='h-full'>
                                             <FollowersList />

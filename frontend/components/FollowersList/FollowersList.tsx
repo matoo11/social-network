@@ -57,7 +57,7 @@ const FollowersList: React.FC = () => {
 
     return (
         <div className="flex flex-col h-full">
-            <div className="h-[15%] flex-shrink-0 mb-8">
+            <div className="h-[15%] flex-shrink-0 mb-10">
                 <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     Select Followers
                 </p>

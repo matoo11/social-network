@@ -21,7 +21,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         onSearch(e.target.value);
     };
     return (
-        <div className={`max-w-md mx-auto mt-5 ${className}`}>
+        <div className={`max-w-full ${className}`}>
             <div className="relative">
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                     <svg

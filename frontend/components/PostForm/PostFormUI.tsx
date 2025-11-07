@@ -64,30 +64,26 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
             <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
                 <Title text="Create New Post" />
             </div>
-            <div className="h-[92.5%] overflow-y-auto hide-scrollbar p-6">
+            <div className="h-[92.5%] p-6">
                 <form onSubmit={onSubmit} className="flex flex-col w-full h-full">
                     <div className="flex flex-col md:flex-row gap-6 h-full">
-                        <div className="flex-1 h-[90%] bg-gray-900">
+                        <div className="flex-1 flex flex-col h-[90%] bg-gray-900">
                             <SelectInput
                                 selectOptions={selectInputOptions}
                                 selectedOption={selectInputOptions[0]}
+                                selectLabel='Post Type'
+                                className='h-[15%] w-full'
                                 onChange={(option) => {
                                     formData.postType = option.optionValue;
                                     onInputChange('postType');
                                     setIsVisible(formData.postType === 3);
                                 }}
                             />
-                            <div>
+                            <div className='max-h-[85%] max-w-md mx-auto mt-5 space-y-2 flex flex-col w-full'>
                                 {isVisible && (
-                                    <div>
-                                        <SearchInput
-                                            onSearch={(query) => {
-                                                console.log('Searching for:', query);
-                                            }}
-                                        />
-                                        <div className="max-w-md mx-auto mt-5 space-y-2">
+                                    <div className='h-full'>
                                             <FollowersList />
-                                            {followers.map((follower) => (
+                                            {/* {followers.map((follower) => (
                                                 <FollowerCard
                                                     key={follower.userID}
                                                     userID={follower.userID}
@@ -101,8 +97,7 @@ const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange,
                                                         )
                                                     }
                                                 />
-                                            ))}
-                                        </div>
+                                            ))} */}
                                     </div>
                                 )}
                             </div>

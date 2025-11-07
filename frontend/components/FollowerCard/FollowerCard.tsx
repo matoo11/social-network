@@ -37,7 +37,7 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
     };
 
     return (
-        <div className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer shadow-sm overflow-hidden dark:bg-gray-800 transition duration-300 ease-in-out">
+        <div className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer shadow-sm bg-gray-800 transition duration-300 ease-in-out">
             <div className="flex items-center justify-between p-3">
                 {/* Left: Avatar + Info */}
                 <div className="flex items-center space-x-4 rtl:space-x-reverse">

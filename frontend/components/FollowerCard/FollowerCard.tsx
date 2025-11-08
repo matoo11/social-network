@@ -37,7 +37,14 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
     };
 
     return (
-        <div className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer shadow-sm bg-gray-800 transition duration-300 ease-in-out">
+        <div
+            onClick={() => {
+                const newValue = !isChecked;
+                setIsChecked(newValue);
+                onCheckChange?.(newValue);
+            }}
+            className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer shadow-sm bg-gray-800 transition duration-300 ease-in-out"
+        >
             <div className="flex items-center justify-between p-3">
                 {/* Left: Avatar + Info */}
                 <div className="flex items-center space-x-4 rtl:space-x-reverse">
@@ -61,7 +68,7 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
                     type="checkbox"
                     checked={isChecked}
                     onChange={handleCheckboxChange}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+                    className="cursor-pointer w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
                 />
             </div>
         </div>

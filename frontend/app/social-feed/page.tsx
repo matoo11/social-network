@@ -6,6 +6,7 @@ import Popup from '@/components/Popup/Popup';
 import { useState } from 'react';
 import PostForm from '@/components/PostForm/PostForm';
 import EventsList from '@/components/EventsList/EventsList';
+import EventCalendar from '@/components/EventCalendar/EventCalendar';
 
 export default function SocialFeed() {
     const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);

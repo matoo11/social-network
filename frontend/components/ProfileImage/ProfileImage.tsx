@@ -5,9 +5,15 @@ type ProfileImageProps = {
     imageUrl: string;
     altText?: string;
     link?: string;
+    className?: string;
 };
 
-const ProfileImage = ({ imageUrl, altText = 'profile Image', link = '' }: ProfileImageProps) => {
+const ProfileImage = ({
+    imageUrl,
+    altText = 'profile Image',
+    link = '',
+    className,
+}: ProfileImageProps) => {
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
         if (!link) {
             event.preventDefault();
@@ -21,9 +27,20 @@ const ProfileImage = ({ imageUrl, altText = 'profile Image', link = '' }: Profil
     // }
 
     return (
-        <div className="flex relative w-full h-full p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500 overflow-hidden items-center justify-center">
-            <a href={link} onClick={handleClick} className='flex relative block w-full h-full items-center justify-center'>
-                <Image className="object-center object-cover rounded-full" src={imageUrl || 'http://localhost:3000/uploads/default-profile.jpg'} alt={altText} fill />
+        <div
+            className={`relative w-full h-full p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500 overflow-hidden flex items-center justify-center ${className}`}
+        >
+            <a
+                href={link}
+                onClick={handleClick}
+                className="relative w-full h-full flex items-center justify-center"
+            >
+                <Image
+                    src={imageUrl || 'http://localhost:3000/uploads/default-profile.jpg'}
+                    alt={altText}
+                    fill
+                    className="object-cover object-center rounded-full"
+                />
             </a>
         </div>
     );

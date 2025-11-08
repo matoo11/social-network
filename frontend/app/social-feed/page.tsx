@@ -7,10 +7,11 @@ import { useState } from 'react';
 import PostForm from '@/components/PostForm/PostForm';
 import EventsList from '@/components/EventsList/EventsList';
 import EventCalendar from '@/components/EventCalendar/EventCalendar';
+import ChatArea from '@/components/ChatArea/ChatArea';
 
 export default function SocialFeed() {
     const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);
-    const [isChatListPopupOpen, setIsChatListPopupOpen] = useState(false); // TODO: Need to Create ChatList Popup
+    const [isChatListPopupOpen, setIsChatListPopupOpen] = useState(false);
     const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false); // TODO: Need to Create EventsList Popup
     const [postListRefreshFn, setPostListRefreshFn] = useState<() => void>();
 
@@ -43,7 +44,7 @@ export default function SocialFeed() {
                         { id: '15', name: 'Oscar', lastMessage: 'Can we reschedule?' },
                         { id: '16', name: 'Paula', lastMessage: 'See you at the event.' },
                     ]}
-                    popupHandler={() => setIsChatListPopupOpen(false)}
+                    popupHandler={() => setIsChatListPopupOpen(true)}
                 />
             </div>
 
@@ -72,6 +73,13 @@ export default function SocialFeed() {
                         handleNewPostCreated();
                     }}
                 />
+            </Popup>
+            <Popup
+                isOpen={isChatListPopupOpen}
+                onClose={() => setIsChatListPopupOpen(false)}
+                className="max-w-3xl"
+            >
+                <ChatArea chatWith="Alice" chatter="Admin" />
             </Popup>
         </div>
     );

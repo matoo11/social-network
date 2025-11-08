@@ -1,7 +1,12 @@
 package dbConn
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	"io"
+	"mime/multipart"
+	"net/http"
 	"social/backend/pkg/db/dbHandler"
 	"time"
 )
@@ -316,4 +321,68 @@ func GetPostsByUserForViewer(ownerID, viewerID int) ([]PostDisplay, error) {
 	}
 
 	return posts, nil
+}
+
+func SaveImage(file multipart.File, filename string, userID int) (int, error) {
+	// Read file bytes
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return 0, err
+	}
+
+	// Detect image type and size
+	contentType := http.DetectContentType(data)
+	img, _, err := image.DecodeConfig(bytes.NewReader(data))
+	if err != nil {
+		// fallback if image.DecodeConfig fails
+		img.Width = 0
+		img.Height = 0
+	}
+
+	query := `
+	INSERT INTO Images (
+		Image_Reference,
+		Image_Data,
+		Image_Filename,
+		Image_Mimetype,
+		Image_Width,
+		Image_Height,
+		Image_Size,
+		Image_Usage_Type_ID,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	)
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	formattedTime := time.Now().Format("2006-01-02 15:04:05")
+
+	result, err := dbHandler.DB.Exec(
+		query,
+		"nil", // optional reference string (if you use external path)
+		data,
+		filename,
+		contentType,
+		img.Width,
+		img.Height,
+		len(data),
+		2, // Image_Usage_Type_ID — define 2 for “post image”
+		userID,
+		formattedTime,
+		userID,
+		formattedTime,
+		1,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("failed to save image: %v", err)
+	}
+
+	lastID, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get last image id: %v", err)
+	}
+
+	return int(lastID), nil
 }

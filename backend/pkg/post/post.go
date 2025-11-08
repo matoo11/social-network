@@ -1,6 +1,7 @@
 package post
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"social/backend/pkg/auth"
@@ -9,34 +10,39 @@ import (
 )
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	var LoggedInUserID int
-
 	session, err := dbConn.GetSessionFromCookie(r)
 	if err != nil {
-		LoggedInUserID = 0
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
-	} else {
+	}
+	LoggedInUserID := session.UserID
 
-		LoggedInUserID = session.UserID
+	err = r.ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
 	}
 
-	fmt.Println("here1")
-	data := struct {
+	// Decode the JSON string from "data" field
+	jsonData := r.FormValue("data")
+	var payload struct {
 		Message    string `json:"message"`
 		Title      string `json:"title"`
 		PostTypeID int    `json:"typeId"`
-	}{}
-	if err := auth.JsonDecode(w, r, &data); err != nil {
-		auth.ErrorPage(w, 400)
+	}
+	if err := json.Unmarshal([]byte(jsonData), &payload); err != nil {
+		http.Error(w, "Invalid JSON data", http.StatusBadRequest)
 		return
 	}
 
-	message := data.Message
-	title := data.Title
-	typeID := data.PostTypeID
-	fmt.Println(message)
+	message := payload.Message
+	title := payload.Title
+	typeID := payload.PostTypeID
 
+	if len(strings.TrimSpace(message)) == 0 {
+		http.Error(w, "Message is required", http.StatusBadRequest)
+		return
+	}
 	if len(message) >= 600 {
 		http.Error(w, "The post length exceeded 600 characters", http.StatusBadRequest)
 		return
@@ -45,23 +51,41 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "The post title length exceeded 60 characters", http.StatusBadRequest)
 		return
 	}
-	val := len(strings.TrimSpace(message)) == 0
-	if val {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		return
-	}
-	if message == "" {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+
+	// Handle optional image
+	var imageID *int = nil
+	file, handler, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+		imgID, err := dbConn.SaveImage(file, handler.Filename, LoggedInUserID)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Image upload failed", http.StatusInternalServerError)
+			return
+		}
+		imageID = &imgID
+	} else if err != http.ErrMissingFile {
+		http.Error(w, "Failed to read image", http.StatusBadRequest)
 		return
 	}
 
 	post := dbConn.Post{
-		PostText:   message,
-		UserID:     LoggedInUserID,
-		PostTitle:  title,
-		PostTypeID: typeID,
+		PostText:        message,
+		UserID:          LoggedInUserID,
+		PostTitle:       title,
+		PostTypeID:      typeID,
+		ImageID:         imageID,
+		CreatedByID:     LoggedInUserID,
+		LastUpdatedByID: LoggedInUserID,
 	}
-	dbConn.CreatePost(post)
+
+	if err := dbConn.CreatePost(post); err != nil {
+		http.Error(w, "Could not create post", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprintln(w, "Post created successfully")
 }
 
 func GetPublicPosts(w http.ResponseWriter, r *http.Request) {
@@ -138,7 +162,7 @@ func GrantAccessToPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	check, err := dbConn.IsPostOwner(data.PostID,LoggedInUserID)
+	check, err := dbConn.IsPostOwner(data.PostID, LoggedInUserID)
 
 	if err != nil {
 		auth.ErrorPage(w, 500)
@@ -156,4 +180,24 @@ func GrantAccessToPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("access granted successfully")
+}
+
+func GetImageHandler(w http.ResponseWriter, r *http.Request) {
+    id := r.URL.Query().Get("id")
+    if id == "" {
+        http.Error(w, "Missing image id", http.StatusBadRequest)
+        return
+    }
+
+    var data []byte
+    var mimeType string
+    // err := dbHandler.DB.QueryRow("SELECT Image_Data, Image_Mimetype FROM Images WHERE Image_ID = ?", id).
+    //     Scan(&data, &mimeType)
+    // if err != nil {
+    //     http.Error(w, "Image not found", http.StatusNotFound)
+    //     return
+    // }
+
+    w.Header().Set("Content-Type", mimeType)
+    w.Write(data)
 }

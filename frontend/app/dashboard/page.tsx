@@ -44,12 +44,27 @@ const Dashboard = () => {
         e.preventDefault();
         setError('');
 
+        const formData = new FormData()
+
+        // Hardcoded post data
+        const postData = {
+            title: "Test Post",
+            message: "This is a test post from the frontend.",
+            typeId: 1
+        }
+
+        formData.append("data", JSON.stringify(postData))
+
+        // Optional: attach a dummy image file if you have an <input type="file" id="imageInput">
+        const fileInput = document.querySelector<HTMLInputElement>("#imageInput")
+        if (fileInput && fileInput.files?.length) {
+            formData.append("image", fileInput.files[0])
+        }
         try {
             const res = await fetch('http://localhost:8080/api/createPost', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ message: 'private post', typeId: 1, title: 'hla' }),
+                body: formData
             });
 
             if (!res.ok) {
@@ -187,6 +202,10 @@ const Dashboard = () => {
                 </form>
                 <form onSubmit={handleCreate} className={styles.logoutForm}>
                     {error && <p className={styles.error}>{error}</p>}
+                    <label>
+                        Select image:
+                        <input type="file" id="imageInput" accept="image/*" />
+                    </label>
                     <button type="submit" className={styles.logoutButton}>
                         post
                     </button>

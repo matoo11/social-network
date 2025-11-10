@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"social/backend/pkg/auth"
 	"social/backend/pkg/db/dbConn"
+	"strconv"
 	"strings"
 )
 
@@ -183,21 +184,25 @@ func GrantAccessToPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetImageHandler(w http.ResponseWriter, r *http.Request) {
-    id := r.URL.Query().Get("id")
-    if id == "" {
-        http.Error(w, "Missing image id", http.StatusBadRequest)
-        return
-    }
+	ids := r.URL.Query().Get("id")
+	if ids == "" {
+		http.Error(w, "Missing image id", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.Atoi(ids)
+	if err != nil {
+		fmt.Println("error 1")
+		return
+	}
 
-    var data []byte
-    var mimeType string
-    // err := dbHandler.DB.QueryRow("SELECT Image_Data, Image_Mimetype FROM Images WHERE Image_ID = ?", id).
-    //     Scan(&data, &mimeType)
-    // if err != nil {
-    //     http.Error(w, "Image not found", http.StatusNotFound)
-    //     return
-    // }
+	var data []byte
+	var mimeType string
+	data, mimeType, err = dbConn.GetPostImage(id)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-    w.Header().Set("Content-Type", mimeType)
-    w.Write(data)
+	w.Header().Set("Content-Type", mimeType)
+	w.Write(data)
 }

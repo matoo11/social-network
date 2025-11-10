@@ -31,6 +31,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		post.GetPrivatePosts(w, r)
 	case "/api/grantAccessToPost":
 		post.GrantAccessToPost(w, r)
+	case "/api/image":
+		post.GetImageHandler(w, r)
 	case "/api/createComment":
 		comment.CreateCommentHandler(w, r)
 	case "/api/signup":

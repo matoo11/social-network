@@ -386,3 +386,15 @@ func SaveImage(file multipart.File, filename string, userID int) (int, error) {
 
 	return int(lastID), nil
 }
+
+func GetPostImage(id int) ([]byte, string, error) {
+	var data []byte
+	var mimeType string
+	err := dbHandler.DB.QueryRow("SELECT Image_Data, Image_Mimetype FROM Images WHERE Image_ID = ?", id).
+		Scan(&data, &mimeType)
+	if err != nil {
+		// http.Error(w, "Image not found", http.StatusNotFound)
+		return nil, "", err
+	}
+	return data, mimeType, nil
+}

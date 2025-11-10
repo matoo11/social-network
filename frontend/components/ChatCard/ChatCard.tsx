@@ -4,15 +4,20 @@
 import React from 'react';
 import ProfileImage from '../ProfileImage/ProfileImage';
 
-type ChatItem = {
+export type ChatCardProps = {
+    id?: string;
     username: string;
     lastMessage?: string;
     avatarUrl?: string;
+    onChatClick?: (username: string) => void;
 };
 
-const ChatCard: React.FC<ChatItem> = ({ username, lastMessage, avatarUrl }) => {
+const ChatCard: React.FC<ChatCardProps> = ({ username, lastMessage, avatarUrl, onChatClick }) => {
     return (
-        <div className="hover:bg-gray-600 rounded-lg cursor-pointer shadow-sm overflow-hidden dark:bg-gray-800 transition duration-300 ease-in-out">
+        <div
+            className="hover:bg-gray-600 rounded-lg cursor-pointer shadow-sm overflow-hidden dark:bg-gray-800 transition duration-300 ease-in-out"
+            onClick={() => onChatClick?.(username)}
+        >
             <div className="flex items-center space-x-4 rtl:space-x-reverse p-2">
                 <div className="w-8 h-8">
                     <ProfileImage imageUrl={avatarUrl || ''} />

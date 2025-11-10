@@ -17,7 +17,7 @@ const EventsList: React.FC<EventsListProps> = ({ popupHandler }) => {
                 <Title text="Events" />
                 <PopupBtn className="mb-2" onClick={popupHandler} />
             </div>
-            <div className="h-[92.5%] overflow-y-auto hide-scrollbar">
+            <div className="h-[92.5%]">
                 <EventCalendar />
             </div>
         </div>

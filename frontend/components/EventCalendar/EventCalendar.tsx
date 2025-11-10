@@ -67,7 +67,7 @@ const EventCalendar: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col items-center justify-start gap-4">
-            <div className="max-w-md w-full bg-white dark:bg-gray-800 p-6">
+            <div className="w-full bg-white dark:bg-gray-800 p-6">
                 <div className="flex justify-between items-center mb-4">
                     <button
                         onClick={prevMonth}

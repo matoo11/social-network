@@ -18,6 +18,7 @@ export type PostCardUIProps = {
   likesCount?: number;
   dislikesCount?: number;
   commentsCount?: number;
+  postContentPopup?: (postID: number) => void;
 };
 
 const PostCardUI: React.FC<PostCardUIProps> = ({
@@ -30,7 +31,8 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
     createdAt,
     likesCount = 0,
     dislikesCount = 0,
-    commentsCount = 0,
+    commentsCount,
+    postContentPopup
 }) => {
     const handleLike = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -46,6 +48,9 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
     const handleComment = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         console.log(`Commented on post ${postID}`);
+        if (postContentPopup) {
+            postContentPopup(postID);
+        }
     };
 
     return (
@@ -82,7 +87,8 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
             <div className="flex items-center rounded-b gap-3 px-5 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
                 <Reaction onClick={handleLike} type="like" count={likesCount} />
                 <Reaction onClick={handleDislike} type="dislike" count={dislikesCount} />
-                <Reaction onClick={handleComment} type="comment" count={commentsCount} />
+                {commentsCount !== undefined && <Reaction onClick={handleComment} type="comment" count={commentsCount} />}
+                
             </div>
         </div>
     );

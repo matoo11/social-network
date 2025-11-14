@@ -3,10 +3,10 @@ import React from 'react';
 import PostCard from '../PostCard/PostCard';
 import Title from '../Title/Title';
 import PopupBtn from '../PopupBtn/PopupBtn';
-import { Post } from '../PostCard/types';
+import { PostCardUIProps } from '../PostCard/PostCardUI';
 
 export type PostListUIProps = {
-    posts: Post[];
+    posts: PostCardUIProps[];
     popupHandler: () => void;
 };
 

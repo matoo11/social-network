@@ -19,7 +19,6 @@ const ProfileImage = ({
             event.preventDefault();
         }
     };
-    console.log('ProfileImage URL:', imageUrl);
     imageUrl = imageUrl.trim();
 
     // if (!imageUrl) {

@@ -34,7 +34,7 @@ const Popup: React.FC<PopupProps> = ({
                 {/* Optional close button */}
                 {showCloseButton && (
                     <button
-                        className="cursor-pointer absolute top-[6.5%] right-[2.5%] bg-gray-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-700"
+                        className="cursor-pointer absolute top-12.5 right-7.5 bg-gray-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-700"
                         onClick={onClose}
                         aria-label="Close"
                     >

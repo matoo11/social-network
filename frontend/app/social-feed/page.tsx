@@ -8,6 +8,7 @@ import PostForm from '@/components/PostForm/PostForm';
 import EventsList from '@/components/EventsList/EventsList';
 import EventCalendar from '@/components/EventCalendar/EventCalendar';
 import ChatArea from '@/components/ChatArea/ChatArea';
+import PostContent from '@/components/PostContent/PostContent';
 
 export default function SocialFeed() {
     const [chatWith, setChatWith] = useState<string>('');
@@ -17,6 +18,8 @@ export default function SocialFeed() {
     const [isChatAreaPopupOpen, setIsChatAreaPopupOpen] = useState(false);
     const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false); // TODO: Need to Create EventsList Popup
     const [postListRefreshFn, setPostListRefreshFn] = useState<() => void>();
+    const [isPostContentPopupOpen, setPostContentPopup] = useState(false);
+    const [selectedPostID, setSelectedPostID] = useState<number>(0);
 
     const handleNewPostCreated = () => {
         if (postListRefreshFn) {
@@ -62,6 +65,10 @@ export default function SocialFeed() {
                 <PostList
                     popupHandler={() => setIsPostFormPopupOpen(true)}
                     onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
+                    postContentPopupHandler={(postID: number) => {
+                        console.log('Open post content popup for post ID:', postID);
+                        setPostContentPopup(true);
+                    }}
                 />
             </div>
 
@@ -89,6 +96,17 @@ export default function SocialFeed() {
                 className="max-w-3xl"
             >
                 <ChatArea chatWith={chatWith} chatter={chatter} />
+            </Popup>
+
+            <Popup
+                isOpen={isPostContentPopupOpen}
+                onClose={() => {
+                    setPostContentPopup(false);
+                    setSelectedPostID(0);
+                }}
+                className="max-w-9xl"
+            >
+                <PostContent postID={selectedPostID} />
             </Popup>
         </div>
     );

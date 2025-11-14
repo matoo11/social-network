@@ -1,5 +1,5 @@
 import SignUpForm from '@/components/SignUpForm/SignUpForm';
 
 export default function SignUpPage() {
-  return <SignUpForm />;
+  return <div className='h-[90vh] mt-[10vh] flex items-center'><SignUpForm /></div>;
 }

@@ -9,6 +9,7 @@ import SelectInput from '../SelectInput/SelectInput';
 import FollowersList from '../FollowersList/FollowersList';
 import PostCard from '../PostCard/PostCard';
 import CommentCard from '../CommentCard/CommentCard';
+import CommentList from '../CommentList/CommentList';
 
 type PostContentProps = {
     postID: number;
@@ -38,16 +39,7 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
                     />
                 </div>
                 <div className="p-4">
-                    <CommentCard
-                        postID={123}
-                        commentID={456}
-                        commentText="This is a sample comment for demonstration purposes."
-                        commenterNickname="JohnDoe"
-                        commenterProfileImageUrl=""
-                        createdAt="2025-01-14T10:30:00"
-                        likesCount={122}
-                        dislikesCount={13}
-                    />
+                    <CommentList postID={postID} />
                 </div>
             </div>
         </div>

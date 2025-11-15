@@ -6,8 +6,10 @@ import ProfileImage from '../ProfileImage/ProfileImage';
 import Image from 'next/image';
 import NavLink from '../NavLink/NavLink';
 import { logoutUser } from '@/lib/api/auth';
+import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
+    const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -27,6 +29,16 @@ const Navbar = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    const handleLogout = async () => {
+        try {
+            await logoutUser();
+            setIsDropdownOpen(false);
+            router.push('/login');
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+    };
 
     return (
         <nav className="bg-white border-gray-200 dark:bg-gray-900 items-center fixed top-0 left-0 w-full z-50 h-[10vh]">
@@ -85,7 +97,10 @@ const Navbar = () => {
                                         Settings
                                     </Link>
                                 </li>
-                                <li onClick={logoutUser} className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer' >
+                                <li
+                                    onClick={handleLogout}
+                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                >
                                     Sign out
                                 </li>
                             </ul>

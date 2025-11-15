@@ -23,7 +23,7 @@ type PostListProps = {
     postContentPopupHandler?: (postID: number) => void;
 };
 
-const PostList: React.FC<PostListProps> = ({ popupHandler, onRef , postContentPopupHandler }) => {
+const PostList: React.FC<PostListProps> = ({ popupHandler, onRef, postContentPopupHandler }) => {
     const [posts, setPosts] = useState<PostListUIProps['posts']>([]);
 
     //TODO: need to replace with actual API call
@@ -32,13 +32,14 @@ const PostList: React.FC<PostListProps> = ({ popupHandler, onRef , postContentPo
             postID: p.PostID,
             title: p.PostTitle,
             content: p.PostText,
-            posterNickname: `User ${p.UserID}`,
-            posterProfileImageUrl: p.ImageID ?? '',
+            posterNickname: p.UserName,
+            posterProfileImageUrl: '',
+            postImageUrl: `http://localhost:8080/api/image?id=${p.ImageID}`,
             createdAt: p.CreationTime,
             likesCount: 0, // backend doesn’t provide yet
             dislikesCount: 0, // backend doesn’t provide yet
             commentsCount: p.Comments ? p.Comments.length : 0,
-            postContentPopup: postContentPopupHandler
+            postContentPopup: postContentPopupHandler,
         }));
 
         setPosts(mockData);

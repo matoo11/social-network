@@ -31,6 +31,7 @@ type PostDisplay struct {
 	PostText     string
 	PostTypeID   int
 	UserID       int
+	UserName string
 	ImageID      *int
 	CreationTime time.Time
 	Comments     []CommentDisplay
@@ -94,7 +95,20 @@ func DeletePost(post Post) error {
 }
 
 func GetPublicPosts() ([]PostDisplay, error) {
-	statement := `SELECT Post_ID, Post_Title, Post_Text, User_ID, Post_Type_ID, Image_ID, Creation_Time FROM Posts WHERE Is_Active = 1 AND Post_Type_ID = 1 ORDER BY Creation_Time DESC`
+	statement := `SELECT 
+    p.Post_ID,
+    p.Post_Title,
+    p.Post_Text,
+    p.User_ID,
+    u.User_Name,
+    p.Post_Type_ID,
+    p.Image_ID,
+    p.Creation_Time
+	FROM Posts p
+	JOIN Users u ON p.User_ID = u.User_ID
+	WHERE p.Is_Active = 1
+  	AND p.Post_Type_ID = 1
+	ORDER BY p.Creation_Time DESC;`
 
 	rows, err := dbHandler.DB.Query(statement)
 	if err != nil {
@@ -105,12 +119,12 @@ func GetPublicPosts() ([]PostDisplay, error) {
 	var posts []PostDisplay
 	for rows.Next() {
 		var post PostDisplay
-
 		err := rows.Scan(
 			&post.PostID,
 			&post.PostTitle,
 			&post.PostText,
 			&post.UserID,
+			&post.UserName,
 			&post.PostTypeID,
 			&post.ImageID,
 			&post.CreationTime,

@@ -3,13 +3,12 @@
 import React from 'react';
 import { useState } from 'react';
 import PostFormUI from './PostFormUI';
-import { title } from 'process';
 
 type PostFormProps = {
     onSubmit?: () => void;
 };
 
-const PostForm: React.FC<PostFormProps> = ({onSubmit}) => {
+const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
     const [formData, setFormData] = useState({
         title: '',
         content: '',
@@ -30,40 +29,25 @@ const PostForm: React.FC<PostFormProps> = ({onSubmit}) => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('Form data on submit:', formData);
+        // console.log('Form data on submit:', formData);
+
+        const formDataa = new FormData();
+        const postDataa = {
+            title: formData.title,
+            message: formData.content,
+            typeId: formData.postType,
+        };
+        formDataa.append('data', JSON.stringify(postDataa));
+
+        const fileInput = document.querySelector<HTMLInputElement>('#file_input');
+        if (fileInput && fileInput.files?.length) {
+            formDataa.append('image', fileInput.files[0]);
+        }
+
         try {
-            await handleCreatePost(formData);
+            console.log(postDataa);
+            await handleCreatePost(formDataa);
             onSubmit?.(); // notify parent if callback provided
-        }
-        catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('Unexpected error occurred');
-            }
-        }
-    };
-
-    async function handleCreatePost(formData: any) {
-        setError('');
-        const title = formData.title;
-        const message = formData.content;
-        const typeId = formData.postType;
-        const privateUsers = formData.privateUsers;
-
-        try {
-            const res = await fetch('http://localhost:8080/api/createPost', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({title, message, typeId}),
-            });
-
-            if (!res.ok) {
-                throw new Error('Failed to create post');
-            }
-
-            //   router.push('/login');
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -72,6 +56,31 @@ const PostForm: React.FC<PostFormProps> = ({onSubmit}) => {
             }
         }
     };
+
+    async function handleCreatePost(formData: FormData) {
+        setError('');
+
+        try {
+            const res = await fetch('http://localhost:8080/api/createPost', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData,
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to create post');
+            }
+
+            //   router.push('/login');
+        } catch (err: unknown) {
+            console.error('Error creating post:', err);
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
+    }
 
     return (
         <PostFormUI

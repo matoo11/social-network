@@ -19,7 +19,7 @@ const ProfileImage = ({
             event.preventDefault();
         }
     };
-    imageUrl = imageUrl.trim();
+    // imageUrl = imageUrl.trim();
 
     // if (!imageUrl) {
     //     imageUrl = 'http://localhost:3000/uploads/default-profile.jpg';

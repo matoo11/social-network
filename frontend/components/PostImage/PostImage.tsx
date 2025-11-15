@@ -14,17 +14,11 @@ const PostImage: React.FC<PostImageProps> = ({ imageUrl, altText = 'Post Image',
         }
     };
     return (
-        <div className="relative w-full h-64">
+        <div className="relative w-full aspect-video">
             {' '}
             {/* Define height and relative position */}
             <a href={link} onClick={handleClick} className="relative block w-full h-full">
-                <Image
-                    className="rounded-t-lg object-cover"
-                    src={imageUrl}
-                    alt={altText}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                />
+                <Image className="object-contain" src={imageUrl} alt={altText} fill sizes="100vw" />
             </a>
         </div>
     );

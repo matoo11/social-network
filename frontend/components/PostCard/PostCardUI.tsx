@@ -1,7 +1,4 @@
 import React from 'react';
-import styles from './PostCard.module.css';
-import Image from 'next/image';
-import { PostCardUIProps } from './types';
 import CreationTime from '../CreationTime/CreationTime';
 import ProfileImage from '../ProfileImage/ProfileImage';
 import PostImage from '../PostImage/PostImage';
@@ -10,37 +7,50 @@ import Title from '../Title/Title';
 import TextElement from '../TextElement/TextElement';
 import Reaction from '../Reaction/Reaction';
 
+export type PostCardUIProps = {
+  postID: number;
+  title: string;
+  content: string;
+  posterNickname?: string;
+  posterProfileImageUrl?: string;
+  postImageUrl?: string;
+  createdAt?: string;
+  likesCount?: number;
+  dislikesCount?: number;
+  commentsCount?: number;
+  postContentPopup?: (postID: number) => void;
+};
+
 const PostCardUI: React.FC<PostCardUIProps> = ({
     postID,
     title,
     content,
-    posterNickname = 'Anonymous',
+    posterNickname = 'Unknown',
     posterProfileImageUrl = '',
     postImageUrl = '',
     createdAt,
     likesCount = 0,
     dislikesCount = 0,
-    commentsCount = 0,
-    onLike,
-    onDislike,
-    onComment,
+    commentsCount,
+    postContentPopup
 }) => {
     const handleLike = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         console.log(`Liked post ${postID}`);
-        if (onLike) onLike();
+        
     };
 
     const handleDislike = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         console.log(`Disliked post ${postID}`);
-        if (onDislike) onDislike();
     };
 
     const handleComment = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         console.log(`Commented on post ${postID}`);
-        if (onComment) onComment();
+        if (postContentPopup) {
+            postContentPopup(postID);
+        }
     };
 
     return (
@@ -76,8 +86,9 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
             {/* Reactions Section */}
             <div className="flex items-center rounded-b gap-3 px-5 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
                 <Reaction onClick={handleLike} type="like" count={likesCount} />
-                <Reaction onClick={handleDislike} type="dislike" count={likesCount} />
-                <Reaction onClick={handleComment} type="comment" count={likesCount} />
+                <Reaction onClick={handleDislike} type="dislike" count={dislikesCount} />
+                {commentsCount !== undefined && <Reaction onClick={handleComment} type="comment" count={commentsCount} />}
+                
             </div>
         </div>
     );

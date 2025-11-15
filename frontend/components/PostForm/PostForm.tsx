@@ -2,11 +2,14 @@
 
 import React from 'react';
 import { useState } from 'react';
-import Title from '../Title/Title';
-import InputField from '../InputField/InputField';
 import PostFormUI from './PostFormUI';
+import { title } from 'process';
 
-const PostForm: React.FC = () => {
+type PostFormProps = {
+    onSubmit?: () => void;
+};
+
+const PostForm: React.FC<PostFormProps> = ({onSubmit}) => {
     const [formData, setFormData] = useState({
         title: '',
         content: '',
@@ -17,7 +20,8 @@ const PostForm: React.FC = () => {
     const [error, setError] = useState('');
 
     const handleInputChange =
-        (field: string | number) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        (field: string | number) =>
+        (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
             setFormData((prev) => ({
                 ...prev,
                 [field]: e.target.value,
@@ -27,7 +31,46 @@ const PostForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log('Form data on submit:', formData);
-        // Add your form submission logic here
+        try {
+            await handleCreatePost(formData);
+            onSubmit?.(); // notify parent if callback provided
+        }
+        catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
+    };
+
+    async function handleCreatePost(formData: any) {
+        setError('');
+        const title = formData.title;
+        const message = formData.content;
+        const typeId = formData.postType;
+        const privateUsers = formData.privateUsers;
+
+        try {
+            const res = await fetch('http://localhost:8080/api/createPost', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({title, message, typeId}),
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to create post');
+            }
+
+            //   router.push('/login');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
     };
 
     return (

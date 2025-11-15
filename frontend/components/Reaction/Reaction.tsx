@@ -5,12 +5,17 @@ type ReactionProps = {
     type: 'like' | 'dislike' | 'comment';
     count: number;
     onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    className?: string;
+    size?: 'xs' | 'sm';
 };
 
-const Reaction: React.FC<ReactionProps> = ({ type, count, onClick }) => {
+const Reaction: React.FC<ReactionProps> = ({ type, count, onClick, className, size }) => {
     let icon = null;
     let baseColor = '';
     let hoverColor = '';
+
+    const sizeClasses =
+        size === 'xs' ? 'text-xs' : 'text-sm';
 
     switch (type) {
         case 'like':
@@ -38,13 +43,13 @@ const Reaction: React.FC<ReactionProps> = ({ type, count, onClick }) => {
         hover:bg-gray-100 dark:hover:bg-gray-700
         cursor-pointer w-15 justify-center
         transition-colors duration-150
-        ${baseColor} ${hoverColor}
+        ${baseColor} ${hoverColor} ${className}
     `;
 
     return (
         <button onClick={onClick} className={classNameCss.trim()}>
-            <span>{icon}</span>
-            <span>{count}</span>
+            <span className={sizeClasses}>{icon}</span>
+            <span className={sizeClasses}>{count}</span>
         </button>
     );
 };

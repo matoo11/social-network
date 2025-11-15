@@ -13,6 +13,7 @@ type SelectInputProps = {
     selectLabel?: string;
     selectOptions: SelectOption[];
     selectedOption: SelectOption;
+    className?: string;
     onChange?: (option: SelectOption) => void;
 };
 
@@ -21,6 +22,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
     selectLabel = 'Select an option',
     selectOptions,
     selectedOption = { optionText: 'Public', optionValue: 1 },
+    className,
     onChange,
 }) => {
 
@@ -36,7 +38,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
     }
   };
     return (
-        <div className="max-w-sm mx-auto">
+        <div className={`max-w-sm mx-auto ${className}`}>
             <label
                 htmlFor={id}
                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"

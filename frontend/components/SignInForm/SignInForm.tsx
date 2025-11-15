@@ -20,7 +20,7 @@ const SignInForm: React.FC = () => {
 
         try {
             await loginUser(userIdentifier, password);
-            router.push('/dashboard');
+            router.push('/social-feed');
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);

@@ -3,8 +3,8 @@
 import React from 'react';
 import Title from '../Title/Title';
 import PopupBtn from '../PopupBtn/PopupBtn';
-
-type EventItem = {};
+import EventCalendar from '../EventCalendar/EventCalendar';
+import AgendaList from '../AgendaList/AgendaList';
 
 type EventsListProps = {
     popupHandler: () => void;
@@ -17,8 +17,8 @@ const EventsList: React.FC<EventsListProps> = ({ popupHandler }) => {
                 <Title text="Events" />
                 <PopupBtn className="mb-2" onClick={popupHandler} />
             </div>
-            <div className="h-[92.5%] overflow-y-auto hide-scrollbar">
-                <div className="flex flex-col gap-2 p-4 ">{/* Event cards would go here */}</div>
+            <div className="h-[92.5%]">
+                <EventCalendar />
             </div>
         </div>
     );

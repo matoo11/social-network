@@ -21,7 +21,7 @@ const SignInFormUI: React.FC<SignInFormUIProps> = ({
     return (
         <div className="mx-auto w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
             <form className="space-y-6" onSubmit={onSubmit}>
-                <h5 className="text-xl font-medium text-gray-900 dark:text-white">
+                <h5 className="font-serif text-xl font-medium text-gray-900 text-white text-center">
                     Sign in to our platform
                 </h5>
                 {error && <p className="mt-2 text-sm text-red-600">{error}</p>}

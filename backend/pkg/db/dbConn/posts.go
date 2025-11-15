@@ -412,3 +412,41 @@ func GetPostImage(id int) ([]byte, string, error) {
 	}
 	return data, mimeType, nil
 }
+
+func GetPostByID(postID int) (PostDisplay, error) {
+	var post PostDisplay
+	query := `
+	SELECT 
+		p.Post_ID,
+		p.Post_Title,
+		p.Post_Text,
+		p.User_ID,
+		u.User_Name,
+		p.Post_Type_ID,
+		p.Image_ID,
+		p.Creation_Time
+	FROM Posts p
+	JOIN Users u ON p.User_ID = u.User_ID
+	WHERE p.Post_ID = ?`
+
+	err := dbHandler.DB.QueryRow(query, postID).Scan(
+		&post.PostID,
+		&post.PostTitle,
+		&post.PostText,
+		&post.UserID,
+		&post.UserName,
+		&post.PostTypeID,
+		&post.ImageID,
+		&post.CreationTime,
+	)
+	if err != nil {
+		return post, fmt.Errorf("failed to get post by ID: %v", err)
+	}
+
+	post.Comments, err = GetCommentsByPostID(post.PostID)
+	if err != nil {
+		return post, fmt.Errorf("failed to get comments for post ID %d: %v", post.PostID, err)
+	}
+
+	return post, nil
+}

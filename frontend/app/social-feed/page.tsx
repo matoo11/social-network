@@ -67,6 +67,7 @@ export default function SocialFeed() {
                     onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
                     postContentPopupHandler={(postID: number) => {
                         console.log('Open post content popup for post ID:', postID);
+                        setSelectedPostID(postID);
                         setPostContentPopup(true);
                     }}
                 />

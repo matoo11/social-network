@@ -205,4 +205,45 @@ func GetImageHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", mimeType)
 	w.Write(data)
+
+}
+
+type PostIDRequest struct {
+	ID int `json:"id"`
+}
+
+func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
+	// Only allow POST or PUT for body (GET typically has no body)
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req PostIDRequest
+
+	// Decode JSON body
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Check ID
+	if req.ID == 0 {
+		http.Error(w, "Missing post id", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch post
+	postData, err := dbConn.GetPostByID(req.ID)
+	if err != nil {
+		http.Error(w, "Post not found", http.StatusNotFound)
+		return
+	}
+
+	// Return JSON
+	if err := auth.JsonEncode(w, postData); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }

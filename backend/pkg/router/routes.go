@@ -25,6 +25,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		auth.SignoutHandler(w, r)
 	case "/api/createPost":
 		post.CreatePostHandler(w, r)
+	case "/api/getPost":
+		post.GetPostByIDHandler(w, r)
 	case "/api/getPublicPosts":
 		post.GetPublicPosts(w, r)
 	case "/api/getPrivatePosts":

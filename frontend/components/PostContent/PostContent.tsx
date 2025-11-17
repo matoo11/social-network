@@ -76,13 +76,13 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
     }, [postID]);
 
     return (
-        <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden bg-gray-900">
-            <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
+        <div className="border-2 border-gray-600 rounded-lg h-full bg-gray-900 flex flex-col">
+            <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 dark:bg-gray-900">
                 <Title text="Post Content" />
             </div>
 
-            <div className="grid grid-cols-2 divide-x divide-gray-300">
-                <div className="p-4">
+            <div className="grid grid-cols-[1fr_2fr] divide-x divide-gray-300 h-[92.5%]">
+                <div className="p-4 h-[65vh] flex flex-col">
                     {loading && <p>Loading post...</p>}
                     {error && <p className="text-red-500">{error}</p>}
                     {postData && (
@@ -98,7 +98,7 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
                         />
                     )}
                 </div>
-                <div className="p-4">
+                <div className="p-4 h-[70vh] flex flex-col">
                     <CommentList postID={postID} />
                 </div>
             </div>

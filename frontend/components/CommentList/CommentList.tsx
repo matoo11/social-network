@@ -11,10 +11,25 @@ import PostCard from '../PostCard/PostCard';
 import CommentCard from '../CommentCard/CommentCard';
 import ImageUploader from '../ImageUploader/ImageUploader';
 
+type Comment = {
+    postID: number;
+    commentID: number;
+    commentText: string;
+    commenterNickname: string;
+    commenterProfileImageUrl: string;
+    commentImageUrl?: string;
+    createdAt: string;
+    likesCount: number;
+    dislikesCount: number;
+}
+
 type CommentListProps = {
     postID: number;
     error?: string;
+    Comments?: Comment[];
 };
+
+
 
 const CommentList: React.FC<CommentListProps> = ({ postID, error }) => {
     return (
@@ -36,17 +51,9 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error }) => {
                         likesCount={122}
                         dislikesCount={13}
                     />
-                    <CommentCard
-                        postID={123}
-                        commentID={456}
-                        commentText="This is a sample comment for demonstration purposes."
-                        commenterNickname="JohnDoe"
-                        commenterProfileImageUrl=""
-                        commentImageUrl=""
-                        createdAt="2025-01-14T10:30:00"
-                        likesCount={122}
-                        dislikesCount={13}
-                    />
+                {/* {comments.map((comment) => (
+                    <CommentCard key={comment.postID} {...comments} />
+                ))} */}
                 </div>
                 <div className=" px-5 pt-2 h-[25%] mt-auto border-t-2 border-gray-600">
                     <textarea

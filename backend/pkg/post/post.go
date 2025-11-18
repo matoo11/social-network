@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"social/backend/pkg/auth"
 	"social/backend/pkg/db/dbConn"
+	"social/backend/pkg/util"
 	"strconv"
 	"strings"
 )
@@ -246,4 +247,14 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
+}
+
+
+func FetchAllPostsHandler(w http.ResponseWriter, r *http.Request) {
+	data, err := dbConn.RetrieveAllDataForDisplay()
+	if err != nil {
+		util.Respond(w, r, http.StatusInternalServerError, nil, err.Error())
+		return
+	}
+	util.Respond(w, r, http.StatusOK, data, "Fetch all posts successful")
 }

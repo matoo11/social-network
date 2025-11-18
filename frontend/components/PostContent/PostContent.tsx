@@ -45,8 +45,32 @@ export async function getPostByID(id: number) {
     }
 }
 
+export async function getAllPosts() {
+    try {
+        const res = await fetch('http://localhost:8080/api/getAllPosts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(errorText || 'Get All posts failed');
+        }
+
+        return res;
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            throw new Error(err.message);
+        } else {
+            throw new Error('Unexpected error occurred');
+        }
+    }
+}
+
 const PostContent: React.FC<PostContentProps> = ({ postID }) => {
-    const [postData, setPostData] = useState<any | null>(null);
+    const [currentPostData, setCurrentPostData] = useState<any | null>(null);
+    const [allPostsData, setAllPostsData] = useState<any[] | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -58,7 +82,7 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
             try {
                 const res = await getPostByID(postID);
                 const data = await res.json(); // parse JSON response
-                setPostData(data);
+                setCurrentPostData(data);
                 console.log('Post data fetched successfully:', data);
             } catch (err: unknown) {
                 if (err instanceof Error) {
@@ -75,6 +99,31 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
         fetchPost();
     }, [postID]);
 
+    //     useEffect(() => {
+    //     const fetchAllPosts = async () => {
+    //         setLoading(true);
+    //         setError(null);
+
+    //         try {
+    //             const res = await getAllPosts();
+    //             const data = await res.json(); // parse JSON response
+    //             setAllPostsData(data);
+    //             console.log('All Posts data fetched successfully:', data);
+    //         } catch (err: unknown) {
+    //             if (err instanceof Error) {
+    //                 setError(err.message);
+    //             } else {
+    //                 setError('Unexpected error occurred');
+    //             }
+    //             console.error('Error fetching post data:', err);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     fetchAllPosts();
+    // });
+
     return (
         <div className="border-2 border-gray-600 rounded-lg h-full bg-gray-900 flex flex-col">
             <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 dark:bg-gray-900">
@@ -85,16 +134,16 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
                 <div className="p-4 h-[65vh] flex flex-col">
                     {loading && <p>Loading post...</p>}
                     {error && <p className="text-red-500">{error}</p>}
-                    {postData && (
+                    {currentPostData && (
                         <PostCard
                             postID={postID}
-                            posterNickname={postData.UserName}
-                            createdAt={postData.CreationTime}
-                            postImageUrl={'http://localhost:8080/api/image?id=' + postData.ImageID}
-                            title={postData.PostTitle}
-                            content={postData.PostText}
-                            likesCount={postData.likesCount}
-                            dislikesCount={postData.dislikesCount}
+                            posterNickname={currentPostData.UserName}
+                            createdAt={currentPostData.CreationTime}
+                            postImageUrl={'http://localhost:8080/api/image?id=' + currentPostData.ImageID}
+                            title={currentPostData.PostTitle}
+                            content={currentPostData.PostText}
+                            likesCount={currentPostData.likesCount}
+                            dislikesCount={currentPostData.dislikesCount}
                         />
                     )}
                 </div>

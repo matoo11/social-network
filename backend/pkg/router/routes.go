@@ -27,8 +27,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		post.CreatePostHandler(w, r)
 	case "/api/getPost":
 		post.GetPostByIDHandler(w, r)
-	case "/api/getAllPosts":
-		post.FetchAllPostsHandler(w,r)
+	case "/api/getPostByID":
+		post.FetchPostByIDHandler(w,r)
 	case "/api/getPublicPosts":
 		post.GetPublicPosts(w, r)
 	case "/api/getPrivatePosts":

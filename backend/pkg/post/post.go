@@ -249,7 +249,6 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func FetchAllPostsHandler(w http.ResponseWriter, r *http.Request) {
 	data, err := dbConn.RetrieveAllDataForDisplay()
 	if err != nil {
@@ -257,4 +256,20 @@ func FetchAllPostsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	util.Respond(w, r, http.StatusOK, data, "Fetch all posts successful")
+}
+
+func FetchPostByIDHandler(w http.ResponseWriter, r *http.Request) {
+
+	var req PostIDRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		util.Respond(w, r, http.StatusBadRequest, nil, "Invalid JSON")
+		return
+	}
+	data, err := dbConn.RetrieveAllDataForDisplayByPostID(req.ID)
+	if err != nil {
+		util.Respond(w, r, http.StatusInternalServerError, nil, err.Error())
+		return
+	}
+	util.Respond(w, r, http.StatusOK, data, "Fetch post successful")
 }

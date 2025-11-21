@@ -23,7 +23,7 @@ const selectInputOptions = [
 
 export async function getPostByID(id: number) {
     try {
-        const res = await fetch('http://localhost:8080/api/getPost', {
+        const res = await fetch('http://localhost:8080/api/getPostByID', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: id }),
@@ -33,29 +33,6 @@ export async function getPostByID(id: number) {
         if (!res.ok) {
             const errorText = await res.text();
             throw new Error(errorText || 'Get post failed');
-        }
-
-        return res;
-    } catch (err: unknown) {
-        if (err instanceof Error) {
-            throw new Error(err.message);
-        } else {
-            throw new Error('Unexpected error occurred');
-        }
-    }
-}
-
-export async function getAllPosts() {
-    try {
-        const res = await fetch('http://localhost:8080/api/getAllPosts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-        });
-
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(errorText || 'Get All posts failed');
         }
 
         return res;
@@ -82,8 +59,8 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
             try {
                 const res = await getPostByID(postID);
                 const data = await res.json(); // parse JSON response
-                setCurrentPostData(data);
-                console.log('Post data fetched successfully:', data);
+                setCurrentPostData(data.data);
+                console.log('Post data fetched successfully:', data.data);
             } catch (err: unknown) {
                 if (err instanceof Error) {
                     setError(err.message);
@@ -137,18 +114,20 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
                     {currentPostData && (
                         <PostCard
                             postID={postID}
-                            posterNickname={currentPostData.UserName}
-                            createdAt={currentPostData.CreationTime}
-                            postImageUrl={'http://localhost:8080/api/image?id=' + currentPostData.ImageID}
+                            posterNickname={currentPostData.PosterNickname}
+                            createdAt={currentPostData.PostTime}
+                            postImageUrl={
+                                'http://localhost:8080/api/image?id=' + currentPostData.PostImageID
+                            }
                             title={currentPostData.PostTitle}
                             content={currentPostData.PostText}
-                            likesCount={currentPostData.likesCount}
-                            dislikesCount={currentPostData.dislikesCount}
+                            likesCount={currentPostData.NumberOfLikes}
+                            dislikesCount={currentPostData.NumberOfDislikes}
                         />
                     )}
                 </div>
                 <div className="p-4 h-[70vh] flex flex-col">
-                    <CommentList postID={postID} />
+                    <CommentList postID={postID} comments={currentPostData.Comments}/>
                 </div>
             </div>
         </div>

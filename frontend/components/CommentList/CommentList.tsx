@@ -16,22 +16,20 @@ type Comment = {
     commentID: number;
     commentText: string;
     commenterNickname: string;
-    commenterProfileImageUrl: string;
-    commentImageUrl?: string;
-    createdAt: string;
+    commentProfileImageId?: number;
+    commentImageId?: number;
+    commentTime: string;
     likesCount: number;
     dislikesCount: number;
-}
+};
 
 type CommentListProps = {
     postID: number;
     error?: string;
-    Comments?: Comment[];
+    comments?: Comment[];
 };
 
-
-
-const CommentList: React.FC<CommentListProps> = ({ postID, error }) => {
+const CommentList: React.FC<CommentListProps> = ({ postID, error, comments }) => {
     return (
         <div className="border-2 border-gray-600 rounded-lg h-full bg-gray-900 flex flex-col">
             <div className="flex justify-center gap-5 items-center h-[5%] pt-2 border-b-2 border-gray-600 dark:bg-gray-900">
@@ -40,7 +38,7 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error }) => {
 
             <div className="flex flex-col h-[95%]">
                 <div className="p-4 flex flex-col items-center gap-5 bg-gray-100 dark:bg-gray-900 py-5 overflow-y-auto hide-scrollbar flex-grow">
-                    <CommentCard
+                    {/* <CommentCard
                         postID={123}
                         commentID={456}
                         commentText="This is a sample comment for demonstration purposes."
@@ -50,10 +48,21 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error }) => {
                         createdAt="2025-01-14T10:30:00"
                         likesCount={122}
                         dislikesCount={13}
-                    />
-                {/* {comments.map((comment) => (
-                    <CommentCard key={comment.postID} {...comments} />
-                ))} */}
+                    /> */}
+                    {comments?.map((comment) => (
+                        <CommentCard
+                            key={comment.commentID}
+                            postID={postID}
+                            commentID={comment.commentID}
+                            commentText={comment.commentText}
+                            commenterNickname={comment.commenterNickname}
+                            // commenterProfileImageUrl={comment.commenterProfileImageUrl}
+                            // commentImageUrl={comment.commentImageUrl}
+                            createdAt={comment.commentTime}
+                            likesCount={comment.likesCount}
+                            dislikesCount={comment.dislikesCount}
+                        />
+                    ))}
                 </div>
                 <div className=" px-5 pt-2 h-[25%] mt-auto border-t-2 border-gray-600">
                     <textarea
@@ -74,7 +83,7 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error }) => {
                                 Comment
                             </button>
                         </div>
-                            <ImageUploader className='mt-2'/>
+                        <ImageUploader className="mt-2" />
                     </div>
                 </div>
             </div>

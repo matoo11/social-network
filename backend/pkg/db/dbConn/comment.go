@@ -8,9 +8,10 @@ import (
 )
 
 type Comment struct {
-	CommentID       int
-	CommentText     string
-	PostID          int
+	CommentID   int
+	CommentText string
+	PostID      int
+	// CommentImageID  *int
 	CreatedByID     int
 	CreationTime    time.Time
 	LastUpdatedByID int
@@ -19,11 +20,11 @@ type Comment struct {
 }
 
 type CommentDisplay struct {
-	CommentID int
-	CommentText string
-	PostID          int
-	CreatedByID     int
-	CreationTime    time.Time
+	CommentID    int
+	CommentText  string
+	PostID       int
+	CreatedByID  int
+	CreationTime time.Time
 }
 
 func CreateComment(comment Comment) error {
@@ -82,7 +83,7 @@ func DeleteComment(comment Comment, loggedInUserID int) error {
 // 	CreationTime    time.Time
 
 // ===================================================================================
-func GetCommentsByPostID(postID int) ([]CommentDisplay, error) {
+func GetDisplayedCommentsByPostID(postID int) ([]CommentDisplay, error) {
 	var comments []CommentDisplay
 	statement := `SELECT Comment_ID, Comment_Text, Post_ID, Created_By_ID, 
 		Creation_Time
@@ -96,6 +97,36 @@ func GetCommentsByPostID(postID int) ([]CommentDisplay, error) {
 		var comment CommentDisplay
 		err := data.Scan(&comment.CommentID, &comment.CommentText, &comment.PostID,
 			&comment.CreatedByID, &comment.CreationTime)
+		if err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+	if err := data.Err(); err != nil {
+		return nil, err
+	}
+	return comments, nil
+}
+
+func GetCommentsByPostID(postID int) ([]Comment, error) {
+	var comments []Comment
+	statement := `SELECT * FROM Comments WHERE Post_ID = ? AND Is_Active = 1 ORDER BY Creation_Time DESC;`
+	data, err := dbHandler.DB.Query(statement, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer data.Close()
+	for data.Next() {
+		var comment Comment
+		err := data.Scan(&comment.CommentID, 
+			&comment.CommentText, 
+			&comment.PostID,
+			// &comment.CommentImageID,
+			&comment.CreatedByID, 
+			&comment.CreationTime, 
+			&comment.LastUpdatedByID,
+			&comment.LastUpdatedTime, 
+			&comment.IsActive)
 		if err != nil {
 			return nil, err
 		}

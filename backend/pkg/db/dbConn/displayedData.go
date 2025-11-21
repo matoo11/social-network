@@ -14,10 +14,12 @@ type Data struct {
 
 type DisplayedPost struct {
 	PostID           int
-	PosterNickname   string
-	PostTime         time.Time
 	PostTitle        string
 	PostText         string
+	PostType         string
+	PosterNickname   string
+	PostImageID      int
+	PostTime         time.Time
 	NumberOfLikes    int
 	NumberOfDislikes int
 	NumberOfComments int
@@ -25,13 +27,15 @@ type DisplayedPost struct {
 }
 
 type DisplayedComment struct {
-	CommentID         int
-	PostID            int
-	CommenterNickname string
-	CommentTime       time.Time
-	CommentText       string
-	NumberOfLikes     int
-	NumberOfDislikes  int
+	PostID                int       `json:"postId"`
+	CommentID             int       `json:"commentId"`
+	CommentText           string    `json:"commentText"`
+	CommenterNickname     string    `json:"commenterNickname"`
+	CommentProfileImageID int       `json:"commentProfileImageId"`
+	CommentImageID        int       `json:"commentImageId"`
+	CommentTime           time.Time `json:"commentTime"`
+	NumberOfLikes         int       `json:"numberOfLikes"`
+	NumberOfDislikes      int       `json:"numberOfDislikes"`
 }
 
 type DisplayedMessage struct {
@@ -41,6 +45,102 @@ type DisplayedMessage struct {
 	To          string    `json:"to"`
 	MessageTime time.Time `json:"messageTime"`
 	IsRead      bool      `json:"isRead"`
+}
+
+func RetrieveAllDataForDisplayByPostID(postID int) (DisplayedPost, error) {
+	var displayedPost DisplayedPost
+	data, err := dbHandler.DB.Query(`SELECT * FROM Posts WHERE Post_ID = ? AND Is_Active = 1 ORDER BY Creation_Time DESC`, postID)
+	if err != nil {
+		return DisplayedPost{}, err
+	}
+	defer data.Close()
+
+	for data.Next() {
+		var post Post
+		err := data.Scan(
+			&post.PostID,
+			&post.PostTitle,
+			&post.PostText,
+			&post.PostTypeID,
+			&post.UserID,
+			&post.ImageID,
+			&post.CreatedByID,
+			&post.CreationTime,
+			&post.LastUpdatedByID,
+			&post.LastUpdatedTime,
+			&post.IsActive)
+		if err != nil {
+			return DisplayedPost{}, err
+		}
+
+		postTypeName, err := GetPostTypeNameByID(post.PostTypeID)
+		if err != nil {
+			return DisplayedPost{}, err
+		}
+
+		poster, err := GetUserByID(post.UserID)
+		if err != nil {
+			return DisplayedPost{}, err
+		}
+
+		numberOfLikes, err := PostLikesCount(post.PostID)
+		if err != nil {
+			return DisplayedPost{}, err
+		}
+
+		numberOfDislikes, err := PostDislikesCount(post.PostID)
+		if err != nil {
+			return DisplayedPost{}, err
+		}
+
+		displayedPost.PostID = post.PostID
+		displayedPost.PostTitle = post.PostTitle
+		displayedPost.PostText = post.PostText
+		displayedPost.PostType = postTypeName
+		displayedPost.PosterNickname = poster.Nick_Name
+		displayedPost.PostImageID = *post.ImageID
+		displayedPost.PostTime = post.CreationTime
+		displayedPost.NumberOfLikes = numberOfLikes
+		displayedPost.NumberOfDislikes = numberOfDislikes
+		comments, err := GetCommentsByPostID(post.PostID)
+		if err != nil {
+			return DisplayedPost{}, err
+		}
+		var displayCommnets []DisplayedComment
+		for _, comment := range comments {
+			commenter, err := GetUserByID(comment.CreatedByID)
+			if err != nil {
+				return DisplayedPost{}, err
+			}
+			var newDisplayedComment DisplayedComment
+			newDisplayedComment.CommentID = comment.CommentID
+			newDisplayedComment.PostID = comment.PostID
+			newDisplayedComment.CommenterNickname = commenter.Nick_Name
+			newDisplayedComment.CommentText = comment.CommentText
+			newDisplayedComment.CommentTime = comment.CreationTime
+
+			numberOfLikes, err := CommentLikesCount(post.PostID, comment.CommentID)
+			if err != nil {
+				return DisplayedPost{}, err
+			}
+			newDisplayedComment.NumberOfLikes = numberOfLikes
+
+			numberOfDislikes, err := CommentDislikesCount(post.PostID, comment.CommentID)
+			if err != nil {
+				return DisplayedPost{}, err
+			}
+			newDisplayedComment.NumberOfDislikes = numberOfDislikes
+
+			displayCommnets = append(displayCommnets, newDisplayedComment)
+		}
+		displayedPost.Comments = displayCommnets
+
+	}
+	if err := data.Err(); err != nil {
+		return DisplayedPost{}, err
+	}
+
+	return displayedPost, nil
 }
 
 func RetrieveAllDataForDisplay() ([]DisplayedPost, error) {
@@ -97,7 +197,7 @@ func RetrieveAllDataForDisplay() ([]DisplayedPost, error) {
 		}
 		newDisplayedPost.NumberOfComments = numberOfComments
 
-		comments, err := GetCommentsByPostID(post.PostID)
+		comments, err := GetDisplayedCommentsByPostID(post.PostID)
 		if err != nil {
 			return nil, err
 		}
@@ -193,7 +293,7 @@ func RetrieveAllDataForDisplayByCategory(category string) ([]DisplayedPost, erro
 			return nil, err
 		}
 		newDisplayedPost.NumberOfDislikes = numberOfDislikes
-		comments, err := GetCommentsByPostID(post.PostID)
+		comments, err := GetDisplayedCommentsByPostID(post.PostID)
 		if err != nil {
 			return nil, err
 		}
@@ -283,7 +383,7 @@ func RetrieveAllDataForDisplayByUserID(userID int) ([]DisplayedPost, error) {
 			return nil, err
 		}
 		newDisplayedPost.NumberOfDislikes = numberOfDislikes
-		comments, err := GetCommentsByPostID(post.PostID)
+		comments, err := GetDisplayedCommentsByPostID(post.PostID)
 		if err != nil {
 			return nil, err
 		}
@@ -554,7 +654,7 @@ func RetrieveSinglePostByIDForDisplay(postID int) (DisplayedPost, error) {
 	}
 
 	// Fetch comments
-	comments, err := GetCommentsByPostID(post.PostID)
+	comments, err := GetDisplayedCommentsByPostID(post.PostID)
 	if err != nil {
 		return DisplayedPost{}, err
 	}
@@ -672,8 +772,6 @@ func RetieveMessagesMapForDisplayByUserID(userID int) (map[string][]DisplayedMes
 
 	return displayedMessagesMap, nil
 }
-
-
 
 // helper functions
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { useState } from 'react';
 import Title from '../Title/Title';
 import InputField from '../InputField/InputField';
@@ -30,6 +30,26 @@ type CommentListProps = {
 };
 
 const CommentList: React.FC<CommentListProps> = ({ postID, error, comments }) => {
+    const commentRef = useRef<HTMLTextAreaElement | null>(null);
+    const [file, setFile] = useState<File | null>(null);
+    const [comment, setComment] = useState('');
+
+    const handleCommentSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('commentText', comment);
+        if (file) formData.append('commentImage', file);
+        console.log('Submitting comment:', comment);
+        console.log('With file:', file);
+
+        // fetch('/api/comments', { method: 'POST', body: formData });
+        //TODO: implement the actual API call to submit the comment
+
+        // Clear inputs
+        setComment('');
+        setFile(null);
+    };
+
     return (
         <div className="border-2 border-gray-600 rounded-lg h-full bg-gray-900 flex flex-col">
             <div className="flex justify-center gap-5 items-center h-[5%] pt-2 border-b-2 border-gray-600 dark:bg-gray-900">
@@ -38,17 +58,6 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments }) =>
 
             <div className="flex flex-col h-[95%]">
                 <div className="p-4 flex flex-col items-center gap-5 bg-gray-100 dark:bg-gray-900 py-5 overflow-y-auto hide-scrollbar flex-grow">
-                    {/* <CommentCard
-                        postID={123}
-                        commentID={456}
-                        commentText="This is a sample comment for demonstration purposes."
-                        commenterNickname="JohnDoe"
-                        commenterProfileImageUrl=""
-                        commentImageUrl="http://localhost:8080/api/image?id=1"
-                        createdAt="2025-01-14T10:30:00"
-                        likesCount={122}
-                        dislikesCount={13}
-                    /> */}
                     {comments?.map((comment) => (
                         <CommentCard
                             key={comment.commentID}
@@ -56,7 +65,7 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments }) =>
                             commentID={comment.commentID}
                             commentText={comment.commentText}
                             commenterNickname={comment.commenterNickname}
-                            // commenterProfileImageUrl={comment.commenterProfileImageUrl}
+                            // commenterProfileImageUrl={comment.commenterProfileImageUrl} // TODO: Need to update the DB to show the comment Image
                             // commentImageUrl={comment.commentImageUrl}
                             createdAt={comment.commentTime}
                             likesCount={comment.likesCount}
@@ -64,13 +73,16 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments }) =>
                         />
                     ))}
                 </div>
-                <div className=" px-5 pt-2 h-[25%] mt-auto border-t-2 border-gray-600">
+                <form
+                    onSubmit={(e)=> handleCommentSubmit(e)}
+                    className=" px-5 pt-2 h-[25%] mt-auto border-t-2 border-gray-600"
+                >
                     <textarea
                         id="message"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white resize-none"
                         placeholder="write a comment..."
-                        value={''}
-                        onChange={() => {}}
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
                     ></textarea>
                     <div className="flex gap-5">
                         {/* Full-width submit button */}
@@ -83,9 +95,9 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments }) =>
                                 Comment
                             </button>
                         </div>
-                        <ImageUploader className="mt-2" />
+                        <ImageUploader file={file} setFile={setFile} className="mt-2" />
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     );

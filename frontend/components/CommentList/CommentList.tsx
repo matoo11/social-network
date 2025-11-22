@@ -11,7 +11,7 @@ import PostCard from '../PostCard/PostCard';
 import CommentCard from '../CommentCard/CommentCard';
 import ImageUploader from '../ImageUploader/ImageUploader';
 
-type Comment = {
+export type Comment = {
     postID: number;
     commentID: number;
     commentText: string;

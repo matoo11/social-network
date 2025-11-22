@@ -13,18 +13,19 @@ type Data struct {
 }
 
 type DisplayedPost struct {
-	PostID           int
-	PostTitle        string
-	PostText         string
-	PostType         string
-	PosterNickname   string
-	PostImageID      int
-	PostTime         time.Time
-	NumberOfLikes    int
-	NumberOfDislikes int
-	NumberOfComments int
-	Comments         []DisplayedComment
+    PostID           int                `json:"postId"`
+    PostTitle        string             `json:"postTitle"`
+    PostText         string             `json:"postText"`
+    PostType         string             `json:"postType"`
+    PosterNickname   string             `json:"posterNickname"`
+    PostImageID      int                `json:"postImageId"`
+    PostTime         time.Time          `json:"postTime"`
+    NumberOfLikes    int                `json:"numberOfLikes"`
+    NumberOfDislikes int                `json:"numberOfDislikes"`
+    NumberOfComments int                `json:"numberOfComments"`
+    Comments         []DisplayedComment `json:"comments"`
 }
+
 
 type DisplayedComment struct {
 	PostID                int       `json:"postId"`

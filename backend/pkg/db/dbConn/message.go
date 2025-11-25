@@ -7,7 +7,7 @@ import (
 )
 
 type Message struct {
-	MessageID       int
+	MessageID    int
 	SenderID     int
 	ReceiverID   int
 	MessageText  string
@@ -17,8 +17,16 @@ type Message struct {
 	IsActive     bool
 }
 
+type MessageDisplay struct {
+	MessageID    int
+	SenderID     int
+	RecieverID   int
+	Content      string
+	CreationTime time.Timer
+}
+
 func CreateChatMessage(message Message) error {
-	
+
 	statement := `INSERT INTO Messages
     (
         Sender_ID,

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ChatMessage from '../ChatMessage/ChatMessage';
+import { sendMessage } from '@/lib/api/websocket'
 
 interface Message {
     id: number;
@@ -11,9 +12,20 @@ interface Message {
 interface ChatProps {
     chatter: string;
     chatWith: string;
+    chatID: string;
 }
 
-const ChatArea: React.FC<ChatProps> = ({ chatWith , chatter}) => {
+
+function SendChatMessage(chatID: number, text: string, type: number) {
+    const data = {
+        type: type,
+        chatID: chatID,
+        message: text
+    }
+    sendMessage("chat", data)
+}
+
+const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -26,6 +38,30 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith , chatter}) => {
         scrollToBottom();
     }, [messages]);
 
+    useEffect(() => {
+        const listener = (e: any) => {
+            const data = e.detail;
+
+            // if (data.senderID !== chatWith && data.recieverID !== chatter) return;
+
+            const incoming: Message = {
+                id: Date.now(),
+                username: data.senderUsername,
+                text: data.message,
+                type: "received",
+            };
+
+            setMessages(prev => [...prev, incoming]);
+        };
+
+        window.addEventListener("ws-chat", listener);
+
+        return () => window.removeEventListener("ws-chat", listener);
+    }, [chatWith, chatter]);
+
+
+
+
     const handleSend = () => {
         if (!input.trim()) return;
 
@@ -37,15 +73,22 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith , chatter}) => {
         };
 
         setMessages([...messages, newMessage]);
+        SendChatMessage(Number(chatID), input, 1)
+        // sendMessage("chat", {
+        //     from: chatter,
+        //     to: chatWith,
+        //     message: input,
+        // });
+
         setInput('');
 
         // Simulate a response
-        setTimeout(() => {
-            setMessages((prev) => [
-                ...prev,
-                { id: Date.now() + 1, text: 'Got it!', type: 'received' , username: chatWith},
-            ]);
-        }, 1000);
+        // setTimeout(() => {
+        //     setMessages((prev) => [
+        //         ...prev,
+        //         { id: Date.now() + 1, text: 'Got it!', type: 'received' , username: chatWith},
+        //     ]);
+        // }, 1000);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

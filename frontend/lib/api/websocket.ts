@@ -20,8 +20,12 @@ export function InitWebSocket() {
             UpdateUserList(msg.Users);
             console.log("here")
         } else if (msg.type === "chat") {
-            console.log(msg.data.message)
-            AddChatBubble(msg.data, false)
+            console.log(msg)
+            // console.log(msg.data.message)
+            // AddChatBubble(msg.data, false)
+            window.dispatchEvent(
+                new CustomEvent("ws-chat", { detail: msg.data })
+            );
         } else {
 
             console.log(msg)

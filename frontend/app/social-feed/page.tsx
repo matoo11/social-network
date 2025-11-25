@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 export default function SocialFeed() {
     const [chatWith, setChatWith] = useState<string>('');
     const [chatter, setChatter] = useState<string>('');
+    const [chatID, setchatID] = useState<string>('');
     const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);
     const [isChatListPopupOpen, setIsChatListPopupOpen] = useState(false);
     const [isChatAreaPopupOpen, setIsChatAreaPopupOpen] = useState(false);
@@ -63,12 +64,14 @@ export default function SocialFeed() {
                 <ChatList
                     chats={chatsData}
                     popupHandler={() => setIsChatListPopupOpen(true)}
-                    onSelectChat={(username) => {
-                        console.log('Selected chat with:', username);
+                    onSelectChat={(id, username) => {
                         setIsChatAreaPopupOpen(true);
+                        setchatID(id);
+                        console.log(id)
                         setChatWith(username);
-                        setChatter('Admin'); // Assuming 'Admin' is the current user
+                        setChatter("Me");
                     }}
+
                 />
             </div>
 
@@ -108,7 +111,8 @@ export default function SocialFeed() {
                 onClose={() => setIsChatAreaPopupOpen(false)}
                 className="max-w-3xl"
             >
-                <ChatArea chatWith={chatWith} chatter={chatter} />
+                <ChatArea chatWith={chatWith} chatter={chatter} chatID={chatID} />
+
             </Popup>
 
             <Popup

@@ -27,28 +27,66 @@ type CommentListProps = {
     postID: number;
     error?: string;
     comments?: Comment[];
+    onCommentAdded?: () => void;
 };
 
-const CommentList: React.FC<CommentListProps> = ({ postID, error, comments }) => {
+type CommentData = {
+    commentText: string;
+    // commentImage?: File;
+    postID: number;
+};
+
+async function handleCreateComment(formData: FormData) {
+    try {
+        const res = await fetch('http://localhost:8080/api/createComment', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData,
+        });
+
+        if (!res.ok) {
+            throw new Error('Failed to create comment');
+        }
+
+        //   router.push('/login');
+    } catch (err: unknown) {
+        console.error('Error creating comment:', err);
+        if (err instanceof Error) {
+            console.error(err.message);
+        } else {
+            console.error('Unexpected error occurred');
+        }
+    }
+}
+
+const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCommentAdded }) => {
     const commentRef = useRef<HTMLTextAreaElement | null>(null);
     const [file, setFile] = useState<File | null>(null);
     const [comment, setComment] = useState('');
 
-    const handleCommentSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    async function handleCommentSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        const data: CommentData = {
+            commentText: comment,
+            postID: postID,
+        };
         const formData = new FormData();
-        formData.append('commentText', comment);
+        // formData.append('commentText', comment);
+        formData.append('data', JSON.stringify(data));
         if (file) formData.append('commentImage', file);
         console.log('Submitting comment:', comment);
         console.log('With file:', file);
 
+        await handleCreateComment(formData);
         // fetch('/api/comments', { method: 'POST', body: formData });
         //TODO: implement the actual API call to submit the comment
 
         // Clear inputs
         setComment('');
         setFile(null);
-    };
+
+        if (onCommentAdded) onCommentAdded();
+    }
 
     return (
         <div className="border-2 border-gray-600 rounded-lg h-full bg-gray-900 flex flex-col">
@@ -74,7 +112,7 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments }) =>
                     ))}
                 </div>
                 <form
-                    onSubmit={(e)=> handleCommentSubmit(e)}
+                    onSubmit={(e) => handleCommentSubmit(e)}
                     className=" px-5 pt-2 h-[25%] mt-auto border-t-2 border-gray-600"
                 >
                     <textarea

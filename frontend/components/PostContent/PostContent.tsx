@@ -12,11 +12,11 @@ type PostContentProps = {
 };
 
 interface APIResponse<T> {
-  success: boolean;
-  code: number;
-  message: string;
-  data: T;
-  authenticated: boolean;
+    success: boolean;
+    code: number;
+    message: string;
+    data: T;
+    authenticated: boolean;
 }
 
 interface BackendPost {
@@ -26,13 +26,12 @@ interface BackendPost {
     postType: string;
     posterNickname: string;
     postImageId: number;
-    postTime: string; 
+    postTime: string;
     numberOfLikes: number;
     numberOfDislikes: number;
     numberOfComments: number;
     comments: BackendDisplayedComment[];
 }
-
 
 interface BackendDisplayedComment {
     postId: number;
@@ -52,7 +51,7 @@ const selectInputOptions = [
     { optionText: 'Private', optionValue: 3 },
 ];
 
-export async function getPostByID(id: number): Promise<APIResponse<BackendPost>>  {
+export async function getPostByID(id: number): Promise<APIResponse<BackendPost>> {
     try {
         const res = await fetch('http://localhost:8080/api/getPostByID', {
             method: 'POST',
@@ -68,7 +67,6 @@ export async function getPostByID(id: number): Promise<APIResponse<BackendPost>>
 
         const data: APIResponse<BackendPost> = await res.json();
         return data;
-
     } catch (err: unknown) {
         if (err instanceof Error) {
             throw new Error(err.message);
@@ -80,50 +78,51 @@ export async function getPostByID(id: number): Promise<APIResponse<BackendPost>>
 
 const PostContent: React.FC<PostContentProps> = ({ postID }) => {
     const [currentPostData, setCurrentPostData] = useState<BackendPost | null>(null);
-    const [currentCommentsData, setCurrentCommentsData] = useState<Comment[] | undefined>(undefined);
+    const [currentCommentsData, setCurrentCommentsData] = useState<Comment[] | undefined>(
+        undefined,
+    );
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchPost = async () => {
-            setLoading(true);
-            setError(null);
+    const fetchPost = async () => {
+        setLoading(true);
+        setError(null);
 
-            try {
-                const res = await getPostByID(postID);
+        try {
+            const res = await getPostByID(postID);
 
-                const PostData = res.data;
+            const PostData = res.data;
 
-                setCurrentPostData(PostData);
-                const CommentListData = PostData.comments || [];
+            setCurrentPostData(PostData);
+            const CommentListData = PostData.comments || [];
 
-                const mappedComments: Comment[] = CommentListData.map((c: BackendDisplayedComment) => ({
-                    postID: c.postId,
-                    commentID: c.commentId,
-                    commentText: c.commentText,
-                    commenterNickname: c.commenterNickname,
-                    commentProfileImageId: c.commentProfileImageId ?? undefined,
-                    commentImageId: c.commentImageId ?? undefined,
-                    commentTime: c.commentTime,
-                    likesCount: c.numberOfLikes ?? 0,
-                    dislikesCount: c.numberOfDislikes ?? 0,
-                }));
+            const mappedComments: Comment[] = CommentListData.map((c: BackendDisplayedComment) => ({
+                postID: c.postId,
+                commentID: c.commentId,
+                commentText: c.commentText,
+                commenterNickname: c.commenterNickname,
+                commentProfileImageId: c.commentProfileImageId ?? undefined,
+                commentImageId: c.commentImageId ?? undefined,
+                commentTime: c.commentTime,
+                likesCount: c.numberOfLikes ?? 0,
+                dislikesCount: c.numberOfDislikes ?? 0,
+            }));
 
-                setCurrentCommentsData(mappedComments);
-                console.log('Mapped Comments:', mappedComments);
-                console.log("post data", PostData)
-            } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError('Unexpected error occurred');
-                }
-                console.error('Error fetching post data:', err);
-            } finally {
-                setLoading(false);
+            setCurrentCommentsData(mappedComments);
+            console.log('Mapped Comments:', mappedComments);
+            console.log('post data', PostData);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
             }
-        };
-
+            console.error('Error fetching post data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
         fetchPost();
     }, [postID]);
 
@@ -153,7 +152,11 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
                     )}
                 </div>
                 <div className="p-4 h-[70vh] flex flex-col">
-                    <CommentList postID={postID} comments={currentCommentsData}/>
+                    <CommentList
+                        postID={postID}
+                        comments={currentCommentsData}
+                        onCommentAdded={fetchPost}
+                    />
                 </div>
             </div>
         </div>

@@ -55,7 +55,7 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
                     id: m.MessageID,
                     username: m.SenderID === Number(chatter) ? chatter : chatWith,
                     text: m.Content,
-                    type: m.SenderID === Number(chatter) ? "sent" : "received",
+                    type: m.IsSender ? "sent" : "received",
                 }));
 
                 setMessages(mapped);

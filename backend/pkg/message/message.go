@@ -36,12 +36,14 @@ func GetPrivateMessages(w http.ResponseWriter, r *http.Request) {
 
 	var displayMessages []dbConn.MessageDisplay
 	for _, f := range messages {
+		isSender := (LoggedInUserID == f.SenderID)
 		message := dbConn.MessageDisplay{
-			MessageID:  f.MessageID,
-			SenderID:   f.SenderID,
-			RecieverID: f.ReceiverID,
-			Content:    f.MessageText,
+			MessageID:    f.MessageID,
+			SenderID:     f.SenderID,
+			RecieverID:   f.ReceiverID,
+			Content:      f.MessageText,
 			CreationTime: f.CreationTime,
+			IsSender:     isSender,
 		}
 		displayMessages = append(displayMessages, message)
 	}

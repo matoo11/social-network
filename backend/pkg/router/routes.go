@@ -23,12 +23,14 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		auth.LoginHandler(w, r)
 	case "/api/signout":
 		auth.SignoutHandler(w, r)
+	case "/api/getUserData":
+		auth.GetUserDataHandler(w, r)
 	case "/api/createPost":
 		post.CreatePostHandler(w, r)
 	case "/api/getPost":
 		post.GetPostByIDHandler(w, r)
 	case "/api/getPostByID":
-		post.FetchPostByIDHandler(w,r)
+		post.FetchPostByIDHandler(w, r)
 	case "/api/getPublicPosts":
 		post.GetPublicPosts(w, r)
 	case "/api/getPrivatePosts":

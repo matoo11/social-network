@@ -5,13 +5,47 @@ import Link from 'next/link';
 import ProfileImage from '../ProfileImage/ProfileImage';
 import Image from 'next/image';
 import NavLink from '../NavLink/NavLink';
-import { logoutUser } from '@/lib/api/auth';
+import { fetchUserData, logoutUser } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
+
+export interface User {
+    userId: number;
+    userName: string;
+    nickName: string;
+    password: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+
+    dateOfBirth: string | null; // because *time.Time can be null in Go
+
+    gender: string;
+    imageId: number;
+    aboutMe: string;
+
+    profileTypeId: number;
+    createdById: number;
+    creationTime: string; // time.Time -> ISO string
+    lastUpdatedById: number;
+    lastUpdatedTime: string; // time.Time -> ISO string
+
+    isActive: boolean;
+}
 
 const Navbar = () => {
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        try {
+            handleUserData();
+            console.log('User data loaded in Navbar:', user);
+        } catch (err) {
+            console.error('Failed to load user:', err);
+        }
+    }, []);
 
     // Close dropdown on outside click
     useEffect(() => {
@@ -37,6 +71,15 @@ const Navbar = () => {
             router.push('/login');
         } catch (error) {
             console.error('Logout failed:', error);
+        }
+    };
+
+    const handleUserData = async () => {
+        try {
+            const data: User = await fetchUserData();
+            setUser(data);
+        } catch (error) {
+            console.error('Fetching user data failed:', error);
         }
     };
 
@@ -74,10 +117,10 @@ const Navbar = () => {
                         <div className="absolute top-8 right-0 z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 w-44">
                             <div className="px-4 py-3">
                                 <span className="block text-sm text-gray-900 dark:text-white">
-                                    Bonnie Green (temp)
+                                    {user ? user.nickName : 'Guest'}
                                 </span>
                                 <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-                                    Temp@Reboot.com
+                                    {user ? user.email : 'Not logged in'}
                                 </span>
                             </div>
                             <ul className="py-2">

@@ -81,3 +81,30 @@ export async function logoutUser() {
         }
     }
 }
+
+export async function fetchUserData() {
+    try {
+        const res = await fetch('http://localhost:8080/api/getUserData', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        console.log('Response received for fetchUserData:', res);
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(errorText || 'Fetching user data failed');
+        }
+
+        const data = await res.json();
+        console.log('Fetched user data:', data);
+        return data;
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            throw new Error(err.message);
+        } else {
+            throw new Error('Unexpected error occurred');
+        }
+    }
+}

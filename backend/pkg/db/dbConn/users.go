@@ -10,18 +10,23 @@ import (
 )
 
 type User struct {
-	User_ID                                                      int
-	User_Name, Nick_Name, Password, Email, First_Name, Last_Name string
-	Date_Of_Birth                                                *time.Time
-	Gender                                                       string
-	Image_ID                                                     int
-	About_Me                                                     string
-	Profile_Type_ID                                              int
-	Created_By_ID                                                int
-	Creation_Time                                                time.Time
-	Last_Updated_By_ID                                           int
-	Last_Updated_Time                                            time.Time
-	Is_Active                                                    bool
+	User_ID            int        `json:"userId"`
+	User_Name          string     `json:"userName"`
+	Nick_Name          string     `json:"nickName"`
+	Password           string     `json:"password"`
+	Email              string     `json:"email"`
+	First_Name         string     `json:"firstName"`
+	Last_Name          string     `json:"lastName"`
+	Date_Of_Birth      *time.Time `json:"dateOfBirth"`
+	Gender             string     `json:"gender"`
+	Image_ID           int        `json:"imageId"`
+	About_Me           string     `json:"aboutMe"`
+	Profile_Type_ID    int        `json:"profileTypeId"`
+	Created_By_ID      int        `json:"createdById"`
+	Creation_Time      time.Time  `json:"creationTime"`
+	Last_Updated_By_ID int        `json:"lastUpdatedById"`
+	Last_Updated_Time  time.Time  `json:"lastUpdatedTime"`
+	Is_Active          bool       `json:"isActive"`
 }
 
 type UserDisplay struct {

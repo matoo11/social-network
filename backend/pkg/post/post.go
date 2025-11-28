@@ -266,10 +266,12 @@ func FetchPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		util.Respond(w, r, http.StatusBadRequest, nil, "Invalid JSON")
 		return
 	}
+	fmt.Println("FetchPostByIDHandler called with ID:", req.ID)
 	data, err := dbConn.RetrieveAllDataForDisplayByPostID(req.ID)
 	if err != nil {
 		util.Respond(w, r, http.StatusInternalServerError, nil, err.Error())
 		return
 	}
+	fmt.Println("Fetched Post Data:", data)
 	util.Respond(w, r, http.StatusOK, data, "Fetch post successful")
 }

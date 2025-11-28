@@ -13,19 +13,18 @@ type Data struct {
 }
 
 type DisplayedPost struct {
-    PostID           int                `json:"postId"`
-    PostTitle        string             `json:"postTitle"`
-    PostText         string             `json:"postText"`
-    PostType         string             `json:"postType"`
-    PosterNickname   string             `json:"posterNickname"`
-    PostImageID      int                `json:"postImageId"`
-    PostTime         time.Time          `json:"postTime"`
-    NumberOfLikes    int                `json:"numberOfLikes"`
-    NumberOfDislikes int                `json:"numberOfDislikes"`
-    NumberOfComments int                `json:"numberOfComments"`
-    Comments         []DisplayedComment `json:"comments"`
+	PostID           int                `json:"postId"`
+	PostTitle        string             `json:"postTitle"`
+	PostText         string             `json:"postText"`
+	PostType         string             `json:"postType"`
+	PosterNickname   string             `json:"posterNickname"`
+	PostImageID      int               `json:"postImageId"`
+	PostTime         time.Time          `json:"postTime"`
+	NumberOfLikes    int                `json:"numberOfLikes"`
+	NumberOfDislikes int                `json:"numberOfDislikes"`
+	NumberOfComments int                `json:"numberOfComments"`
+	Comments         []DisplayedComment `json:"comments"`
 }
-
 
 type DisplayedComment struct {
 	PostID                int       `json:"postId"`
@@ -99,7 +98,11 @@ func RetrieveAllDataForDisplayByPostID(postID int) (DisplayedPost, error) {
 		displayedPost.PostText = post.PostText
 		displayedPost.PostType = postTypeName
 		displayedPost.PosterNickname = poster.Nick_Name
-		displayedPost.PostImageID = *post.ImageID
+		if post.ImageID != nil {
+			displayedPost.PostImageID = *post.ImageID
+		} else {
+			displayedPost.PostImageID = 0 // or leave as nil depending on your struct
+		}
 		displayedPost.PostTime = post.CreationTime
 		displayedPost.NumberOfLikes = numberOfLikes
 		displayedPost.NumberOfDislikes = numberOfDislikes
@@ -140,6 +143,8 @@ func RetrieveAllDataForDisplayByPostID(postID int) (DisplayedPost, error) {
 	if err := data.Err(); err != nil {
 		return DisplayedPost{}, err
 	}
+
+	fmt.Println("Displayed Post:", displayedPost)
 
 	return displayedPost, nil
 }

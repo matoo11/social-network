@@ -25,7 +25,7 @@ interface BackendPost {
     postText: string;
     postType: string;
     posterNickname: string;
-    postImageId: number;
+    postImageId?: number;
     postTime: string;
     numberOfLikes: number;
     numberOfDislikes: number;
@@ -52,6 +52,7 @@ const selectInputOptions = [
 ];
 
 export async function getPostByID(id: number): Promise<APIResponse<BackendPost>> {
+    console.log('Response received for getPostByID');
     try {
         const res = await fetch('http://localhost:8080/api/getPostByID', {
             method: 'POST',
@@ -64,8 +65,8 @@ export async function getPostByID(id: number): Promise<APIResponse<BackendPost>>
             const errorText = await res.text();
             throw new Error(errorText || 'Get post failed');
         }
-
         const data: APIResponse<BackendPost> = await res.json();
+        console.log('Fetched Post Data:', data);
         return data;
     } catch (err: unknown) {
         if (err instanceof Error) {
@@ -142,7 +143,10 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
                             posterNickname={currentPostData.posterNickname}
                             createdAt={currentPostData.postTime}
                             postImageUrl={
-                                'http://localhost:8080/api/image?id=' + currentPostData.postImageId
+                                currentPostData.postImageId
+                                    ? 'http://localhost:8080/api/image?id=' +
+                                      currentPostData.postImageId
+                                    : ''
                             }
                             title={currentPostData.postTitle}
                             content={currentPostData.postText}

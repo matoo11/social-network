@@ -35,6 +35,40 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     };
 
     useEffect(() => {
+        const loadMessages = async () => {
+            try {
+                const res = await fetch(
+                    "http://localhost:8080/api/message/getPrivateMessages",
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ userID: Number(chatID) }),
+                    }
+                );
+
+                const data = await res.json();
+
+                const mapped = data.map((m: any) => ({
+                    id: m.MessageID,
+                    username: m.SenderID === Number(chatter) ? chatter : chatWith,
+                    text: m.Content,
+                    type: m.SenderID === Number(chatter) ? "sent" : "received",
+                }));
+
+                setMessages(mapped);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        loadMessages();
+    }, [chatID, chatter, chatWith]);
+
+
+    useEffect(() => {
         scrollToBottom();
     }, [messages]);
 

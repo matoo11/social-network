@@ -41,11 +41,13 @@ func GetPrivateMessages(w http.ResponseWriter, r *http.Request) {
 			SenderID:   f.SenderID,
 			RecieverID: f.ReceiverID,
 			Content:    f.MessageText,
+			CreationTime: f.CreationTime,
 		}
 		displayMessages = append(displayMessages, message)
 	}
 
 	if err := auth.JsonEncode(w, displayMessages); err != nil {
+		fmt.Println(err)
 		http.Error(w, "hrar error", 500)
 	}
 }

@@ -22,7 +22,8 @@ type MessageDisplay struct {
 	SenderID     int
 	RecieverID   int
 	Content      string
-	CreationTime time.Timer
+	CreationTime time.Time
+	IsSender     bool
 }
 
 func CreateChatMessage(message Message) error {
@@ -73,9 +74,9 @@ func GetChatMessagesBetweenUsers(user1ID, user2ID int) ([]Message, error) {
         Creation_Time,
         Is_Active
     FROM Messages
-    WHERE ((SenderID = ? AND ReceiverID = ?) OR
-           (SenderID = ? AND ReceiverID = ?))
-    ORDER BY Sent_Time ASC`
+    WHERE ((Sender_ID = ? AND Receiver_ID = ?) OR
+           (Sender_ID = ? AND Receiver_ID = ?))
+    ORDER BY Creation_Time ASC`
 
 	rows, err := dbHandler.DB.Query(statement, user1ID, user2ID, user2ID, user1ID)
 	if err != nil {

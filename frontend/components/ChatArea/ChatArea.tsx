@@ -7,6 +7,7 @@ interface Message {
     username: string;
     text: string;
     type: 'sent' | 'received';
+    time?: string;
 }
 
 interface ChatProps {
@@ -56,6 +57,7 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
                     username: m.SenderID === Number(chatter) ? chatter : chatWith,
                     text: m.Content,
                     type: m.IsSender ? "sent" : "received",
+                    time: m.CreationTime,
                 }));
 
                 setMessages(mapped);
@@ -83,6 +85,9 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
                 username: data.senderUsername,
                 text: data.message,
                 type: "received",
+                time: new Date().toISOString()
+
+
             };
 
             setMessages(prev => [...prev, incoming]);
@@ -104,6 +109,7 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
             username: chatter,
             text: input,
             type: 'sent',
+            time: new Date().toISOString()
         };
 
         setMessages([...messages, newMessage]);
@@ -144,10 +150,11 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
                         userImage=""
                         type={msg.type}
                         message={msg.text}
-                        time={new Date().toLocaleTimeString([], {
+                        time={msg.time ? new Date(msg.time).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
-                        })}
+                        }) : ""}
+
                         key={msg.id}
                     />
                 ))}

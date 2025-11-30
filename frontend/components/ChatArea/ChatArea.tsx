@@ -1,19 +1,32 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ChatMessage from '../ChatMessage/ChatMessage';
+import { sendMessage } from '@/lib/api/websocket'
 
 interface Message {
     id: number;
     username: string;
     text: string;
     type: 'sent' | 'received';
+    time?: string;
 }
 
 interface ChatProps {
     chatter: string;
     chatWith: string;
+    chatID: string;
 }
 
-const ChatArea: React.FC<ChatProps> = ({ chatWith , chatter}) => {
+
+function SendChatMessage(chatID: number, text: string, type: number) {
+    const data = {
+        type: type,
+        chatID: chatID,
+        message: text
+    }
+    sendMessage("chat", data)
+}
+
+const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -23,8 +36,70 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith , chatter}) => {
     };
 
     useEffect(() => {
+        const loadMessages = async () => {
+            try {
+                const res = await fetch(
+                    "http://localhost:8080/api/message/getPrivateMessages",
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ userID: Number(chatID) }),
+                    }
+                );
+
+                const data = await res.json();
+
+                const mapped = data.map((m: any) => ({
+                    id: m.MessageID,
+                    username: m.SenderID === Number(chatter) ? chatter : chatWith,
+                    text: m.Content,
+                    type: m.IsSender ? "sent" : "received",
+                    time: m.CreationTime,
+                }));
+
+                setMessages(mapped);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        loadMessages();
+    }, [chatID, chatter, chatWith]);
+
+
+    useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    useEffect(() => {
+        const listener = (e: any) => {
+            const data = e.detail;
+
+            // if (data.senderID !== chatWith && data.recieverID !== chatter) return;
+
+            const incoming: Message = {
+                id: Date.now(),
+                username: data.senderUsername,
+                text: data.message,
+                type: "received",
+                time: new Date().toISOString()
+
+
+            };
+
+            setMessages(prev => [...prev, incoming]);
+        };
+
+        window.addEventListener("ws-chat", listener);
+
+        return () => window.removeEventListener("ws-chat", listener);
+    }, [chatWith, chatter]);
+
+
+
 
     const handleSend = () => {
         if (!input.trim()) return;
@@ -34,18 +109,26 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith , chatter}) => {
             username: chatter,
             text: input,
             type: 'sent',
+            time: new Date().toISOString()
         };
 
         setMessages([...messages, newMessage]);
+        SendChatMessage(Number(chatID), input, 1)
+        // sendMessage("chat", {
+        //     from: chatter,
+        //     to: chatWith,
+        //     message: input,
+        // });
+
         setInput('');
 
         // Simulate a response
-        setTimeout(() => {
-            setMessages((prev) => [
-                ...prev,
-                { id: Date.now() + 1, text: 'Got it!', type: 'received' , username: chatWith},
-            ]);
-        }, 1000);
+        // setTimeout(() => {
+        //     setMessages((prev) => [
+        //         ...prev,
+        //         { id: Date.now() + 1, text: 'Got it!', type: 'received' , username: chatWith},
+        //     ]);
+        // }, 1000);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -67,10 +150,11 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith , chatter}) => {
                         userImage=""
                         type={msg.type}
                         message={msg.text}
-                        time={new Date().toLocaleTimeString([], {
+                        time={msg.time ? new Date(msg.time).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
-                        })}
+                        }) : ""}
+
                         key={msg.id}
                     />
                 ))}

@@ -7,6 +7,7 @@ import (
 	"social/backend/pkg/comment"
 	"social/backend/pkg/follow"
 	"social/backend/pkg/group"
+	"social/backend/pkg/message"
 	"social/backend/pkg/post"
 	"social/backend/pkg/profile"
 	"social/backend/pkg/websocket"
@@ -81,6 +82,10 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		group.GetGroupEventsHandler(w, r)
 	case "/api/groups/events/respond":
 		group.RespondToEventHandler(w, r)
+	case "/api/message/getPrivateMessages":
+		message.GetPrivateMessages(w, r)
+	case "/api/chat/getChatList":
+		message.GetChatList(w, r)
 	default:
 		http.NotFound(w, r)
 	}

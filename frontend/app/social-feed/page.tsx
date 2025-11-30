@@ -9,10 +9,12 @@ import EventsList from '@/components/EventsList/EventsList';
 import EventCalendar from '@/components/EventCalendar/EventCalendar';
 import ChatArea from '@/components/ChatArea/ChatArea';
 import PostContent from '@/components/PostContent/PostContent';
+import { useEffect } from 'react';
 
 export default function SocialFeed() {
     const [chatWith, setChatWith] = useState<string>('');
     const [chatter, setChatter] = useState<string>('');
+    const [chatID, setchatID] = useState<string>('');
     const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);
     const [isChatListPopupOpen, setIsChatListPopupOpen] = useState(false);
     const [isChatAreaPopupOpen, setIsChatAreaPopupOpen] = useState(false);
@@ -20,6 +22,32 @@ export default function SocialFeed() {
     const [postListRefreshFn, setPostListRefreshFn] = useState<() => void>();
     const [isPostContentPopupOpen, setPostContentPopup] = useState(false);
     const [selectedPostID, setSelectedPostID] = useState<number>(0);
+    const [chatsData, setChatsData] = useState([]);
+
+    useEffect(() => {
+        const loadChats = async () => {
+            try {
+                const res = await fetch("http://localhost:8080/api/chat/getChatList", {
+                    credentials: 'include',
+                });
+                const data = await res.json();
+                // setChatsData(data);
+                const mapped = data.map((item: any) => ({
+                    id: String(item.UserID),        // or whatever your backend sends
+                    username: item.Username,    // match your API field
+                    lastMessage: item.last_message || '' // fallback if backend doesn't send
+                }));
+
+                setChatsData(mapped);
+                // console.log(mapped)
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        loadChats();
+    }, []);
+
 
     const handleNewPostCreated = () => {
         if (postListRefreshFn) {
@@ -27,36 +55,23 @@ export default function SocialFeed() {
         }
     };
 
+
+
     return (
         <div className="flex w-full h-full mt-[10vh]">
             {/* Left column - 17.5% */}
             <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
                 <ChatList
-                    chats={[
-                        { id: '1', username: 'Alice', lastMessage: 'Hello!' },
-                        { id: '2', username: 'Bob', lastMessage: 'How are you?' },
-                        { id: '3', username: 'Charlie', lastMessage: 'See you later.' },
-                        { id: '4', username: 'Diana', lastMessage: 'Let’s meet tomorrow.' },
-                        { id: '5', username: 'Ethan', lastMessage: 'Can you call me?' },
-                        { id: '6', username: 'Fiona', lastMessage: 'Got the files, thanks!' },
-                        { id: '7', username: 'George', lastMessage: 'Where are you?' },
-                        { id: '8', username: 'Hannah', lastMessage: 'Lunch at 1?' },
-                        { id: '9', username: 'Ivan', lastMessage: 'I’ll check and let you know.' },
-                        { id: '10', username: 'Julia', lastMessage: 'Awesome work today!' },
-                        { id: '11', username: 'Kevin', lastMessage: 'I’ll be there in 10.' },
-                        { id: '12', username: 'Laura', lastMessage: 'Don’t forget the meeting.' },
-                        { id: '13', username: 'Mike', lastMessage: 'That sounds great!' },
-                        { id: '14', username: 'Nina', lastMessage: 'Thanks for the update.' },
-                        { id: '15', username: 'Oscar', lastMessage: 'Can we reschedule?' },
-                        { id: '16', username: 'Paula', lastMessage: 'See you at the event.' },
-                    ]}
+                    chats={chatsData}
                     popupHandler={() => setIsChatListPopupOpen(true)}
-                    onSelectChat={(username) => {
-                        console.log('Selected chat with:', username);
+                    onSelectChat={(id, username) => {
                         setIsChatAreaPopupOpen(true);
+                        setchatID(id);
+                        console.log(id)
                         setChatWith(username);
-                        setChatter('Admin'); // Assuming 'Admin' is the current user
+                        setChatter("Me");
                     }}
+
                 />
             </div>
 
@@ -96,7 +111,8 @@ export default function SocialFeed() {
                 onClose={() => setIsChatAreaPopupOpen(false)}
                 className="max-w-3xl"
             >
-                <ChatArea chatWith={chatWith} chatter={chatter} />
+                <ChatArea chatWith={chatWith} chatter={chatter} chatID={chatID} />
+
             </Popup>
 
             <Popup

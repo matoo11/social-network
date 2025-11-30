@@ -27,14 +27,14 @@ export default function SocialFeed() {
     useEffect(() => {
         const loadChats = async () => {
             try {
-                const res = await fetch("http://localhost:8080/api/getFollowers", {
+                const res = await fetch("http://localhost:8080/api/chat/getChatList", {
                     credentials: 'include',
                 });
                 const data = await res.json();
                 // setChatsData(data);
                 const mapped = data.map((item: any) => ({
-                    id: String(item.FollowerID),        // or whatever your backend sends
-                    username: item.FollowerUsername,    // match your API field
+                    id: String(item.UserID),        // or whatever your backend sends
+                    username: item.Username,    // match your API field
                     lastMessage: item.last_message || '' // fallback if backend doesn't send
                 }));
 

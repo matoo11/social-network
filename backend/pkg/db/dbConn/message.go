@@ -1,6 +1,7 @@
 package dbConn
 
 import (
+	"database/sql"
 	"fmt"
 	"social/backend/pkg/db/dbHandler"
 	"time"
@@ -24,6 +25,12 @@ type MessageDisplay struct {
 	Content      string
 	CreationTime time.Time
 	IsSender     bool
+}
+
+type ChatUser struct {
+	UserID          int
+	Username        string
+	LastMessageTime string
 }
 
 func CreateChatMessage(message Message) error {
@@ -110,3 +117,66 @@ func GetChatMessagesBetweenUsers(user1ID, user2ID int) ([]Message, error) {
 
 	return chats, nil
 }
+
+func GetChatUsers(userID int) ([]ChatUser, error) {
+    statement := `
+        SELECT
+            otherUser.User_ID,
+            MAX(m.Creation_Time) AS LastMessageTime
+        FROM (
+            -- users I follow
+            SELECT Followed_ID AS User_ID 
+            FROM Followers 
+            WHERE Follower_ID = ?
+            
+            UNION
+            
+            -- users who follow me
+            SELECT Follower_ID AS User_ID 
+            FROM Followers 
+            WHERE Followed_ID = ?
+        ) AS otherUser
+
+        LEFT JOIN Messages m
+            ON (
+                (m.Sender_ID = ? AND m.Receiver_ID = otherUser.User_ID)
+                OR
+                (m.Sender_ID = otherUser.User_ID AND m.Receiver_ID = ?)
+            )
+
+        GROUP BY otherUser.User_ID
+        ORDER BY LastMessageTime DESC;
+    `
+
+    rows, err := dbHandler.DB.Query(statement, userID, userID, userID, userID)
+    if err != nil {
+        return nil, fmt.Errorf("failed to get chat users: %v", err)
+    }
+    defer rows.Close()
+
+    var users []ChatUser
+
+    for rows.Next() {
+        var user ChatUser
+        var lastMsg sql.NullString
+
+        err := rows.Scan(&user.UserID, &lastMsg)
+        if err != nil {
+            return nil, fmt.Errorf("failed to scan chat users: %v", err)
+        }
+
+        if lastMsg.Valid {
+            user.LastMessageTime = lastMsg.String
+        }
+		user1, err := GetUserByID(user.UserID)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		user.Username = user1.User_Name
+        users = append(users, user)
+    }
+
+    return users, nil
+}
+

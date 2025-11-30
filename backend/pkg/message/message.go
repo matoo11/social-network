@@ -28,6 +28,8 @@ func GetPrivateMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	
+
 	messages, err := dbConn.GetChatMessagesBetweenUsers(LoggedInUserID, data.ChatID)
 	if err != nil {
 		fmt.Println(err)
@@ -52,4 +54,32 @@ func GetPrivateMessages(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		http.Error(w, "hrar error", 500)
 	}
+}
+
+func GetChatList(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
+
+	session, err := dbConn.GetSessionFromCookie(r)
+
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	} else {
+		LoggedInUserID = session.UserID
+	}
+
+	hrar, err := dbConn.GetChatUsers(LoggedInUserID)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("here")
+	fmt.Println(err)
+	fmt.Println(hrar)
+
+	if err := auth.JsonEncode(w, hrar); err != nil {
+		fmt.Println(err)
+		http.Error(w, "hrar error", 500)
+	}
+	
 }

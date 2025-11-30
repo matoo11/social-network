@@ -79,7 +79,9 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
             const data = e.detail;
 
             // if (data.senderID !== chatWith && data.recieverID !== chatter) return;
-
+            if (String(data.senderID) !== chatID) return;
+            console.log(chatID)
+            console.log(data)
             const incoming: Message = {
                 id: Date.now(),
                 username: data.senderUsername,

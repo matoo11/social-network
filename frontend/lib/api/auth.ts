@@ -13,7 +13,10 @@ export async function loginUser(username: string, password: string) {
             throw new Error(errorText || 'Login failed');
         }
 
-        return res;
+        const responseData = await res.json();
+
+        console.log('Login response:', responseData.data);
+        return responseData.data;
     } catch (err: unknown) {
         if (err instanceof Error) {
             throw new Error(err.message);

@@ -13,7 +13,7 @@ type UserInfo = {
     userID: number;
     userName: string;
     nickName: string;
-    eamil: string;
+    email: string;
     imageID: number;
 };
 
@@ -29,15 +29,14 @@ const SignInForm: React.FC = () => {
         e.preventDefault();
         setError('');
 
-        
         try {
             const user: UserInfo = await loginUser(userIdentifier, password);
             console.log('Logged in user:', user);
-            
+
             setUser({
                 userName: user.userName,
                 nickName: user.nickName,
-                email: user.eamil,
+                email: user.email,
                 profileImageID: user.imageID,
             });
 

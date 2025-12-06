@@ -7,6 +7,7 @@ import Image from 'next/image';
 import NavLink from '../NavLink/NavLink';
 import { fetchUserData, logoutUser } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/app/context/UserContext';
 
 export interface User {
     userId: number;
@@ -16,19 +17,15 @@ export interface User {
     email: string;
     firstName: string;
     lastName: string;
-
-    dateOfBirth: string | null; // because *time.Time can be null in Go
-
+    dateOfBirth: string | null;
     gender: string;
     imageId: number;
     aboutMe: string;
-
     profileTypeId: number;
     createdById: number;
-    creationTime: string; // time.Time -> ISO string
+    creationTime: string;
     lastUpdatedById: number;
-    lastUpdatedTime: string; // time.Time -> ISO string
-
+    lastUpdatedTime: string;
     isActive: boolean;
 }
 
@@ -36,18 +33,28 @@ const Navbar = () => {
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
-    const [user, setUser] = useState<User | null>(null);
+
+    const { user, setUser } = useUser();
 
     useEffect(() => {
-        try {
-            handleUserData();
-            console.log('User data loaded in Navbar:', user);
-        } catch (err) {
-            console.error('Failed to load user:', err);
-        }
+        handleUserData();
     }, []);
 
-    // Close dropdown on outside click
+    const handleUserData = async () => {
+        try {
+            const data: User = await fetchUserData();
+
+            setUser({
+                userName: data.userName,
+                nickName: data.nickName,
+                email: data.email,
+                profileImageID: data.imageId,
+            });
+        } catch (error) {
+            console.error('Fetching user data failed:', error);
+        }
+    };
+
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (
@@ -68,18 +75,17 @@ const Navbar = () => {
         try {
             await logoutUser();
             setIsDropdownOpen(false);
+
+            setUser({
+                userName: 'Guest',
+                nickName: 'Guest',
+                email: 'Not Logged In',
+                profileImageID: 0,
+            });
+
             router.push('/login');
         } catch (error) {
             console.error('Logout failed:', error);
-        }
-    };
-
-    const handleUserData = async () => {
-        try {
-            const data: User = await fetchUserData();
-            setUser(data);
-        } catch (error) {
-            console.error('Fetching user data failed:', error);
         }
     };
 
@@ -98,6 +104,7 @@ const Navbar = () => {
                         Social Network
                     </span>
                 </a>
+
                 <div
                     className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative"
                     ref={dropdownRef}
@@ -112,15 +119,14 @@ const Navbar = () => {
                         </div>
                     </button>
 
-                    {/* Dropdown menu */}
                     {isDropdownOpen && (
                         <div className="absolute top-8 right-0 z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 w-44">
                             <div className="px-4 py-3">
                                 <span className="block text-sm text-gray-900 dark:text-white">
-                                    {user ? user.nickName : 'Guest'}
+                                    {user?.userName ?? 'Guest'}
                                 </span>
                                 <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-                                    {user ? user.email : 'Not logged in'}
+                                    {user?.email ?? 'Not logged in'}
                                 </span>
                             </div>
                             <ul className="py-2">
@@ -151,7 +157,6 @@ const Navbar = () => {
                     )}
                 </div>
 
-                {/* Navigation links */}
                 <div
                     className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
                     id="navbar-user"
@@ -177,7 +182,6 @@ const Navbar = () => {
                             onClick={() => {
                                 const menu = document.getElementById('openchat');
                                 if (menu) {
-                                    console.log('here');
                                     menu.classList.toggle('hidden');
                                 }
                             }}

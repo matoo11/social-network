@@ -859,8 +859,25 @@ func GetCategoryIDFromCategoryText(categoryText string) (int, error) {
 
 func RetrievePostsByUserIDForDisplay(userID int) ([]DisplayedPost, error) {
 	var displayedPosts []DisplayedPost
-	statement := `SELECT * FROM Posts WHERE Is_Active = 1 AND User_ID = ? ORDER BY Creation_Time DESC;`
-	data, err := dbHandler.DB.Query(statement, userID)
+	statement := `
+SELECT DISTINCT Posts.*
+FROM Posts
+LEFT JOIN Followers
+  ON Posts.Post_Type_ID = 2
+  AND Followers.Followed_ID = Posts.User_ID
+  AND Followers.Follower_ID = ?
+LEFT JOIN Private_Posts_Users
+  ON Posts.Post_Type_ID = 3
+  AND Private_Posts_Users.Post_ID = Posts.Post_ID
+  AND Private_Posts_Users.User_ID = ?
+WHERE
+      (Posts.Post_Type_ID = 1)
+   OR (Posts.Post_Type_ID = 2 AND Followers.Follower_ID IS NOT NULL)
+   OR (Posts.Post_Type_ID = 3 AND Private_Posts_Users.User_ID IS NOT NULL)
+   OR (Posts.User_ID = ?)   -- include current user's posts
+ORDER BY Posts.Creation_Time DESC;
+`
+	data, err := dbHandler.DB.Query(statement, userID, userID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -870,8 +887,11 @@ func RetrievePostsByUserIDForDisplay(userID int) ([]DisplayedPost, error) {
 		var post Post
 		err := data.Scan(
 			&post.PostID,
+			&post.PostTitle,
 			&post.PostText,
 			&post.UserID,
+			&post.PostTypeID,
+			&post.ImageID,
 			&post.CreatedByID,
 			&post.CreationTime,
 			&post.LastUpdatedByID,
@@ -880,27 +900,44 @@ func RetrievePostsByUserIDForDisplay(userID int) ([]DisplayedPost, error) {
 		if err != nil {
 			return nil, err
 		}
+		var newDisplayedPost DisplayedPost
+
+		newDisplayedPost.PostType, err = GetPostTypeNameByID(post.PostTypeID)
+		if err != nil {
+			return nil, err
+		}
+
 		poster, err := GetUserByID(post.UserID)
 		if err != nil {
 			return nil, err
 		}
-		var newDisplayedPost DisplayedPost
-		newDisplayedPost.PosterNickname = poster.Nick_Name
-		newDisplayedPost.PostID = post.PostID
-		newDisplayedPost.PostTime = post.CreationTime
-		newDisplayedPost.PostText = post.PostText
 
 		numberOfLikes, err := PostLikesCount(post.PostID)
 		if err != nil {
 			return nil, err
 		}
-		newDisplayedPost.NumberOfLikes = numberOfLikes
 
 		numberOfDislikes, err := PostDislikesCount(post.PostID)
 		if err != nil {
 			return nil, err
 		}
+
+		newDisplayedPost.PostID = post.PostID
+		newDisplayedPost.PostTitle = post.PostTitle
+		newDisplayedPost.PostText = post.PostText
+		newDisplayedPost.PosterNickname = poster.Nick_Name
+
+		if post.ImageID != nil {
+			newDisplayedPost.PostImageID = *post.ImageID
+		} else {
+			newDisplayedPost.PostImageID = 0
+		}
+
+		newDisplayedPost.PostTime = post.CreationTime
+
+		newDisplayedPost.NumberOfLikes = numberOfLikes
 		newDisplayedPost.NumberOfDislikes = numberOfDislikes
+
 		comments, err := GetDisplayedCommentsByPostID(post.PostID)
 		if err != nil {
 			return nil, err

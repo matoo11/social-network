@@ -77,9 +77,12 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
         console.log('Submitting comment:', comment);
         console.log('With file:', file);
 
-        await handleCreateComment(formData);
-        // fetch('/api/comments', { method: 'POST', body: formData });
-        //TODO: implement the actual API call to submit the comment
+        try {
+            await handleCreateComment(formData);
+        } catch (err) {
+            //TODO: show error to user
+            console.error('Error submitting comment:', err);
+        }
 
         // Clear inputs
         setComment('');

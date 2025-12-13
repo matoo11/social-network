@@ -52,7 +52,6 @@ type PostListProps = {
 const PostList: React.FC<PostListProps> = ({ popupHandler, onRef, postContentPopupHandler }) => {
     const [posts, setPosts] = useState<PostListUIProps['posts']>([]);
 
-    //TODO: need to replace with actual API call
     const fetchPostsFromAPI = async () => {
         const mockData: PostListUIProps['posts'] = (await fetchposts()).map((p: DisplayedPost) => ({
             postID: p.postId,

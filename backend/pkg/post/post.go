@@ -11,6 +11,13 @@ import (
 	"strings"
 )
 
+type PostPayload struct {
+	Message      *string `json:"message"`
+	Title        *string `json:"title"`
+	PostTypeID   *int    `json:"typeId"`
+	PrivateUsers []int   `json:"privateUsers"`
+}
+
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := dbConn.GetSessionFromCookie(r)
 	if err != nil {
@@ -27,30 +34,21 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Decode the JSON string from "data" field
 	jsonData := r.FormValue("data")
-	var payload struct {
-		Message    string `json:"message"`
-		Title      string `json:"title"`
-		PostTypeID int    `json:"typeId"`
-	}
+	var payload PostPayload
+
 	if err := json.Unmarshal([]byte(jsonData), &payload); err != nil {
 		http.Error(w, "Invalid JSON data", http.StatusBadRequest)
 		return
 	}
 
-	message := payload.Message
-	title := payload.Title
-	typeID := payload.PostTypeID
-
-	if len(strings.TrimSpace(message)) == 0 {
-		http.Error(w, "Message is required", http.StatusBadRequest)
-		return
-	}
-	if len(message) >= 600 {
-		http.Error(w, "The post length exceeded 600 characters", http.StatusBadRequest)
-		return
-	}
-	if len(title) >= 60 {
-		http.Error(w, "The post title length exceeded 60 characters", http.StatusBadRequest)
+	// validate required fields
+	validationErrors := ValidatePostPayload(&payload)
+	if len(validationErrors) > 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]any{
+			"error":  "Validation failed",
+			"fields": validationErrors,
+		})
 		return
 	}
 
@@ -71,15 +69,18 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := dbConn.Post{
-		PostText:        message,
+	post := dbConn.PostData{
+		PostText:        *payload.Message,
 		UserID:          LoggedInUserID,
-		PostTitle:       title,
-		PostTypeID:      typeID,
+		PostTitle:       *payload.Title,
+		PostTypeID:      *payload.PostTypeID,
 		ImageID:         imageID,
 		CreatedByID:     LoggedInUserID,
 		LastUpdatedByID: LoggedInUserID,
+		PrivateUsersIDs: payload.PrivateUsers,
 	}
+
+	fmt.Println("Post Data:", post)
 
 	if err := dbConn.CreatePost(post); err != nil {
 		http.Error(w, "Could not create post", http.StatusInternalServerError)
@@ -288,4 +289,37 @@ func FetchPostsByUserIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	util.Respond(w, r, http.StatusOK, postsData, "Fetch posts by user ID successful")
+}
+
+// helper functions
+func ValidatePostPayload(p *PostPayload) map[string]string {
+	errors := make(map[string]string)
+
+	// Validate title
+	if p.Title == nil || len(strings.TrimSpace(*p.Title)) == 0 {
+		errors["title"] = "Title is required"
+	} else if len(*p.Title) > 60 {
+		errors["title"] = "The post title length exceeded 60 characters"
+	}
+
+	// Validate message
+	if p.Message == nil || len(strings.TrimSpace(*p.Message)) == 0 {
+		errors["message"] = "Message is required"
+	} else if len(*p.Message) > 600 {
+		errors["message"] = "The post length exceeded 600 characters"
+	}
+
+	// Validate type ID
+	if p.PostTypeID == nil {
+		errors["typeId"] = "TypeID is required"
+	}
+
+	// Conditional validation: PrivateUsers required if PostTypeID == 3
+	if p.PostTypeID != nil && *p.PostTypeID == 3 {
+		if len(p.PrivateUsers) == 0 {
+			errors["privateUsers"] = "PrivateUsers cannot be empty when PostTypeID is 3"
+		}
+	}
+
+	return errors
 }

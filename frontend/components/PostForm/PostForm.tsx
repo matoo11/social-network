@@ -19,11 +19,24 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
     const [error, setError] = useState('');
 
     const handleInputChange =
-        (field: string | number) =>
+        (field: string) =>
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+            let value: any = e.target.value;
+
+            if (field === 'postType') {
+                // Convert number field
+                value = parseInt(value, 10);
+            }
+
+            if (field === 'privateUsers') {
+                // Assume multi-select <select multiple>
+                const select = e.target as HTMLSelectElement;
+                value = Array.from(select.selectedOptions).map((o) => parseInt(o.value, 10));
+            }
+
             setFormData((prev) => ({
                 ...prev,
-                [field]: e.target.value,
+                [field]: value,
             }));
         };
 
@@ -36,6 +49,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
             title: formData.title,
             message: formData.content,
             typeId: formData.postType,
+            privateUsers: formData.privateUsers,
         };
         formDataa.append('data', JSON.stringify(postDataa));
 

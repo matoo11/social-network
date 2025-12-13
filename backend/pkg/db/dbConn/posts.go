@@ -25,6 +25,21 @@ type Post struct {
 	IsActive        bool
 }
 
+type PostData struct {
+	PostID          int
+	PostTitle       string
+	PostText        string
+	PostTypeID      int
+	UserID          int
+	ImageID         *int
+	CreatedByID     int
+	CreationTime    time.Time
+	LastUpdatedByID int
+	LastUpdatedTime time.Time
+	IsActive        bool
+	PrivateUsersIDs   []int
+}
+
 type PostDisplay struct {
 	PostID       int
 	PostTitle    string
@@ -44,8 +59,7 @@ func boolToInt(value bool) int {
 	return 0
 }
 
-func CreatePost(post Post) error {
-	fmt.Println("here19")
+func CreatePost(post PostData) error {
 	statement := `INSERT INTO Posts
     (
 		Post_Title,
@@ -80,7 +94,20 @@ func CreatePost(post Post) error {
 		return err
 	}
 
-	fmt.Println("here9")
+	// If post is private (PostTypeID == 3), grant access to specified users
+	if post.PostTypeID == 3 && len(post.PrivateUsersIDs) > 0 {
+		var postID int
+		err = dbHandler.DB.QueryRow("SELECT last_insert_rowid()").Scan(&postID)
+		if err != nil {
+			return err
+		}
+
+		err = GrantPostAccessToUsers(postID, post.PrivateUsersIDs, post.CreatedByID)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

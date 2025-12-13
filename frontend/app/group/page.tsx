@@ -1,6 +1,6 @@
 'use client';
 
-import ChatList from '@/components/ChatList/ChatList';
+import GroupList from '@/components/ChatList/GroupList';
 import PostList from '@/components/PostList/PostList';
 import Popup from '@/components/Popup/Popup';
 import { useState } from 'react';
@@ -10,6 +10,8 @@ import EventCalendar from '@/components/EventCalendar/EventCalendar';
 import ChatArea from '@/components/ChatArea/ChatArea';
 import PostContent from '@/components/PostContent/PostContent';
 import { useEffect } from 'react';
+import GroupChatArea from '@/components/ChatArea/GroupChatArea';
+import Testing from '@/components/ChatArea/GroupChatArea';
 
 export default function SocialFeed() {
     const [chatWith, setChatWith] = useState<string>('');
@@ -32,15 +34,15 @@ export default function SocialFeed() {
                 });
                 const data = await res.json();
                 // setChatsData(data);
-                console.log(data)
+                // console.log(data)
                 const mapped = data.map((item: any) => ({
-                    id: String(item.groupID),        // or whatever your backend sends
-                    username: item.title,    // match your API field
-                    lastMessage: item.last_message || '' // fallback if backend doesn't send
+                    id: String(item.groupId),        
+                    username: item.title,    
+                    lastMessage: item.last_message || ''
                 }));
+                
 
                 setChatsData(mapped);
-                // console.log(mapped)
             } catch (err) {
                 console.error(err);
             }
@@ -62,13 +64,14 @@ export default function SocialFeed() {
         <div className="flex w-full h-full mt-[10vh]">
             {/* Left column - 17.5% */}
             <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
-                <ChatList
+                <GroupList
                     chats={chatsData}
                     popupHandler={() => setIsChatListPopupOpen(true)}
                     onSelectChat={(id, username) => {
-                        setIsChatAreaPopupOpen(true);
-                        setchatID(id);
+
                         console.log(id)
+                        // setIsChatAreaPopupOpen(true);
+                        setchatID(id);
                         setChatWith(username);
                         setChatter("Me");
                     }}
@@ -91,7 +94,9 @@ export default function SocialFeed() {
 
             {/* Right column - 30% */}
             <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
-                <EventsList popupHandler={() => setIsEventsListPopupOpen(false)} />
+                {/* <EventsList popupHandler={() => setIsEventsListPopupOpen(false)} /> */}
+                {/* <GroupChatArea chatID='1' chatWith='hrar' chatter='2'/> */}
+                <Testing chatID={chatID} chatWith={chatWith} chatter={chatter}/>
             </div>
 
             {/* Popups */}

@@ -857,6 +857,115 @@ func GetCategoryIDFromCategoryText(categoryText string) (int, error) {
 	return CategoryID, nil
 }
 
+func RetrievePublicPostsForDisplay() ([]DisplayedPost, error) {
+	var displayedPosts []DisplayedPost
+	statement := `SELECT * FROM Posts
+	WHERE Post_Type_ID = 1 AND Is_Active = 1
+	ORDER BY Creation_Time DESC;`
+	
+	data, err := dbHandler.DB.Query(statement)
+	if err != nil {
+		return nil, err
+	}
+	defer data.Close()
+
+	for data.Next() {
+		var post Post
+		err := data.Scan(
+			&post.PostID,
+			&post.PostTitle,
+			&post.PostText,
+			&post.UserID,
+			&post.PostTypeID,
+			&post.ImageID,
+			&post.CreatedByID,
+			&post.CreationTime,
+			&post.LastUpdatedByID,
+			&post.LastUpdatedTime,
+			&post.IsActive)
+		if err != nil {
+			return nil, err
+		}
+		var newDisplayedPost DisplayedPost
+
+		newDisplayedPost.PostType, err = GetPostTypeNameByID(post.PostTypeID)
+		if err != nil {
+			return nil, err
+		}
+
+		poster, err := GetUserByID(post.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		numberOfLikes, err := PostLikesCount(post.PostID)
+		if err != nil {
+			return nil, err
+		}
+
+		numberOfDislikes, err := PostDislikesCount(post.PostID)
+		if err != nil {
+			return nil, err
+		}
+
+		newDisplayedPost.PostID = post.PostID
+		newDisplayedPost.PostTitle = post.PostTitle
+		newDisplayedPost.PostText = post.PostText
+		newDisplayedPost.PosterNickname = poster.Nick_Name
+
+		if post.ImageID != nil {
+			newDisplayedPost.PostImageID = *post.ImageID
+		} else {
+			newDisplayedPost.PostImageID = 0
+		}
+
+		newDisplayedPost.PostTime = post.CreationTime
+
+		newDisplayedPost.NumberOfLikes = numberOfLikes
+		newDisplayedPost.NumberOfDislikes = numberOfDislikes
+
+		comments, err := GetDisplayedCommentsByPostID(post.PostID)
+		if err != nil {
+			return nil, err
+		}
+		var displayCommnets []DisplayedComment
+		for _, comment := range comments {
+			commenter, err := GetUserByID(comment.CreatedByID)
+			if err != nil {
+				return nil, err
+			}
+			var newDisplayedComment DisplayedComment
+			newDisplayedComment.CommentID = comment.CommentID
+			newDisplayedComment.PostID = comment.PostID
+			newDisplayedComment.CommenterNickname = commenter.Nick_Name
+			newDisplayedComment.CommentText = comment.CommentText
+			newDisplayedComment.CommentTime = comment.CreationTime
+
+			numberOfLikes, err := CommentLikesCount(post.PostID, comment.CommentID)
+			if err != nil {
+				return nil, err
+			}
+			newDisplayedComment.NumberOfLikes = numberOfLikes
+
+			numberOfDislikes, err := CommentDislikesCount(post.PostID, comment.CommentID)
+			if err != nil {
+				return nil, err
+			}
+			newDisplayedComment.NumberOfDislikes = numberOfDislikes
+
+			displayCommnets = append(displayCommnets, newDisplayedComment)
+		}
+
+		newDisplayedPost.Comments = displayCommnets
+		displayedPosts = append(displayedPosts, newDisplayedPost)
+	}
+	if err := data.Err(); err != nil {
+		return nil, err
+	}
+
+	return displayedPosts, nil
+}
+
 func RetrievePostsByUserIDForDisplay(userID int) ([]DisplayedPost, error) {
 	var displayedPosts []DisplayedPost
 	statement := `
@@ -979,19 +1088,3 @@ ORDER BY Posts.Creation_Time DESC;
 
 	return displayedPosts, nil
 }
-
-// SELECT Posts.*
-// FROM Posts
-// LEFT JOIN Followers
-//   ON Posts.Post_Type_ID = 2
-//   AND Followers.Followed_ID = Posts.User_ID
-//   AND Followers.Follower_ID = :loggedInUserId
-// LEFT JOIN Private_Posts_Users
-//   ON Posts.Post_Type_ID = 3
-//   AND Private_Posts_Users.Post_ID = Posts.Post_ID
-//   AND Private_Posts_Users.User_ID = :loggedInUserId
-// WHERE
-//     (Posts.Post_Type_ID = 1)
-//  OR (Posts.Post_Type_ID = 2 AND Followers.Follower_ID IS NOT NULL)
-//  OR (Posts.Post_Type_ID = 3 AND Private_Posts_Users.User_ID IS NOT NULL)
-// ORDER BY Posts.Creation_Time DESC;

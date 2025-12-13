@@ -280,9 +280,17 @@ func FetchPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 func FetchPostsByUserIDHandler(w http.ResponseWriter, r *http.Request) {
 	user, authenticated := auth.Authenticator(w, r)
 	if !authenticated {
-		// util.Respond(w, r, http.StatusUnauthorized, nil, "Unauthorized") // TODO: get public posts only
+		// If not authenticated, return public posts
+		publicPosts, err := dbConn.RetrievePublicPostsForDisplay()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		util.Respond(w, r, http.StatusOK, publicPosts, "Fetch public posts successful")
 		return
 	}
+
+	// If authenticated, return visible posts by user ID
 	postsData, err := dbConn.RetrievePostsByUserIDForDisplay(user.User_ID)
 	if err != nil {
 		util.Respond(w, r, http.StatusInternalServerError, nil, err.Error())

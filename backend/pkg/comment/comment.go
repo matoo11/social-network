@@ -2,6 +2,7 @@ package comment
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"social/backend/pkg/auth"
 	"social/backend/pkg/db/dbConn"
@@ -10,9 +11,8 @@ import (
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	var LoggedInUserID int
-	// fmt.Println("ok")
+
 	session, err := dbConn.GetSessionFromCookie(r)
-	// fmt.Println("ok")
 	if err != nil {
 		auth.ErrorPage(w, 401)
 		return
@@ -52,30 +52,31 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		auth.ErrorPage(w, http.StatusBadRequest)
 		return
 	}
+	fmt.Println(commentText)
 
 	// Handle optional image
-	// var imageID *int = nil
-	// file, handler, err := r.FormFile("image")
-	// if err == nil {
-	// 	defer file.Close()
-	// 	imgID, err := dbConn.SaveImage(file, handler.Filename, LoggedInUserID)
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		http.Error(w, "Image upload failed", http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// 	imageID = &imgID
-	// } else if err != http.ErrMissingFile {
-	// 	http.Error(w, "Failed to read image", http.StatusBadRequest)
-	// 	return
-	// }
+	var imageID *int = nil
+	file, handler, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+		imgID, err := dbConn.SaveImage(file, handler.Filename, LoggedInUserID)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Image upload failed", http.StatusInternalServerError)
+			return
+		}
+		imageID = &imgID
+	} else if err != http.ErrMissingFile {
+		http.Error(w, "Failed to read image", http.StatusBadRequest)
+		return
+	}
 
 	newComment := dbConn.Comment{
 		CommentText:     commentText,
 		PostID:          postID,
 		CreatedByID:     LoggedInUserID,
 		LastUpdatedByID: LoggedInUserID,
-		// ImageID: imageID,
+		CommentImageID: imageID,
 	}
 
 	err = dbConn.CreateComment(newComment)

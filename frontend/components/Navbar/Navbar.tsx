@@ -51,7 +51,11 @@ const Navbar = () => {
                 profileImageID: data.imageId,
             });
         } catch (error) {
-            console.error('Fetching user data failed:', error);
+            if (error instanceof Error && error.message === 'User is not logged in') {
+                console.warn('No user is logged in.');
+            } else {
+                console.error('Fetching user data failed:', error);
+            }
         }
     };
 

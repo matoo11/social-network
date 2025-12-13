@@ -11,7 +11,7 @@ type Comment struct {
 	CommentID   int
 	CommentText string
 	PostID      int
-	// CommentImageID  *int
+	CommentImageID  *int
 	CreatedByID     int
 	CreationTime    time.Time
 	LastUpdatedByID int
@@ -31,24 +31,27 @@ func CreateComment(comment Comment) error {
 	statement := `INSERT INTO Comments 
 		( 
             Comment_Text, 
-            Post_ID, 
+            Post_ID,
+			Image_ID, 
             Created_By_ID, 
             Creation_Time, 
             Last_Updated_By_ID, 
-            Last_Updated_Time
+            Last_Updated_Time,
+			Is_Active
         ) 
-        VALUES (?, ?, ?, ?, ?, ?)`
+        VALUES (?, ?, ?, ?, ?, ?,?,?)`
 	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	_, err := dbHandler.DB.Exec(
 		statement,
 		comment.CommentText,
 		comment.PostID,
+		comment.CommentImageID,
 		comment.CreatedByID,
 		formattedCurrentTime,
-		comment.LastUpdatedByID,
-		comment.LastUpdatedTime,
+		comment.CreatedByID,
 		formattedCurrentTime,
+		1,
 	)
 	if err != nil {
 		fmt.Print(err)
@@ -121,7 +124,7 @@ func GetCommentsByPostID(postID int) ([]Comment, error) {
 		err := data.Scan(&comment.CommentID, 
 			&comment.CommentText, 
 			&comment.PostID,
-			// &comment.CommentImageID,
+			&comment.CommentImageID,
 			&comment.CreatedByID, 
 			&comment.CreationTime, 
 			&comment.LastUpdatedByID,

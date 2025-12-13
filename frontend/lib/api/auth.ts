@@ -95,6 +95,10 @@ export async function fetchUserData() {
 
         console.log('Response received for fetchUserData:', res);
 
+        if (res.status === 401) {
+            throw new Error('User is not logged in');
+        }
+
         if (!res.ok) {
             const errorText = await res.text();
             throw new Error(errorText || 'Fetching user data failed');

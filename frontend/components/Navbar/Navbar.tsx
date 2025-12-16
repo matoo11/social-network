@@ -9,6 +9,7 @@ import { fetchUserData, logoutUser } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/context/UserContext';
 
+//TODO: Need to modify the returned data from the backend to not include password
 export interface User {
     userId: number;
     userName: string;
@@ -45,14 +46,15 @@ const Navbar = () => {
             const data: User = await fetchUserData();
 
             setUser({
+                userId: data.userId,
                 userName: data.userName,
                 nickName: data.nickName,
                 email: data.email,
                 profileImageID: data.imageId,
             });
         } catch (error) {
-            if (error instanceof Error && error.message === 'User is not logged in') {
-                console.warn('No user is logged in.');
+            if (error instanceof Error && error.message === 'Current user is guest') {
+                console.warn('Current user is guest');
             } else {
                 console.error('Fetching user data failed:', error);
             }
@@ -81,6 +83,7 @@ const Navbar = () => {
             setIsDropdownOpen(false);
 
             setUser({
+                userId: 0,
                 userName: 'Guest',
                 nickName: 'Guest',
                 email: 'Not Logged In',
@@ -134,6 +137,17 @@ const Navbar = () => {
                                 </span>
                             </div>
                             <ul className="py-2">
+                                {user.userId === 0 && (
+                                    <li
+                                        onClick={() => {
+                                            setIsDropdownOpen(false);
+                                            router.push('/login');
+                                        }}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                    >
+                                        Login
+                                    </li>
+                                )}
                                 <li>
                                     <Link
                                         href="/dashboard"
@@ -150,12 +164,14 @@ const Navbar = () => {
                                         Settings
                                     </Link>
                                 </li>
-                                <li
-                                    onClick={handleLogout}
-                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
-                                >
-                                    Sign out
-                                </li>
+                                {user.userId !== 0 && (
+                                    <li
+                                        onClick={handleLogout}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                    >
+                                        Sign out
+                                    </li>
+                                )}
                             </ul>
                         </div>
                     )}

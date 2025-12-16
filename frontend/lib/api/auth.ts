@@ -93,10 +93,8 @@ export async function fetchUserData() {
             headers: { 'Content-Type': 'application/json' },
         });
 
-        console.log('Response received for fetchUserData:', res);
-
         if (res.status === 401) {
-            throw new Error('User is not logged in');
+            throw new Error('unauthorized user');
         }
 
         if (!res.ok) {
@@ -105,7 +103,11 @@ export async function fetchUserData() {
         }
 
         const data = await res.json();
-        console.log('Fetched user data:', data);
+
+        if (!data || !data.data) {
+            throw new Error('Current user is guest');
+        }
+        
         return data;
     } catch (err: unknown) {
         if (err instanceof Error) {

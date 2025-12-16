@@ -53,7 +53,15 @@ const PostList: React.FC<PostListProps> = ({ popupHandler, onRef, postContentPop
     const [posts, setPosts] = useState<PostListUIProps['posts']>([]);
 
     const fetchPostsFromAPI = async () => {
-        const mockData: PostListUIProps['posts'] = (await fetchposts()).map((p: DisplayedPost) => ({
+        const data = await fetchposts();
+
+        if (!data || data.length === 0) {
+            console.warn('No posts returned');
+            setPosts([]);
+            return;
+        }
+
+        const mockData: PostListUIProps['posts'] = data.map((p: DisplayedPost) => ({
             postID: p.postId,
             title: p.postTitle,
             content: p.postText,
@@ -63,13 +71,12 @@ const PostList: React.FC<PostListProps> = ({ popupHandler, onRef, postContentPop
             postImageUrl:
                 p.postImageId !== 0 ? `http://localhost:8080/api/image?id=${p.postImageId}` : null,
             createdAt: p.postTime,
-            likesCount: 0, // backend doesn’t provide yet
-            dislikesCount: 0, // backend doesn’t provide yet
-            commentsCount: p.comments ? p.comments.length : 0,
+            likesCount: p.numberOfLikes,
+            dislikesCount: p.numberOfDislikes,
+            commentsCount: p.numberOfComments,
             postContentPopup: postContentPopupHandler,
         }));
 
-        console.log('Fetched posts:', mockData);
         setPosts(mockData);
     };
 

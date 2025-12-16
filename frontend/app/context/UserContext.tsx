@@ -3,6 +3,7 @@
 import { createContext, useContext, useState } from 'react';
 
 type User = {
+    userId: number;
     userName: string | null;
     nickName?: string | null;
     email?: string | null;
@@ -18,6 +19,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User>({
+        userId: 0,
         userName: 'Guest',
         nickName: 'Guest',
         email: 'Not Logged In',

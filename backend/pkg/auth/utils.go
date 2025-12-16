@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"social/backend/pkg/db/dbConn"
+	"social/backend/pkg/util"
 )
 
 func Authenticator(w http.ResponseWriter, r *http.Request) (dbConn.User, bool) {
@@ -27,7 +28,8 @@ func GetUserDataHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("user data handler called")
 	user, authenticated := Authenticator(w, r)
 	if !authenticated {
-		ErrorPage(w, 401)
+		// ErrorPage(w, 401)
+		util.Respond(w, r, http.StatusOK, nil, "user is guest")
 		return
 	}
 

@@ -71,6 +71,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
         }
     };
 
+    // TODO: Need to handle guest when creating post (disable form or redirect to login)
     async function handleCreatePost(formData: FormData) {
         setError('');
 

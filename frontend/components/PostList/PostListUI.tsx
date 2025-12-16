@@ -18,9 +18,11 @@ const PostListUI: React.FC<PostListUIProps> = ({ posts, popupHandler }) => {
                 <PopupBtn className="mb-2" onClick={popupHandler} />
             </div>
             <div className="flex flex-col items-center h-[92.5%] px-15 gap-5 bg-gray-100 dark:bg-gray-900 py-5 overflow-y-auto hide-scrollbar">
-                {posts.map((post) => (
-                    <PostCard key={post.postID} {...post} />
-                ))}
+                {!posts || posts.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400 mt-10">No posts are available</p>
+                ) : (
+                    posts.map((post) => <PostCard key={post.postID} {...post} />)
+                )}
             </div>
         </div>
     );

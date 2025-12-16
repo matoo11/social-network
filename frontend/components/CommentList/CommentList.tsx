@@ -17,7 +17,7 @@ export type Comment = {
     commentText: string;
     commenterNickname: string;
     commentProfileImageId?: number;
-    commentImageId?: number;
+    commentImageId?: number ;
     commentTime: string;
     likesCount: number;
     dislikesCount: number;
@@ -73,7 +73,7 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
         const formData = new FormData();
         // formData.append('commentText', comment);
         formData.append('data', JSON.stringify(data));
-        if (file) formData.append('commentImage', file);
+        if (file) formData.append('image', file);
         console.log('Submitting comment:', comment);
         console.log('With file:', file);
 
@@ -106,8 +106,8 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
                             commentID={comment.commentID}
                             commentText={comment.commentText}
                             commenterNickname={comment.commenterNickname}
-                            // commenterProfileImageUrl={comment.commentProfileImageId} // TODO: Need to update the DB to show the comment Image
-                            // commentImageUrl={comment.commentImageUrl}
+                            commenterProfileImageUrl={comment.commentProfileImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}` : undefined}
+                            commentImageUrl={comment.commentImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentImageId}` : undefined}
                             createdAt={comment.commentTime}
                             likesCount={comment.likesCount}
                             dislikesCount={comment.dislikesCount}

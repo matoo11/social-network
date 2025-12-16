@@ -65,7 +65,7 @@ const CommentCard: React.FC<CommentCardUIProps> = ({
 
             {commentImageUrl && (
                 <div className="">
-                    <PostImage imageUrl={commentImageUrl} className='h-60' />
+                    <PostImage imageUrl={commentImageUrl} className="h-60" />
                 </div>
             )}
 

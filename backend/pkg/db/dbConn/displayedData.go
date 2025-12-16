@@ -122,6 +122,13 @@ func RetrieveAllDataForDisplayByPostID(postID int) (DisplayedPost, error) {
 			newDisplayedComment.CommenterNickname = commenter.Nick_Name
 			newDisplayedComment.CommentText = comment.CommentText
 			newDisplayedComment.CommentTime = comment.CreationTime
+			newDisplayedComment.CommentProfileImageID = 0 //TODO: Need to asign an image Id to the user profile and fetch it here
+
+			if comment.CommentImageID != nil {
+				newDisplayedComment.CommentImageID = *comment.CommentImageID
+			} else {
+				newDisplayedComment.CommentImageID = 0
+			}
 
 			numberOfLikes, err := CommentLikesCount(post.PostID, comment.CommentID)
 			if err != nil {
@@ -862,7 +869,7 @@ func RetrievePublicPostsForDisplay() ([]DisplayedPost, error) {
 	statement := `SELECT * FROM Posts
 	WHERE Post_Type_ID = 1 AND Is_Active = 1
 	ORDER BY Creation_Time DESC;`
-	
+
 	data, err := dbHandler.DB.Query(statement)
 	if err != nil {
 		return nil, err

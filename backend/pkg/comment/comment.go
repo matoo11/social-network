@@ -79,6 +79,13 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		CommentImageID: imageID,
 	}
 
+	
+	if imageID == nil {
+		fmt.Println("no image attached to comment")
+	} else {
+		fmt.Println("comment image id:",*imageID)
+	}
+
 	err = dbConn.CreateComment(newComment)
 	if err != nil {
 		auth.ErrorPage(w, http.StatusInternalServerError)

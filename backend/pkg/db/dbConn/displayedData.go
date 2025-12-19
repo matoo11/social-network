@@ -122,8 +122,8 @@ func RetrieveAllDataForDisplayByPostID(postID int) (DisplayedPost, error) {
 			newDisplayedComment.CommenterNickname = commenter.Nick_Name
 			newDisplayedComment.CommentText = comment.CommentText
 			newDisplayedComment.CommentTime = comment.CreationTime
-			newDisplayedComment.CommentProfileImageID = 0 //TODO: Need to asign an image Id to the user profile and fetch it here
-
+			newDisplayedComment.CommentProfileImageID = commenter.Image_ID
+			
 			if comment.CommentImageID != nil {
 				newDisplayedComment.CommentImageID = *comment.CommentImageID
 			} else {

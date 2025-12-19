@@ -14,7 +14,6 @@ export interface User {
     userId: number;
     userName: string;
     nickName: string;
-    password: string;
     email: string;
     firstName: string;
     lastName: string;
@@ -23,10 +22,7 @@ export interface User {
     imageId: number;
     aboutMe: string;
     profileTypeId: number;
-    createdById: number;
     creationTime: string;
-    lastUpdatedById: number;
-    lastUpdatedTime: string;
     isActive: boolean;
 }
 
@@ -53,6 +49,7 @@ const Navbar = () => {
                 profileImageID: data.imageId,
             });
         } catch (error) {
+            console.error(error);
             if (error instanceof Error && error.message === 'Current user is guest') {
                 console.warn('Current user is guest');
             } else {

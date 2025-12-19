@@ -33,9 +33,19 @@ func GetUserDataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := JsonEncode(w, user)
-	if err != nil {
-		fmt.Println(err)
-		return
+	displayedUserData := struct {
+		UserID   int    `json:"userId"`
+		UserName string `json:"userName"`
+		NickName string `json:"nickName"`
+		Email    string `json:"email"`
+		ImageId  int    `json:"imageId"`
+	}{
+		UserID:   user.User_ID,
+		UserName: user.User_Name,
+		NickName: user.Nick_Name,
+		Email:    user.Email,
+		ImageId:  user.Image_ID,
 	}
+
+	util.Respond(w, r, http.StatusOK, displayedUserData, "user data fetched successfully")
 }

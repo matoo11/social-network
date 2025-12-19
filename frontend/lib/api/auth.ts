@@ -102,13 +102,13 @@ export async function fetchUserData() {
             throw new Error(errorText || 'Fetching user data failed');
         }
 
-        const data = await res.json();
+        const responseData = await res.json();
 
-        if (!data || !data.data) {
+        if (!responseData || !responseData.data) {
             throw new Error('Current user is guest');
         }
         
-        return data;
+        return responseData.data;
     } catch (err: unknown) {
         if (err instanceof Error) {
             throw new Error(err.message);

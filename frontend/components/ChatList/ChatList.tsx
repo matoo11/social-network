@@ -5,7 +5,6 @@ import ChatCard from '../ChatCard/ChatCard';
 import Title from '../Title/Title';
 import PopupBtn from '../PopupBtn/PopupBtn';
 import { ChatCardProps } from '../ChatCard/ChatCard';
-import { on } from 'events';
 
 type ChatListProps = {
     chats: ChatCardProps[];

@@ -9,7 +9,6 @@ import { fetchUserData, logoutUser } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/context/UserContext';
 
-//TODO: Need to modify the returned data from the backend to not include password
 export interface User {
     userId: number;
     userName: string;

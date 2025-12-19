@@ -71,7 +71,6 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
         }
     };
 
-    // TODO: Need to handle guest when creating post (disable form or redirect to login)
     async function handleCreatePost(formData: FormData) {
         setError('');
 
@@ -81,6 +80,10 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
                 credentials: 'include',
                 body: formData,
             });
+
+            if (res.status === 401) {
+                throw new Error('unauthorized user');
+            }
 
             if (!res.ok) {
                 throw new Error('Failed to create post');

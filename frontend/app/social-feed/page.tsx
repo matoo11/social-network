@@ -6,11 +6,13 @@ import Popup from '@/components/Popup/Popup';
 import { useState } from 'react';
 import PostForm from '@/components/PostForm/PostForm';
 import EventsList from '@/components/EventsList/EventsList';
-import EventCalendar from '@/components/EventCalendar/EventCalendar';
 import ChatArea from '@/components/ChatArea/ChatArea';
 import PostContent from '@/components/PostContent/PostContent';
+import { useUser } from '../context/UserContext';
+import SignInForm from '@/components/SignInForm/SignInForm';
 
 export default function SocialFeed() {
+    const { user } = useUser();
     const [chatWith, setChatWith] = useState<string>('');
     const [chatter, setChatter] = useState<string>('');
     const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);
@@ -20,6 +22,7 @@ export default function SocialFeed() {
     const [postListRefreshFn, setPostListRefreshFn] = useState<() => void>();
     const [isPostContentPopupOpen, setPostContentPopup] = useState(false);
     const [selectedPostID, setSelectedPostID] = useState<number>(0);
+    const [isSignInPopupOpen, setIsSignInPopupOpen] = useState(false);
 
     const handleNewPostCreated = () => {
         if (postListRefreshFn) {
@@ -32,6 +35,7 @@ export default function SocialFeed() {
             {/* Left column - 17.5% */}
             <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
                 <ChatList
+                    //TODO: Need to create a function to return the chat list data from the backend
                     chats={[
                         { id: '1', username: 'Alice', lastMessage: 'Hello!' },
                         { id: '2', username: 'Bob', lastMessage: 'How are you?' },
@@ -63,7 +67,13 @@ export default function SocialFeed() {
             {/* Middle column - 52.5% */}
             <div className="w-[52.5%] bg-gray-900 ml-[17.5%] fixed h-[90%]">
                 <PostList
-                    popupHandler={() => setIsPostFormPopupOpen(true)}
+                    popupHandler={() => {
+                        if (user.userId !== 0) {
+                            setIsPostFormPopupOpen(true);
+                        } else {
+                            setIsSignInPopupOpen(true);
+                        }
+                    }}
                     onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
                     postContentPopupHandler={(postID: number) => {
                         console.log('Open post content popup for post ID:', postID);
@@ -75,7 +85,11 @@ export default function SocialFeed() {
 
             {/* Right column - 30% */}
             <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
-                <EventsList popupHandler={() => setIsEventsListPopupOpen(false)} />
+                <EventsList
+                    popupHandler={() => {
+                        setIsEventsListPopupOpen(false);
+                    }}
+                />
             </div>
 
             {/* Popups */}
@@ -108,6 +122,16 @@ export default function SocialFeed() {
                 className="max-w-9xl"
             >
                 <PostContent postID={selectedPostID} />
+            </Popup>
+
+            <Popup
+                isOpen={isSignInPopupOpen}
+                onClose={() => {
+                    setIsSignInPopupOpen(false);
+                }}
+                className="max-w-sm"
+            >
+                <SignInForm onSuccess={() => setIsSignInPopupOpen(false)} />
             </Popup>
         </div>
     );

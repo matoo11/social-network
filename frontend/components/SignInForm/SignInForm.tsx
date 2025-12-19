@@ -17,7 +17,11 @@ type UserInfo = {
     imageID: number;
 };
 
-const SignInForm: React.FC = () => {
+interface SignInFormProps {
+    onSuccess?: () => void;
+}
+
+const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
     const router = useRouter();
     const { setUser } = useUser();
 
@@ -34,11 +38,16 @@ const SignInForm: React.FC = () => {
             console.log('Logged in user:', user);
 
             setUser({
+                userId: user.userID,
                 userName: user.userName,
                 nickName: user.nickName,
                 email: user.email,
                 profileImageID: user.imageID,
             });
+
+            if (onSuccess) {
+                onSuccess();
+            }
 
             router.push('/social-feed');
         } catch (err: unknown) {

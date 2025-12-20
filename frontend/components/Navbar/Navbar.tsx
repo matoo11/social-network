@@ -143,29 +143,34 @@ const Navbar = () => {
                                         Login
                                     </li>
                                 )}
-                                <li>
-                                    <Link
-                                        href="/dashboard"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                                    >
-                                        Dashboard
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        href="/settings"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                                    >
-                                        Settings
-                                    </Link>
-                                </li>
+
                                 {user.userId !== 0 && (
-                                    <li
-                                        onClick={handleLogout}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
-                                    >
-                                        Sign out
-                                    </li>
+                                    <div>
+                                        <li>
+                                            //TODO: Need to create a profile component/page
+                                            <Link
+                                                href="/profile"
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                                            >
+                                                Profile
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            //TODO: Need to create a settings component/page
+                                            <Link
+                                                href="/settings"
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                                            >
+                                                Settings
+                                            </Link>
+                                        </li>
+                                        <li
+                                            onClick={handleLogout}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                        >
+                                            Sign out
+                                        </li>
+                                    </div>
                                 )}
                             </ul>
                         </div>

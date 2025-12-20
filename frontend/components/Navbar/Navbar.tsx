@@ -48,7 +48,6 @@ const Navbar = () => {
                 profileImageID: data.imageId,
             });
         } catch (error) {
-            console.error(error);
             if (error instanceof Error && error.message === 'Current user is guest') {
                 console.warn('Current user is guest');
             } else {

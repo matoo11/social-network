@@ -17,14 +17,19 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
 		RenderTemplate(w, "frontend/index.html", nil)
+	// websocket route
 	case "/api/ws":
 		websocket.WebsocketHandler(w, r)
+	// auth routes
 	case "/api/signin":
 		auth.LoginHandler(w, r)
 	case "/api/signout":
 		auth.SignoutHandler(w, r)
+	case "/api/signup":
+		auth.SignupHandler(w, r)
 	case "/api/getUserData":
 		auth.GetUserDataHandler(w, r)
+	// post routes
 	case "/api/createPost":
 		post.CreatePostHandler(w, r)
 	case "/api/getPost":
@@ -43,8 +48,7 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		post.GetImageHandler(w, r)
 	case "/api/createComment":
 		comment.CreateCommentHandler(w, r)
-	case "/api/signup":
-		auth.SignupHandler(w, r)
+	// follow routes
 	case "/api/addFollow":
 		follow.AddFollow(w, r)
 	case "/api/unFollow":
@@ -53,10 +57,12 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		follow.FollowStatus(w, r)
 	case "/api/getFollowers":
 		follow.GetFollowers(w, r)
+	// profile routes
 	case "/api/profile/get":
 		profile.GetProfileHandler(w, r)
 	case "/api/profile/toggle":
 		profile.ToggleProfileVisibilityHandler(w, r)
+	// group routes
 	case "/api/groups/create":
 		group.CreateGroupHandler(w, r)
 	case "/api/groups/all":
@@ -73,6 +79,7 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		group.RequestToJoinGroupHandler(w, r)
 	case "/api/groups/request/pending":
 		group.GetPendingRequestsHandler(w, r)
+	// group posts routes
 	case "/api/groups/posts/create":
 		group.CreateGroupPostHandler(w, r)
 	case "/api/groups/posts":

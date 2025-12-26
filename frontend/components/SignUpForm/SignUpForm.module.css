@@ -1,0 +1,74 @@
+.signUpContainer {
+  color: black;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.signUpForm {
+  color: black;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formRow {
+  display: flex;
+  gap: 1rem;
+}
+
+.formRow .signUpInput {
+  flex: 1;
+}
+
+.signUpInput {
+  color: black;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.signUpSelect {
+  color: black;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+.signUpButton {
+  padding: 0.75rem;
+  background-color: #0070f3;
+  color: rgb(7, 7, 7);
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.signUpButton:hover {
+  background-color: #0056b3;
+}
+
+.signUpError {
+  color: red;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.fieldLabel {
+  color: black;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}

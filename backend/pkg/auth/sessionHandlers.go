@@ -1,12 +1,14 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"social/backend/pkg/db/dbConn"
 	"time"
 )
 
 func SessionHandler(w http.ResponseWriter, r *http.Request, userID int) {
+	fmt.Println(userID)
 	err := dbConn.DeleteInactiveSessionsForUser(userID)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

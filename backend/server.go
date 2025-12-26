@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"social/backend/pkg/router"
+	"social/backend/pkg/middleware"
 )
 
 func StartServer() {
-	http.HandleFunc("/", router.Router)
+	http.HandleFunc("/", middleware.Middleware)
 	// http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("web/static/css"))))
 	// http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 	fmt.Println("Starting server on http://localhost:8080")

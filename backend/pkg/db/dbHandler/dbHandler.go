@@ -3,6 +3,7 @@ package dbHandler
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"social/backend/pkg/logs"
 	"strings"
@@ -37,16 +38,22 @@ func OpenDB() error {
 		return fmt.Errorf("failed to open DB: %v", err)
 	}
 
-	if recreatedFlag {
-		// err = CreateAdminUser()
-		// if err != nil {
-		// 	log.Print(err)
+	// ✅ Enable foreign key constraints
+	_, err = DB.Exec("PRAGMA foreign_keys = ON;")
+	if err != nil {
+		return fmt.Errorf("failed to enable foreign key constraints: %v", err)
+	}
 
-		// }
-		// err = CreateTestUsers()
-		// if err != nil {
-		// 	log.Print(err)
-		// }
+	if recreatedFlag {
+		err = CreateAdminUser()
+		if err != nil {
+			log.Print(err)
+
+		}
+		err = CreateTestUsers()
+		if err != nil {
+			log.Print(err)
+		}
 	}
 
 	return nil
@@ -62,6 +69,13 @@ func ReCreateDB(sqlCommandsFilePath, dbFilePath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open DB: %v", err)
 	}
+
+	// ✅ Enable foreign key constraints
+	_, err = DB.Exec("PRAGMA foreign_keys = ON;")
+	if err != nil {
+		return fmt.Errorf("failed to enable foreign key constraints: %v", err)
+	}
+
 	defer DB.Close()
 
 	// Split SQL commands and Convert it to string
@@ -90,19 +104,24 @@ func FileExists(filename string) bool {
 
 func CreateAdminUser() error {
 	user := struct {
-		Nickname, Password, Email string
-		FirstName, LastName       string
-		Age                       int
-		Gender                    string
-		IsActive                  bool
+		UserName, Nickname, Password, Email string
+		FirstName, LastName                 string
+		DateOfBirth                         time.Time
+		Gender                              string
+		ImageID, ProfileTypeID              int
+		IsActive                            bool
 	}{
-		Nickname:  "admin",
-		Password:  "q1w2e3r4",
-		Email:     "Admin@Reboot01.com",
-		FirstName: "John",
-		LastName:  "Doe",
-		Age:       24,
-		Gender:    "M",
+		UserName:      "admin_user",
+		Nickname:      "admin",
+		Password:      "q1w2e3r4",
+		Email:         "Admin@Reboot01.com",
+		FirstName:     "John",
+		LastName:      "Doe",
+		DateOfBirth:   time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC),
+		Gender:        "M",
+		ImageID:       1,
+		ProfileTypeID: 1,
+		IsActive:      true,
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -110,23 +129,44 @@ func CreateAdminUser() error {
 		return fmt.Errorf("failed to hash password: %v", err)
 	}
 
-	statement := `INSERT INTO Users 
-        (Nick_Name, 
-		Password, 
-		Email, 
-		First_Name, 
-		Last_Name, 
-		Age,
-		Gender, 
-		Created_By_ID, 
-		Creation_Time, 
-		Last_Updated_By_ID, 
-		Last_Updated_Time)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+	statement := `INSERT INTO Users (
+		User_Name,
+		Nick_Name,
+		Password,
+		Email,
+		First_Name,
+		Last_Name,
+		Date_of_Birth,
+		Gender,
+		Image_ID,
+		Profile_Type_ID,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	currentTime := time.Now().Format("2006-01-02 15:04:05")
 
-	_, err = DB.Exec(statement, user.Nickname, hashedPassword, user.Email, user.FirstName, user.LastName, user.Age, user.Gender, 1, currentTime, 1, currentTime)
+	_, err = DB.Exec(statement,
+		user.UserName,
+		user.Nickname,
+		hashedPassword,
+		user.Email,
+		user.FirstName,
+		user.LastName,
+		user.DateOfBirth.Format("2006-01-02"),
+		user.Gender,
+		user.ImageID,
+		user.ProfileTypeID,
+		1, // Created_By_ID
+		currentTime,
+		1, // Last_Updated_By_ID
+		currentTime,
+		user.IsActive,
+	)
+
 	if err != nil {
 		return fmt.Errorf("failed to create user: %v", err)
 	}
@@ -136,29 +176,30 @@ func CreateAdminUser() error {
 
 func CreateTestUsers() error {
 	users := []struct {
+		UserName  string
 		NickName  string
 		Email     string
 		FirstName string
 		LastName  string
-		Age       int
+		Age       int // will convert to DateOfBirth
 		Gender    string
 	}{
-		{"test", "test@example.com", "John", "Doe", 25, "M"},
-		{"test2", "test2@example.com", "Jane", "Smith", 30, "F"},
-		{"alpha1", "alpha1@example.com", "Liam", "Brown", 18, "M"},
-		{"beta2", "beta2@example.com", "Olivia", "Jones", 22, "F"},
-		{"gamma3", "gamma3@example.com", "Noah", "Taylor", 28, "M"},
-		{"delta4", "delta4@example.com", "Emma", "Davis", 26, "F"},
-		{"echo5", "echo5@example.com", "Lucas", "Miller", 19, "M"},
-		{"foxtrot6", "foxtrot6@example.com", "Ava", "Wilson", 32, "F"},
-		{"golf7", "golf7@example.com", "Ethan", "Lee", 35, "M"},
-		{"hotel8", "hotel8@example.com", "Mia", "White", 24, "F"},
-		{"india9", "india9@example.com", "Zack", "Hall", 27, "M"},
-		{"juliet10", "juliet10@example.com", "Ella", "Lopez", 21, "F"},
-		{"kilo11", "kilo11@example.com", "Mark", "Young", 29, "M"},
+		{"testuser1", "test", "test@example.com", "John", "Doe", 25, "M"},
+		{"testuser2", "test2", "test2@example.com", "Jane", "Smith", 30, "F"},
+		{"alphauser1", "alpha1", "alpha1@example.com", "Liam", "Brown", 18, "M"},
+		{"betauser2", "beta2", "beta2@example.com", "Olivia", "Jones", 22, "F"},
+		{"gammauser3", "gamma3", "gamma3@example.com", "Noah", "Taylor", 28, "M"},
+		{"deltauser4", "delta4", "delta4@example.com", "Emma", "Davis", 26, "F"},
+		{"echouser5", "echo5", "echo5@example.com", "Lucas", "Miller", 19, "M"},
+		{"foxtrotuser6", "foxtrot6", "foxtrot6@example.com", "Ava", "Wilson", 32, "F"},
+		{"golfuser7", "golf7", "golf7@example.com", "Ethan", "Lee", 35, "M"},
+		{"hoteluser8", "hotel8", "hotel8@example.com", "Mia", "White", 24, "F"},
+		{"indiauser9", "india9", "india9@example.com", "Zack", "Hall", 27, "M"},
+		{"julietuser10", "juliet10", "juliet10@example.com", "Ella", "Lopez", 21, "F"},
+		{"kilouser11", "kilo11", "kilo11@example.com", "Mark", "Young", 29, "M"},
 	}
 
-	// Hash the password once
+	// Pre-hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("q1w2e3r4"), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("error hashing password: %v", err)
@@ -166,19 +207,49 @@ func CreateTestUsers() error {
 
 	insertStmt := `
 	INSERT INTO Users (
-		Nick_Name, Password, Email, First_Name, Last_Name, Age, Gender,
-		Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		User_Name,
+		Nick_Name,
+		Password,
+		Email,
+		First_Name,
+		Last_Name,
+		Date_of_Birth,
+		Gender,
+		Image_ID,
+		Profile_Type_ID,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
-	currentTime := time.Now().Format("2006-01-02 15:04:05")
+	now := time.Now()
+	currentTime := now.Format("2006-01-02 15:04:05")
 
 	for _, user := range users {
+		// Convert Age to Date_of_Birth (naive approximation)
+		dateOfBirth := now.AddDate(-user.Age, 0, 0).Format("2006-01-02")
+
 		_, err := DB.Exec(insertStmt,
-			user.NickName, hashedPassword, user.Email,
-			user.FirstName, user.LastName, user.Age, user.Gender,
-			1, currentTime, 1, currentTime, true,
+			user.UserName,
+			user.NickName,
+			hashedPassword,
+			user.Email,
+			user.FirstName,
+			user.LastName,
+			dateOfBirth,
+			user.Gender,
+			1, // Image_ID
+			1, // Profile_Type_ID
+			1, // Created_By_ID
+			currentTime,
+			1, // Last_Updated_By_ID
+			currentTime,
+			true, // Is_Active
 		)
+
 		if err != nil {
 			return fmt.Errorf("failed to insert user %s: %v", user.NickName, err)
 		}

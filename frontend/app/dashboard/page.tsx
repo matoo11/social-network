@@ -10,6 +10,7 @@ import UserListButton from '@/components/UserList/UserListButton';
 import PostImage from '@/components/PostImage/PostImage';
 import ProfileImage from '@/components/ProfileImage/ProfileImage';
 import ChatPopup from '@/components/ChatPopup/ChatPopup';
+import { title } from 'process';
 
 const Dashboard = () => {
     const router = useRouter();
@@ -185,6 +186,32 @@ const Dashboard = () => {
         }
     };
 
+    const creategroup = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const res = await fetch('http://localhost:8080/api/groups/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ title: "hrar", description: "jawad" }),
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to logout');
+            }
+
+            //   router.push('/login');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Unexpected error occurred');
+            }
+        }
+    };
+
     return (
         <div className={styles.dashboardContainer}>
             <ChatPopup />
@@ -232,6 +259,12 @@ const Dashboard = () => {
                     {error && <p className={styles.error}>{error}</p>}
                     <button type="submit" className={styles.logoutButton}>
                         checkfollow
+                    </button>
+                </form>
+                <form onSubmit={creategroup} className={styles.logoutForm}>
+                    {error && <p className={styles.error}>{error}</p>}
+                    <button type="submit" className={styles.logoutButton}>
+                        creategroup test
                     </button>
                 </form>
             </div>

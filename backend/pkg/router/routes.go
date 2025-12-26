@@ -19,7 +19,7 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		RenderTemplate(w, "frontend/index.html", nil)
 	// websocket route
 	case "/api/ws":
-		// websocket.WebsocketHandler(w, r)
+		chat.ChatHandler(w, r)
 	// auth routes
 	case "/api/signin":
 		auth.LoginHandler(w, r)

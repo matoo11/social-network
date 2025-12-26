@@ -6,7 +6,6 @@ import Popup from '@/components/Popup/Popup';
 import { useState } from 'react';
 import PostForm from '@/components/PostForm/PostForm';
 import EventsList from '@/components/EventsList/EventsList';
-import ChatArea from '@/components/ChatArea/ChatArea';
 import PostContent from '@/components/PostContent/PostContent';
 import { useUser } from '../context/UserContext';
 import SignInForm from '@/components/SignInForm/SignInForm';
@@ -26,29 +25,29 @@ export default function SocialFeed() {
     const [chatsData, setChatsData] = useState([]);
     const [isSignInPopupOpen, setIsSignInPopupOpen] = useState(false);
 
-    useEffect(() => {
-        const loadChats = async () => {
-            try {
-                const res = await fetch("http://localhost:8080/api/chat/getChatList", {
-                    credentials: 'include',
-                });
-                const data = await res.json();
-                // setChatsData(data);
-                const mapped = data.map((item: any) => ({
-                    id: String(item.UserID),        // or whatever your backend sends
-                    username: item.Username,    // match your API field
-                    lastMessage: item.last_message || '' // fallback if backend doesn't send
-                }));
+    // useEffect(() => {
+    //     const loadChats = async () => {
+    //         try {
+    //             const res = await fetch("http://localhost:8080/api/chat/getChatList", {
+    //                 credentials: 'include',
+    //             });
+    //             const data = await res.json();
+    //             // setChatsData(data);
+    //             const mapped = data.map((item: any) => ({
+    //                 id: String(item.UserID),        // or whatever your backend sends
+    //                 username: item.Username,    // match your API field
+    //                 lastMessage: item.last_message || '' // fallback if backend doesn't send
+    //             }));
 
-                setChatsData(mapped);
-                // console.log(mapped)
-            } catch (err) {
-                console.error(err);
-            }
-        };
+    //             setChatsData(mapped);
+    //             // console.log(mapped)
+    //         } catch (err) {
+    //             console.error(err);
+    //         }
+    //     };
 
-        loadChats();
-    }, []);
+    //     loadChats();
+    // }, []);
 
 
     const handleNewPostCreated = () => {
@@ -141,7 +140,6 @@ export default function SocialFeed() {
                 onClose={() => setIsChatAreaPopupOpen(false)}
                 className="max-w-3xl"
             >
-                <ChatArea chatWith={chatWith} chatter={chatter} chatID={chatID} />
 
             </Popup>
 

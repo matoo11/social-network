@@ -8,14 +8,16 @@ import (
 )
 
 type Message struct {
-	MessageID    int
-	SenderID     int
-	ReceiverID   int
-	MessageText  string
-	IsRead       bool
-	CreatedByID  int
-	CreationTime time.Time
-	IsActive     bool
+	MessageID       int
+	MessageText     string
+	SenderID        int
+	ReceiverID      int
+	IsRead          bool
+	CreatedByID     int
+	CreationTime    time.Time
+	LastUpdatedByID int
+	LastUpdatedTime time.Time
+	IsActive        bool
 }
 
 type MessageDisplay struct {
@@ -33,41 +35,44 @@ type ChatUser struct {
 	LastMessageTime string
 }
 
-func CreateChatMessage(message Message) error {
+func CreateNewMessage(message Message) (int, error) {
 
-	statement := `INSERT INTO Messages
-    (
-        Sender_ID,
-        Receiver_ID,
-        Message_Text,
-        Is_Read,
-        Created_By_ID,
-        Creation_Time,
-		Last_Updated_By_ID,
-		Last_Updated_Time,
-        Is_Active
-    )
-    VALUES
-    (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
+	if len(message.MessageText) <= 0 || len(message.MessageText) > 2000 {
+		return 0, fmt.Errorf("message length should be between 1 and 2000")
+	}
 
-	_, err := dbHandler.DB.Exec(
-		statement,
+	statement := `INSERT INTO Messages 
+    (message_text, 
+     sender_id, 
+     receiver_id, 
+     created_by_id, 
+     creation_time, 
+     last_updated_by_id, 
+     last_updated_time)
+	VALUES (?, ?, ?, ?, ?, ?, ?)`
+
+	currentTime := time.Now().Format("2006-01-02 15:04:05")
+
+	result, err := dbHandler.DB.Exec(statement,
+		message.MessageText,
 		message.SenderID,
 		message.ReceiverID,
-		message.MessageText,
-		message.IsRead,
 		message.CreatedByID,
-		formattedCurrentTime,
-		formattedCurrentTime,
-		formattedCurrentTime,
-		message.IsActive,
+		currentTime,
+		message.LastUpdatedByID,
+		currentTime,
 	)
+
 	if err != nil {
-		fmt.Println("create error")
-		return fmt.Errorf("failed to create chat message: %v", err)
+		return 0, fmt.Errorf("failed to insert message: %v", err)
 	}
-	return nil
+
+	messageID, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to retrieve inserted message ID: %v", err)
+	}
+
+	return int(messageID), nil
 }
 
 func GetChatMessagesBetweenUsers(user1ID, user2ID int) ([]Message, error) {

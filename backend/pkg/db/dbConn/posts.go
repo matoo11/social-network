@@ -25,13 +25,28 @@ type Post struct {
 	IsActive        bool
 }
 
+type PostData struct {
+	PostID          int
+	PostTitle       string
+	PostText        string
+	PostTypeID      int
+	UserID          int
+	ImageID         *int
+	CreatedByID     int
+	CreationTime    time.Time
+	LastUpdatedByID int
+	LastUpdatedTime time.Time
+	IsActive        bool
+	PrivateUsersIDs   []int
+}
+
 type PostDisplay struct {
 	PostID       int
 	PostTitle    string
 	PostText     string
 	PostTypeID   int
 	UserID       int
-	UserName string
+	UserName     string
 	ImageID      *int
 	CreationTime time.Time
 	Comments     []CommentDisplay
@@ -44,8 +59,7 @@ func boolToInt(value bool) int {
 	return 0
 }
 
-func CreatePost(post Post) error {
-	fmt.Println("here19")
+func CreatePost(post PostData) error {
 	statement := `INSERT INTO Posts
     (
 		Post_Title,
@@ -80,7 +94,20 @@ func CreatePost(post Post) error {
 		return err
 	}
 
-	fmt.Println("here9")
+	// If post is private (PostTypeID == 3), grant access to specified users
+	if post.PostTypeID == 3 && len(post.PrivateUsersIDs) > 0 {
+		var postID int
+		err = dbHandler.DB.QueryRow("SELECT last_insert_rowid()").Scan(&postID)
+		if err != nil {
+			return err
+		}
+
+		err = GrantPostAccessToUsers(postID, post.PrivateUsersIDs, post.CreatedByID)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -133,7 +160,7 @@ func GetPublicPosts() ([]PostDisplay, error) {
 			return nil, fmt.Errorf("failed to scan chat message: %v", err)
 		}
 
-		post.Comments, err = GetCommentsByPostID(post.PostID)
+		post.Comments, err = GetDisplayedCommentsByPostID(post.PostID)
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
@@ -322,7 +349,7 @@ func GetPostsByUserForViewer(ownerID, viewerID int) ([]PostDisplay, error) {
 			return nil, fmt.Errorf("failed to scan user post: %w", err)
 		}
 
-		post.Comments, err = GetCommentsByPostID(post.PostID)
+		post.Comments, err = GetDisplayedCommentsByPostID(post.PostID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch comments for post %d: %w", post.PostID, err)
 		}
@@ -443,10 +470,20 @@ func GetPostByID(postID int) (PostDisplay, error) {
 		return post, fmt.Errorf("failed to get post by ID: %v", err)
 	}
 
-	post.Comments, err = GetCommentsByPostID(post.PostID)
+	post.Comments, err = GetDisplayedCommentsByPostID(post.PostID)
 	if err != nil {
 		return post, fmt.Errorf("failed to get comments for post ID %d: %v", post.PostID, err)
 	}
 
 	return post, nil
+}
+
+func GetPostTypeNameByID(postTypeID int) (string, error) {
+	var postTypeName string
+	err := dbHandler.DB.QueryRow("SELECT Post_Type_Name FROM Post_Types WHERE Post_Type_ID = ?", postTypeID).
+		Scan(&postTypeName)
+	if err != nil {
+		return "", err
+	}
+	return postTypeName, nil
 }

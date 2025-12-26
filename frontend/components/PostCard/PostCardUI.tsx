@@ -54,7 +54,6 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
     if (postImageUrl === 'http://localhost:8080/api/image?id=null') {
         postImageUrl = '';
     }
-    console.log(postImageUrl);
     return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 w-full min-w-sm">
             {/* Profile Section */}

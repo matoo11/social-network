@@ -54,7 +54,7 @@ const EventCalendar: React.FC = () => {
         return days;
     };
 
-    // Example event data
+    // Example event data // TODO: Need to remove this after implementing the events from backend 
     const events: Record<string, Event[]> = {
         [today.toDateString()]: [
             { id: 1, title: 'Team Meeting', time: '10:00 AM' },

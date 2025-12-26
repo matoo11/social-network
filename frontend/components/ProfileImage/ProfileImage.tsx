@@ -38,6 +38,7 @@ const ProfileImage = ({
                     src={imageUrl || 'http://localhost:3000/uploads/default-profile.jpg'}
                     alt={altText}
                     fill
+                    sizes="48px"
                     className="object-cover object-center rounded-full"
                 />
             </a>

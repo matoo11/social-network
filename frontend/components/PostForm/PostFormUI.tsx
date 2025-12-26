@@ -19,13 +19,14 @@ type FormData = {
 };
 
 type PostFormUIProps = {
-    formData: FormData;
-    error: string;
-    onInputChange: (
-        field: string | number,
-    ) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
-    onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  formData: FormData;
+  error: string;
+  onInputChange: (
+    field: keyof FormData
+  ) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 };
+
 
 const selectInputOptions = [
     { optionText: 'Public', optionValue: 1 },

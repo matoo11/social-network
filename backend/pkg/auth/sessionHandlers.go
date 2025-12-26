@@ -7,7 +7,9 @@ import (
 	"time"
 )
 
-func SessionHandler(w http.ResponseWriter, r *http.Request, userID int) {
+func SessionHandler(w http.ResponseWriter, r *http.Request, user *dbConn.User) {
+	userID := user.User_ID
+
 	fmt.Println(userID)
 	err := dbConn.DeleteInactiveSessionsForUser(userID)
 	if err != nil {
@@ -69,7 +71,21 @@ func SessionHandler(w http.ResponseWriter, r *http.Request, userID int) {
 		}
 		SetSessionCookie(w, sessionID)
 	}
-	// http.Redirect(w, r, "/", http.StatusFound)
+
+data := struct {
+    UserID   int    `json:"userID"`
+    UserName string `json:"userName"`
+    NickName string `json:"nickName"`
+    Email    string `json:"email"`
+    ImageID  int    `json:"imageID"`
+}{
+    UserID:   user.User_ID,
+    UserName: user.User_Name,
+    NickName: user.Nick_Name,
+    Email:    user.Email,
+    ImageID:  user.Image_ID,
+}
+	Respond(w, r, 200, data, "login Successful")
 }
 
 func SetSessionCookie(w http.ResponseWriter, sessionID string) {

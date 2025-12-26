@@ -56,7 +56,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, data Login) {
 			return
 		}
 		
-		SessionHandler(w, r, user.User_ID)
+		SessionHandler(w, r, user)
 		
 		} else {
 			ErrorPage(w, http.StatusMethodNotAllowed)

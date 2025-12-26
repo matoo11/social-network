@@ -13,7 +13,10 @@ export async function loginUser(username: string, password: string) {
             throw new Error(errorText || 'Login failed');
         }
 
-        return res;
+        const responseData = await res.json();
+
+        console.log('Login response:', responseData.data);
+        return responseData.data;
     } catch (err: unknown) {
         if (err instanceof Error) {
             throw new Error(err.message);
@@ -73,6 +76,39 @@ export async function logoutUser() {
         }
 
         return res;
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            throw new Error(err.message);
+        } else {
+            throw new Error('Unexpected error occurred');
+        }
+    }
+}
+
+export async function fetchUserData() {
+    try {
+        const res = await fetch('http://localhost:8080/api/getUserData', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (res.status === 401) {
+            throw new Error('unauthorized user');
+        }
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(errorText || 'Fetching user data failed');
+        }
+
+        const responseData = await res.json();
+
+        if (!responseData || !responseData.data) {
+            throw new Error('Current user is guest');
+        }
+        
+        return responseData.data;
     } catch (err: unknown) {
         if (err instanceof Error) {
             throw new Error(err.message);

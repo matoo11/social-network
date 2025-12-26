@@ -5,15 +5,57 @@ import Link from 'next/link';
 import ProfileImage from '../ProfileImage/ProfileImage';
 import Image from 'next/image';
 import NavLink from '../NavLink/NavLink';
-import { logoutUser } from '@/lib/api/auth';
+import { fetchUserData, logoutUser } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/app/context/UserContext';
+
+export interface User {
+    userId: number;
+    userName: string;
+    nickName: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string | null;
+    gender: string;
+    imageId: number;
+    aboutMe: string;
+    profileTypeId: number;
+    creationTime: string;
+    isActive: boolean;
+}
 
 const Navbar = () => {
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
-    // Close dropdown on outside click
+    const { user, setUser } = useUser();
+
+    useEffect(() => {
+        handleUserData();
+    }, []);
+
+    const handleUserData = async () => {
+        try {
+            const data: User = await fetchUserData();
+
+            setUser({
+                userId: data.userId,
+                userName: data.userName,
+                nickName: data.nickName,
+                email: data.email,
+                profileImageID: data.imageId,
+            });
+        } catch (error) {
+            if (error instanceof Error && error.message === 'Current user is guest') {
+                console.warn('Current user is guest');
+            } else {
+                console.error('Fetching user data failed:', error);
+            }
+        }
+    };
+
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (
@@ -34,6 +76,15 @@ const Navbar = () => {
         try {
             await logoutUser();
             setIsDropdownOpen(false);
+
+            setUser({
+                userId: 0,
+                userName: 'Guest',
+                nickName: 'Guest',
+                email: 'Not Logged In',
+                profileImageID: 0,
+            });
+
             router.push('/login');
         } catch (error) {
             console.error('Logout failed:', error);
@@ -55,6 +106,7 @@ const Navbar = () => {
                         Social Network
                     </span>
                 </a>
+
                 <div
                     className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative"
                     ref={dropdownRef}
@@ -69,46 +121,62 @@ const Navbar = () => {
                         </div>
                     </button>
 
-                    {/* Dropdown menu */}
                     {isDropdownOpen && (
                         <div className="absolute top-8 right-0 z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 w-44">
                             <div className="px-4 py-3">
                                 <span className="block text-sm text-gray-900 dark:text-white">
-                                    Bonnie Green (temp)
+                                    {user?.userName ?? 'Guest'}
                                 </span>
                                 <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-                                    Temp@Reboot.com
+                                    {user?.email ?? 'Not logged in'}
                                 </span>
                             </div>
                             <ul className="py-2">
-                                <li>
-                                    <Link
-                                        href="/dashboard"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                                {user.userId === 0 && (
+                                    <li
+                                        onClick={() => {
+                                            setIsDropdownOpen(false);
+                                            router.push('/login');
+                                        }}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
                                     >
-                                        Dashboard
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        href="/settings"
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                                    >
-                                        Settings
-                                    </Link>
-                                </li>
-                                <li
-                                    onClick={handleLogout}
-                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
-                                >
-                                    Sign out
-                                </li>
+                                        Login
+                                    </li>
+                                )}
+
+                                {user.userId !== 0 && (
+                                    <div>
+                                        <li>
+                                            {/* TODO: Need to create a profile component/page */}
+                                            <Link
+                                                href="/profile"
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                                            >
+                                                Profile
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            {/* TODO: Need to create a settings component/page */}
+                                            <Link
+                                                href="/settings"
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                                            >
+                                                Settings
+                                            </Link>
+                                        </li>
+                                        <li
+                                            onClick={handleLogout}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                        >
+                                            Sign out
+                                        </li>
+                                    </div>
+                                )}
                             </ul>
                         </div>
                     )}
                 </div>
 
-                {/* Navigation links */}
                 <div
                     className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
                     id="navbar-user"
@@ -134,7 +202,6 @@ const Navbar = () => {
                             onClick={() => {
                                 const menu = document.getElementById('openchat');
                                 if (menu) {
-                                    console.log('here');
                                     menu.classList.toggle('hidden');
                                 }
                             }}

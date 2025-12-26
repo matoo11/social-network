@@ -4,8 +4,32 @@ import React, { useEffect, useState } from 'react';
 import PostListUI from './PostListUI';
 import { PostListUIProps } from './PostListUI';
 
+export interface DisplayedPost {
+    postId: number;
+    postTitle: string;
+    postText: string;
+    postType: string;
+    posterNickname: string;
+    postImageId: number;
+    postTime: string; // ISO date string (Go's time.Time → string)
+    numberOfLikes: number;
+    numberOfDislikes: number;
+    numberOfComments: number;
+    comments: DisplayedComment[];
+}
+
+export interface DisplayedComment {
+    commentId: number;
+    postId: number;
+    commenterNickname: string;
+    commentText: string;
+    commentTime: string; // ISO date string
+    numberOfLikes: number;
+    numberOfDislikes: number;
+}
+
 const fetchposts = async () => {
-    const res = await fetch('http://localhost:8080/api/getPublicPosts', {
+    const res = await fetch('http://localhost:8080/api/fetchPostsByUserID', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -14,7 +38,9 @@ const fetchposts = async () => {
     if (!res.ok) {
         throw new Error('Failed to logout');
     }
-    return res.json();
+    const respond = await res.json();
+
+    return respond.data;
 };
 
 type PostListProps = {
@@ -26,19 +52,28 @@ type PostListProps = {
 const PostList: React.FC<PostListProps> = ({ popupHandler, onRef, postContentPopupHandler }) => {
     const [posts, setPosts] = useState<PostListUIProps['posts']>([]);
 
-    //TODO: need to replace with actual API call
     const fetchPostsFromAPI = async () => {
-        const mockData: PostListUIProps['posts'] = (await fetchposts()).map((p: any) => ({
-            postID: p.PostID,
-            title: p.PostTitle,
-            content: p.PostText,
-            posterNickname: p.UserName,
+        const data = await fetchposts();
+
+        if (!data || data.length === 0) {
+            console.warn('No posts returned');
+            setPosts([]);
+            return;
+        }
+
+        const mockData: PostListUIProps['posts'] = data.map((p: DisplayedPost) => ({
+            postID: p.postId,
+            title: p.postTitle,
+            content: p.postText,
+            postType: p.postType,
+            posterNickname: p.posterNickname,
             posterProfileImageUrl: '',
-            postImageUrl: `http://localhost:8080/api/image?id=${p.ImageID}`,
-            createdAt: p.CreationTime,
-            likesCount: 0, // backend doesn’t provide yet
-            dislikesCount: 0, // backend doesn’t provide yet
-            commentsCount: p.Comments ? p.Comments.length : 0,
+            postImageUrl:
+                p.postImageId !== 0 ? `http://localhost:8080/api/image?id=${p.postImageId}` : null,
+            createdAt: p.postTime,
+            likesCount: p.numberOfLikes,
+            dislikesCount: p.numberOfDislikes,
+            commentsCount: p.numberOfComments,
             postContentPopup: postContentPopupHandler,
         }));
 

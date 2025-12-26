@@ -6,9 +6,24 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { loginUser } from '@/lib/api/auth';
 import SignInFormUI from './SignInFormUI';
+import { useUser } from '../../app/context/UserContext';
+import Username from '../Username/Username';
 
-const SignInForm: React.FC = () => {
+type UserInfo = {
+    userID: number;
+    userName: string;
+    nickName: string;
+    email: string;
+    imageID: number;
+};
+
+interface SignInFormProps {
+    onSuccess?: () => void;
+}
+
+const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
     const router = useRouter();
+    const { setUser } = useUser();
 
     const [userIdentifier, setUserIdentifier] = useState('');
     const [password, setPassword] = useState('');
@@ -19,7 +34,21 @@ const SignInForm: React.FC = () => {
         setError('');
 
         try {
-            await loginUser(userIdentifier, password);
+            const user: UserInfo = await loginUser(userIdentifier, password);
+            console.log('Logged in user:', user);
+
+            setUser({
+                userId: user.userID,
+                userName: user.userName,
+                nickName: user.nickName,
+                email: user.email,
+                profileImageID: user.imageID,
+            });
+
+            if (onSuccess) {
+                onSuccess();
+            }
+
             router.push('/social-feed');
         } catch (err: unknown) {
             if (err instanceof Error) {

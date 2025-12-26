@@ -4,13 +4,12 @@ import (
 	"html/template"
 	"net/http"
 	"social/backend/pkg/auth"
+	"social/backend/pkg/chat"
 	"social/backend/pkg/comment"
 	"social/backend/pkg/follow"
 	"social/backend/pkg/group"
-	"social/backend/pkg/message"
 	"social/backend/pkg/post"
 	"social/backend/pkg/profile"
-	"social/backend/pkg/websocket"
 )
 
 func Router(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +19,7 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		RenderTemplate(w, "frontend/index.html", nil)
 	// websocket route
 	case "/api/ws":
-		websocket.WebsocketHandler(w, r)
+		// websocket.WebsocketHandler(w, r)
 	// auth routes
 	case "/api/signin":
 		auth.LoginHandler(w, r)
@@ -96,9 +95,9 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	case "/api/groups/events/respond":
 		group.RespondToEventHandler(w, r)
 	case "/api/message/getPrivateMessages":
-		message.GetPrivateMessages(w, r)
+		chat.GetPrivateMessages(w, r)
 	case "/api/chat/getChatList":
-		message.GetChatList(w, r)
+		chat.GetChatList(w, r)
 	default:
 		http.NotFound(w, r)
 	}

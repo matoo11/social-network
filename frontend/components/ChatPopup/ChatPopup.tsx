@@ -1,6 +1,6 @@
 import ChatBubble from './ChatBubble';
 import { createRoot } from 'react-dom/client';
-import { sendMessage } from '@/lib/api/chat-service';
+// import { sendMessage } from '@/lib/api/chat-service';
 
 let chatID: number;
 let chatType: number;
@@ -106,7 +106,7 @@ export function SendChatMessage(chatID: number, text: string, type: number) {
         chatID: chatID,
         message: text,
     };
-    sendMessage('chat', data);
+    // sendMessage('chat', data);
 }
 
 export function ClearChat() {

@@ -15,11 +15,11 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
-    CheckOrigin: func(r *http.Request) bool {
-        origin := r.Header.Get("Origin")
-        // Allow Next.js frontend on port 3000
-        return origin == "http://localhost:3000"
-    },
+	CheckOrigin: func(r *http.Request) bool {
+		origin := r.Header.Get("Origin")
+		// Allow Next.js frontend on port 3000
+		return origin == "http://localhost:3000"
+	},
 }
 
 // var Clients = make(map[string]*websocket.Conn)
@@ -43,7 +43,7 @@ type WSMessage struct {
 }
 
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
-fmt.Println("WebSocket Endpoint Hit")
+	fmt.Println("WebSocket Endpoint Hit")
 	user, authenticated := auth.Authenticator(w, r)
 
 	if !authenticated {

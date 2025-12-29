@@ -9,6 +9,7 @@ import EventsList from '@/components/EventsList/EventsList';
 import PostContent from '@/components/PostContent/PostContent';
 import { useUser } from '../context/UserContext';
 import SignInForm from '@/components/SignInForm/SignInForm';
+import ChatComponent from '@/components/ChatExample/ChatExample';
 
 export default function SocialFeed() {
     const { user } = useUser();
@@ -49,19 +50,17 @@ export default function SocialFeed() {
     //     loadChats();
     // }, []);
 
-
     const handleNewPostCreated = () => {
         if (postListRefreshFn) {
             postListRefreshFn(); // refresh PostList
         }
     };
 
-
-
     return (
         <div className="flex w-full h-full mt-[10vh]">
             {/* Left column - 17.5% */}
             <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
+                <ChatComponent />
                 <ChatList
                     //TODO: Need to create a function to return the chat list data from the backend
                     chats={[
@@ -86,11 +85,10 @@ export default function SocialFeed() {
                     onSelectChat={(id, username) => {
                         setIsChatAreaPopupOpen(true);
                         setchatID(id);
-                        console.log(id)
+                        console.log(id);
                         setChatWith(username);
-                        setChatter("Me");
+                        setChatter('Me');
                     }}
-
                 />
             </div>
 
@@ -139,9 +137,7 @@ export default function SocialFeed() {
                 isOpen={isChatAreaPopupOpen}
                 onClose={() => setIsChatAreaPopupOpen(false)}
                 className="max-w-3xl"
-            >
-
-            </Popup>
+            ></Popup>
 
             <Popup
                 isOpen={isPostContentPopupOpen}

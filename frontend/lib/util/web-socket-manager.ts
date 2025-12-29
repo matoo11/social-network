@@ -1,20 +1,12 @@
 export default class WebSocketManager {
     private name: string;
     private ws: WebSocket | null;
-    private onOpenHandler: ((event: Event) => void) | null;
-    private onMessageHandler: ((event: MessageEvent) => void) | null;
-    private onCloseHandler: ((event: CloseEvent) => void) | null;
-    private onErrorHandler: ((error: Event) => void) | null;
+    private subscribers: Map<string, Set<(data: any) => void>>;
 
     constructor(name: string = 'default') {
         this.name = name;
         this.ws = null;
-
-        // Handlers (optional overrides)
-        this.onOpenHandler = null;
-        this.onMessageHandler = null;
-        this.onCloseHandler = null;
-        this.onErrorHandler = null;
+        this.subscribers = new Map();
     }
 
     async connect(url: string): Promise<void> {
@@ -22,7 +14,7 @@ export default class WebSocketManager {
             this.ws &&
             (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)
         ) {
-            console.log(`[${this.name}] WebSocket is already connected or connecting.`);
+            console.log(`[${this.name}] WebSocket already connected/connecting.`);
             return;
         }
 
@@ -30,48 +22,64 @@ export default class WebSocketManager {
 
         this.ws.onopen = (event: Event) => {
             console.log(`[${this.name}] WebSocket connected`);
-            if (this.onOpenHandler) this.onOpenHandler(event);
+            this.publish('__open__', event);
         };
 
         this.ws.onmessage = (event: MessageEvent) => {
-            console.groupCollapsed(`[${this.name}] Message received`);
-            console.log(event.data);
-            console.groupEnd();
-            if (this.onMessageHandler) this.onMessageHandler(event);
+            let parsed: any;
+            try {
+                parsed = JSON.parse(event.data);
+            } catch {
+                // if not JSON, forward raw payload
+                this.publish('*', event.data);
+                return;
+            }
+
+            const type = parsed.payLoadType || parsed.type || '*';
+            const data = parsed.data ?? parsed;
+
+            // publish to specific type and wildcard subscribers
+            this.publish(type, data);
+            if (type !== '*') this.publish('*', { type, data });
         };
 
         this.ws.onclose = (event: CloseEvent) => {
             console.log(`[${this.name}] WebSocket closed`);
-            if (this.onCloseHandler) this.onCloseHandler(event);
+            this.publish('__close__', event);
         };
 
         this.ws.onerror = (error: Event) => {
-            console.error(`[${this.name}] WebSocket error:`, error);
-            if (this.onErrorHandler) this.onErrorHandler(error);
+            console.error(`[${this.name}] WebSocket error`, error);
+            this.publish('__error__', error);
         };
     }
 
-    // Handler setters
-    onOpen(callback: (event: Event) => void): void {
-        this.onOpenHandler = callback;
+    // Simple pub/sub
+    subscribe(eventType: string, callback: (data: any) => void): () => void {
+        const set = this.subscribers.get(eventType) ?? new Set();
+        set.add(callback);
+        this.subscribers.set(eventType, set);
+
+        // return unsubscribe function
+        return () => {
+            const s = this.subscribers.get(eventType);
+            if (!s) return;
+            s.delete(callback);
+            if (s.size === 0) this.subscribers.delete(eventType);
+        };
     }
 
-    onMessage(callback: (event: MessageEvent) => void): void {
-        this.onMessageHandler = callback;
-    }
-
-    onClose(callback: (event: CloseEvent) => void): void {
-        this.onCloseHandler = callback;
-    }
-
-    onError(callback: (error: Event) => void): void {
-        this.onErrorHandler = callback;
-    }
-
-    disconnect(): void {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.close();
-            console.log(`[${this.name}] WebSocket closed manually`);
+    // Publish to subscribers (internal)
+    private publish(eventType: string, data: any): void {
+        const set = this.subscribers.get(eventType);
+        if (set) {
+            for (const cb of Array.from(set)) {
+                try {
+                    cb(data);
+                } catch (e) {
+                    console.error('subscriber error', e);
+                }
+            }
         }
     }
 
@@ -81,6 +89,14 @@ export default class WebSocketManager {
         } else {
             console.warn(`[${this.name}] WebSocket not open. Message not sent.`);
         }
+    }
+
+    disconnect(): void {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.close();
+            console.log(`[${this.name}] WebSocket closed manually`);
+        }
+        this.ws = null;
     }
 
     getConnection(): WebSocket | null {

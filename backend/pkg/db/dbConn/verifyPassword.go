@@ -14,6 +14,7 @@ func VerifyUserPassword(username, password string) (*User, error) {
 		SELECT 
 			User_ID,
 			User_Name,
+			Nick_Name,
 			Password,
 			Email,
 			Is_Active
@@ -22,6 +23,7 @@ func VerifyUserPassword(username, password string) (*User, error) {
 		Scan(
 			&user.User_ID,
 			&user.User_Name,
+			&user.Nick_Name,
 			&user.Password,
 			&user.Email,
 			&user.Is_Active,
@@ -32,6 +34,7 @@ func VerifyUserPassword(username, password string) (*User, error) {
 				SELECT 
 					User_ID,
 					User_Name,
+					Nick_Name,
 					Password,
 					Email,
 					Is_Active
@@ -40,6 +43,7 @@ func VerifyUserPassword(username, password string) (*User, error) {
 				Scan(
 					&user.User_ID,
 					&user.User_Name,
+					&user.Nick_Name,
 					&user.Password,
 					&user.Email,
 					&user.Is_Active,

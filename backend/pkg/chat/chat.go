@@ -74,6 +74,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 	// Get Chat List per User
 	userList, err := dbConn.RetrieveChatListForDisplay(user.Nick_Name)
 	if err != nil {
+		fmt.Println("err")
 		logs.LogError(err.Error())
 	}
 
@@ -115,13 +116,17 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
+		fmt.Println("msg:", msg)
+
 		sender, err := dbConn.GetUserIDByUserNickname(msg.From)
 		if err != nil {
+			fmt.Println("err1")
 			logs.LogError("Read error: " + err.Error())
 			break
 		}
 		receiver, err := dbConn.GetUserIDByUserNickname(msg.To)
 		if err != nil {
+			fmt.Println("err2")
 			logs.LogError("Read error: " + err.Error())
 			break
 		}
@@ -311,9 +316,11 @@ func (cm *ClientManager) GetConnByUsername(username string) *websocket.Conn {
 func (cm *ClientManager) NotifyMessageReceiver(receiverNickname string, payLoad ChatPayload) error {
 	payLoad.PayLoadType = "messageReceived"
 	wsConnection := cm.GetConnByUsername(receiverNickname)
-
-	err := wsConnection.WriteJSON(payLoad)
-	if err != nil {
+	if wsConnection == nil {
+		logs.LogInfo(fmt.Sprintf("NotifyMessageReceiver: user %s is offline or has no active connection", receiverNickname))
+		return fmt.Errorf("no active websocket connection for user %s", receiverNickname)
+	}
+	if err := wsConnection.WriteJSON(payLoad); err != nil {
 		return err
 	}
 	return nil

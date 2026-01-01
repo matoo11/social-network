@@ -123,7 +123,7 @@ func RetrieveAllDataForDisplayByPostID(postID int) (DisplayedPost, error) {
 			newDisplayedComment.CommentText = comment.CommentText
 			newDisplayedComment.CommentTime = comment.CreationTime
 			newDisplayedComment.CommentProfileImageID = commenter.Image_ID
-			
+
 			if comment.CommentImageID != nil {
 				newDisplayedComment.CommentImageID = *comment.CommentImageID
 			} else {
@@ -839,6 +839,8 @@ func GetMessageByID(messageID int) (Message, error) {
 		&message.IsRead,
 		&message.CreatedByID,
 		&message.CreationTime,
+		&message.LastUpdatedByID,
+		&message.LastUpdatedTime,
 		&message.IsActive,
 	)
 	if err != nil {

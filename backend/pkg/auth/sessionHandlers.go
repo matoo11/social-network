@@ -85,6 +85,8 @@ data := struct {
     Email:    user.Email,
     ImageID:  user.Image_ID,
 }
+
+fmt.Println(data)
 	Respond(w, r, 200, data, "login Successful")
 }
 

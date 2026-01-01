@@ -151,7 +151,31 @@ func GetAllUsers() ([]UserDisplay, error) {
 func GetUserIDByUserNickname(userNickname string) (User, error) {
 	statement := "SELECT * FROM Users WHERE Nick_Name = ? AND Is_Active = 1"
 	var user User
-	err := dbHandler.DB.QueryRow(statement, userNickname).Scan(&user.User_ID, &user.Nick_Name, &user.Password, &user.Email, &user.First_Name, &user.Last_Name, &user.Date_Of_Birth, &user.Gender, &user.Created_By_ID, &user.Creation_Time, &user.Last_Updated_By_ID, &user.Last_Updated_Time, &user.Is_Active)
+	var aboutMe sql.NullString
+	err := dbHandler.DB.QueryRow(statement, userNickname).Scan(
+		&user.User_ID,
+		&user.User_Name,
+		&user.Nick_Name,
+		&user.Password,
+		&user.Email,
+		&user.First_Name,
+		&user.Last_Name,
+		&user.Date_Of_Birth,
+		&user.Gender,
+		&user.Image_ID,
+		&aboutMe,
+		&user.Profile_Type_ID,
+		&user.Created_By_ID,
+		&user.Creation_Time,
+		&user.Last_Updated_By_ID,
+		&user.Last_Updated_Time,
+		&user.Is_Active,
+	)
+
+	if aboutMe.Valid {
+		user.About_Me = aboutMe.String
+	}
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return User{}, fmt.Errorf("user does not exist: %v", err)

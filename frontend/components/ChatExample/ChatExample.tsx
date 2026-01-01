@@ -8,6 +8,11 @@ type ChatListData = {
     onlineUsers: string[];
 };
 
+type PayLoad = {
+    payLoadType: string;
+    data: ChatListData;
+};
+
 export default function ChatComponent() {
     const [allUsers, setAllUsers] = useState<string[]>([]);
     const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
@@ -15,9 +20,10 @@ export default function ChatComponent() {
 
     useEffect(() => {
         const unsub =
-            subscribe?.('chatList', (data: ChatListData) => {
-                setAllUsers(data.allUsers ?? []);
-                setOnlineUsers(data.onlineUsers ?? []);
+            subscribe?.('chatList', (data: PayLoad) => {
+                console.log('Received chatList data', data);
+                setAllUsers(data.data.allUsers ?? []);
+                setOnlineUsers(data.data.onlineUsers ?? []);
             }) ?? (() => {});
 
         return () => {
@@ -27,7 +33,7 @@ export default function ChatComponent() {
 
     const handleSendTest = () => {
         console.log('Sending test message');
-        send?.({ payLoadType: 'privateMessages', data: { text: 'hello from client' } });
+        send?.({ from: 'admin', to: 'test', content: 'hello from client' });
     };
 
     return (

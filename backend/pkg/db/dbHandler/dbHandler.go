@@ -24,7 +24,7 @@ func OpenDB() error {
 
 	// Check if the database file exists and recreate it if it doesn't
 	if FileExists(dbFilePath) {
-		logs.LogInfo(fmt.Sprintf("Database file %s already exists. Skipping recreation.", dbFile))
+		logs.LogInfo("Database file %s already exists. Skipping recreation.", dbFile)
 	} else {
 		err := ReCreateDB(sqlCommandsFilePath, dbFilePath)
 		if err != nil {

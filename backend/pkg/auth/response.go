@@ -15,6 +15,7 @@ type APIResponse struct {
 	Authenticated bool   `json:"authenticated"`
 }
 
+// FIXME: dublicate code with util/respond.go
 func Respond(w http.ResponseWriter, r *http.Request, code int, data any, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
@@ -31,7 +32,7 @@ func Respond(w http.ResponseWriter, r *http.Request, code int, data any, message
 	// Marshal data to JSON for logging
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
-		logs.LogError(fmt.Sprintf("Failed to marshal response data: %v", err))
+		logs.LogError("Failed to marshal response data: %v", err)
 		dataBytes = []byte(`"failed to marshal data"`)
 	}
 
@@ -92,7 +93,7 @@ func RespondHTML(w http.ResponseWriter, r *http.Request, code int, title string,
 
 	_, err := w.Write([]byte(html))
 	if err != nil {
-		logs.LogError(fmt.Sprintf("Failed to write HTML response: %v", err))
+		logs.LogError("Failed to write HTML response: %v", err)
 	}
 
 	// Optional: log this HTML response

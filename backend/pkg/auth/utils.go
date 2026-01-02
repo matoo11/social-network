@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"social/backend/pkg/db/dbConn"
+	"social/backend/pkg/logs"
 	"social/backend/pkg/util"
 )
 
 func Authenticator(w http.ResponseWriter, r *http.Request) (dbConn.User, bool) {
 	session, err := dbConn.GetSessionFromCookie(r)
-	fmt.Println("Authenticator called, session:", session, "error:", err)
+	logs.LogDebug("Authenticator called, error: %v", err)
 	if err != nil {
 		// LoggedInUserID = 0
 		// LoggedInNickname = ""

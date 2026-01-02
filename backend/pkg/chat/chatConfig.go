@@ -10,13 +10,14 @@ import (
 // Constants
 // =============================================================================
 
-// PayloadType constants for WebSocket message types
-const (
-	PayloadTypeChatList        = "chatList"
-	PayloadTypePrivateMessages = "privateMessages"
-	PayloadTypeMessageSent     = "messageSent"
-	PayloadTypeMessageReceived = "messageReceived"
-)
+// PayloadTypes is a map of all valid payload types for WebSocket messages
+var PayloadTypes = map[string]string{
+    "chatList":        "chatList",
+    "privateMessagesHistory": "privateMessagesHistory",
+    "messageSent":     "messageSent",
+    "messageReceived": "messageReceived",
+    "initialChatList": "initialChatList",
+}
 
 // Allowed origins for WebSocket connections
 var allowedOrigins = []string{
@@ -43,8 +44,8 @@ var upgrader = websocket.Upgrader{
 // Types
 // =============================================================================
 
-// ChatPayload represents the standard WebSocket message envelope
-type ChatPayload struct {
+// WsPayload represents the standard WebSocket message envelope
+type WsPayload struct {
 	PayLoadType string `json:"payLoadType"`
 	Data        any    `json:"data"`
 }

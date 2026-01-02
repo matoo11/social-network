@@ -50,35 +50,33 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 	clientManager.AddClient(user.Nick_Name, ws)
 	go clientManager.UpdateUsersList(ws)
 
-	// Send initial chat list to the newly connected client
-	if err := sendInitialChatList(ws, user.Nick_Name); err != nil {
-		logs.LogError("Failed to send initial chat list: %v", err)
-		return
-	}
-
-	// Send message history to the client
-	if err := sendMessageHistory(ws, user.User_ID); err != nil {
-		logs.LogError("Failed to send message history: %v", err)
-		return
-	}
-
 	// Main message processing loop
 	for {
-		var msg WSMessage
-		if err := ws.ReadJSON(&msg); err != nil {
+		var wsPayload WsPayload
+		if err := ws.ReadJSON(&wsPayload); err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				logs.LogError("WebSocket read error: %v", err)
 			}
 			break
 		}
 
-		logs.LogInfo("Message received: from=%s, to=%s", msg.From, msg.To)
-
-		if err := processAndDeliverMessage(ws, msg); err != nil {
-			logs.LogError("Failed to process message: %v", err)
-			// Continue processing other messages instead of breaking
+		if PayloadTypes[wsPayload.PayLoadType] == "" {
+			logs.LogError("Unknown payload type: %s", wsPayload.PayLoadType)
 			continue
 		}
+
+		if wsPayload.PayLoadType == PayloadTypes["initialChatList"] {
+			if err := sendInitialChatList(ws, user.Nick_Name); err != nil {
+				logs.LogError("Failed to send chat list: %v", err)
+				continue
+			}
+		}
+
+		if err := processAndDeliverMessage(ws, wsPayload); err != nil {
+			logs.LogError("Failed to process message: %v", err)
+			continue
+		}
+
 	}
 }
 
@@ -88,6 +86,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 
 // sendInitialChatList sends the chat list (all users and online users) to a client
 func sendInitialChatList(ws *websocket.Conn, userNickname string) error {
+	logs.LogInfo("initial chat list called...")
 	userList, err := dbConn.RetrieveChatListForDisplay(userNickname)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve chat list: %w", err)
@@ -98,8 +97,8 @@ func sendInitialChatList(ws *websocket.Conn, userNickname string) error {
 		OnlineUsers: clientManager.GetOnlineUsers(),
 	}
 
-	payload := ChatPayload{
-		PayLoadType: PayloadTypeChatList,
+	payload := WsPayload{
+		PayLoadType: PayloadTypes["initialChatList"],
 		Data:        chatList,
 	}
 
@@ -116,8 +115,8 @@ func sendMessageHistory(ws *websocket.Conn, userID int) error {
 		return fmt.Errorf("failed to retrieve messages: %w", err)
 	}
 
-	payload := ChatPayload{
-		PayLoadType: PayloadTypePrivateMessages,
+	payload := WsPayload{
+		PayLoadType: PayloadTypes["privateMessagesHistory"],
 		Data:        messagesMap,
 	}
 
@@ -128,7 +127,24 @@ func sendMessageHistory(ws *websocket.Conn, userID int) error {
 }
 
 // processAndDeliverMessage handles the complete flow of processing and delivering a message
-func processAndDeliverMessage(ws *websocket.Conn, msg WSMessage) error {
+func processAndDeliverMessage(ws *websocket.Conn, wsPayload WsPayload) error {
+	var msg WSMessage
+	if wsPayload.PayLoadType != PayloadTypes["messageSent"] {
+		return nil
+	}
+
+	dataMap, ok := wsPayload.Data.(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid data format")
+	}
+
+	msg = WSMessage{
+		From:    dataMap["from"].(string),
+		To:      dataMap["to"].(string),
+		Content: dataMap["content"].(string),
+	}
+	logs.LogInfo("Message received: from=%s, to=%s", msg.From, msg.To)
+
 	// Validate message content
 	content := strings.TrimSpace(msg.Content)
 	if content == "" {
@@ -165,8 +181,8 @@ func processAndDeliverMessage(ws *websocket.Conn, msg WSMessage) error {
 	}
 
 	// Send confirmation to sender
-	payload := ChatPayload{
-		PayLoadType: PayloadTypeMessageSent,
+	payload := WsPayload{
+		PayLoadType: PayloadTypes["messageSent"],
 		Data:        displayedMessage,
 	}
 
@@ -289,8 +305,8 @@ func (cm *ClientManager) UpdateUsersList(excludeConn *websocket.Conn) {
 			return true
 		}
 
-		payload := ChatPayload{
-			PayLoadType: PayloadTypeChatList,
+		payload := WsPayload{
+			PayLoadType: PayloadTypes["chatList"],
 			Data: ChatList{
 				AllUsers:    userList,
 				OnlineUsers: onlineUsers,
@@ -318,8 +334,8 @@ func (cm *ClientManager) UpdateAllUsersList() {
 			return true
 		}
 
-		payload := ChatPayload{
-			PayLoadType: PayloadTypeChatList,
+		payload := WsPayload{
+			PayLoadType: PayloadTypes["chatList"],
 			Data: ChatList{
 				AllUsers:    userList,
 				OnlineUsers: onlineUsers,
@@ -351,8 +367,8 @@ func (cm *ClientManager) GetConnByUsername(username string) *websocket.Conn {
 
 // NotifyMessageReceiver sends a message notification to the recipient.
 // Returns an error if the recipient is offline or the send fails.
-func (cm *ClientManager) NotifyMessageReceiver(receiverNickname string, payload ChatPayload) error {
-	payload.PayLoadType = PayloadTypeMessageReceived
+func (cm *ClientManager) NotifyMessageReceiver(receiverNickname string, payload WsPayload) error {
+	payload.PayLoadType = PayloadTypes["messageReceived"]
 
 	wsConn := cm.GetConnByUsername(receiverNickname)
 	if wsConn == nil {

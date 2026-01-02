@@ -1,193 +1,216 @@
 package chat
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"social/backend/pkg/auth"
-	"social/backend/pkg/db/dbConn"
-	"social/backend/pkg/logs"
-	"social/backend/pkg/util"
 	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
+
+	"social/backend/pkg/auth"
+	"social/backend/pkg/db/dbConn"
+	"social/backend/pkg/logs"
+	"social/backend/pkg/util"
 )
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		origin := r.Header.Get("Origin")
-		// Allow Next.js frontend on port 3000
-		return origin == "http://localhost:3000"
-	},
-}
+// =============================================================================
+// WebSocket Handler
+// =============================================================================
 
-// var Clients = make(map[string]*websocket.Conn)
-
-// var Clients = make(map[*websocket.Conn]string)
-
-type ChatPayload struct {
-	PayLoadType string `json:"payLoadType"`
-	Data        any    `json:"data"`
-}
-
-type ChatList struct {
-	AllUsers    []string `json:"allUsers"`
-	OnlineUsers []string `json:"onlineUsers"`
-}
-
-type WSMessage struct {
-	From    string `json:"from"`
-	To      string `json:"to"`
-	Content string `json:"content"`
-}
-
+// ChatHandler handles WebSocket connections for real-time chat functionality.
+// It authenticates the user, upgrades the connection, and manages message routing.
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("WebSocket Endpoint Hit")
-	user, authenticated := auth.Authenticator(w, r)
+	logs.LogInfo("WebSocket endpoint hit")
 
+	user, authenticated := auth.Authenticator(w, r)
 	if !authenticated {
 		util.Respond(w, r, http.StatusUnauthorized, nil, "User unauthorized")
 		return
 	}
 
+	// Upgrade HTTP connection to WebSocket
 	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil { // Handle message...
+	if err != nil {
+		logs.LogError("WebSocket upgrade failed: %v", err)
 		util.Respond(w, r, http.StatusBadRequest, nil, fmt.Sprintf("WebSocket upgrade failed: %v", err))
 		return
 	}
-	logs.LogInfo(fmt.Sprintf("New Client has Connected (%v) ", user.Nick_Name))
+	logs.LogInfo("Client connected: %s", user.Nick_Name)
 
 	// Clean up on function exit (connection close or error)
 	defer func() {
-		logs.LogInfo("Connection in backend is closing...")
-
+		logs.LogInfo("Client disconnecting: %s", user.Nick_Name)
 		clientManager.RemoveClient(ws)
 		go clientManager.UpdateAllUsersList()
 		ws.Close()
 	}()
 
-	// Update Online Users List
+	// Register client connection
 	clientManager.AddClient(user.Nick_Name, ws)
 	go clientManager.UpdateUsersList(ws)
 
-	// Get Chat List per User
-	userList, err := dbConn.RetrieveChatListForDisplay(user.Nick_Name)
-	if err != nil {
-		fmt.Println("err")
-		logs.LogError(err.Error())
+	// Send initial chat list to the newly connected client
+	if err := sendInitialChatList(ws, user.Nick_Name); err != nil {
+		logs.LogError("Failed to send initial chat list: %v", err)
+		return
 	}
 
-	// Get Online Users List
-	onlineClientList := clientManager.GetOnlineUsers()
-
-	// Prepare payLoad to send it to FrontEnd
-	var chatList ChatList
-	chatList.AllUsers = userList
-	chatList.OnlineUsers = onlineClientList
-
-	var payLoad ChatPayload
-	payLoad.PayLoadType = "chatList"
-	payLoad.Data = chatList
-
-	err = ws.WriteJSON(payLoad)
-	if err != nil {
-		logs.LogError("Error writing JSON for the payLoad in ChatHandler")
+	// Send message history to the client
+	if err := sendMessageHistory(ws, user.User_ID); err != nil {
+		logs.LogError("Failed to send message history: %v", err)
+		return
 	}
 
-	displayedMessagesMap, err := dbConn.RetieveMessagesMapForDisplayByUserID(user.User_ID)
-	if err != nil {
-		logs.LogError("Error writing JSON for the payLoad in ChatHandler")
-	}
-
-	payLoad.PayLoadType = "privateMessages"
-	payLoad.Data = displayedMessagesMap
-
-	err = ws.WriteJSON(payLoad)
-	if err != nil {
-		logs.LogError("Error writing JSON for the payLoad in ChatHandler")
-	}
-
+	// Main message processing loop
 	for {
 		var msg WSMessage
-		err := ws.ReadJSON(&msg)
-		if err != nil {
-			logs.LogError("Read error: " + err.Error())
+		if err := ws.ReadJSON(&msg); err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				logs.LogError("WebSocket read error: %v", err)
+			}
 			break
 		}
 
-		fmt.Println("msg:", msg)
+		logs.LogInfo("Message received: from=%s, to=%s", msg.From, msg.To)
 
-		sender, err := dbConn.GetUserIDByUserNickname(msg.From)
-		if err != nil {
-			fmt.Println("err1")
-			logs.LogError("Read error: " + err.Error())
-			break
+		if err := processAndDeliverMessage(ws, msg); err != nil {
+			logs.LogError("Failed to process message: %v", err)
+			// Continue processing other messages instead of breaking
+			continue
 		}
-		receiver, err := dbConn.GetUserIDByUserNickname(msg.To)
-		if err != nil {
-			fmt.Println("err2")
-			logs.LogError("Read error: " + err.Error())
-			break
-		}
-
-		dbMsg := dbConn.Message{
-			MessageText: strings.TrimSpace(msg.Content),
-			SenderID:    sender.User_ID,
-			ReceiverID:  receiver.User_ID,
-		}
-		messageID, err := dbConn.CreateNewMessage(dbMsg)
-		if err != nil {
-			logs.LogError("DB error: " + err.Error())
-			break
-		}
-
-		displayedMessage, err := dbConn.RetrieveMessageForDisplayByID(messageID)
-		if err != nil {
-			logs.LogError("DB error: " + err.Error())
-			break
-		}
-
-		var payLoad ChatPayload
-		payLoad.PayLoadType = "messageSent"
-		payLoad.Data = displayedMessage
-
-		err = ws.WriteJSON(payLoad)
-		if err != nil {
-			logs.LogError("Error writing JSON for the payLoad in ChatHandler")
-		}
-		go clientManager.NotifyMessageReceiver(displayedMessage.To, payLoad)
-
 	}
 }
 
-//  ===============================================================================
-//  ===============================================================================
+// =============================================================================
+// Helper Functions
+// =============================================================================
 
-type ClientManager struct {
-	clients    sync.Map // map[string]*sync.Map (conn → true)
-	connToUser sync.Map // map[*websocket.Conn]string
+// sendInitialChatList sends the chat list (all users and online users) to a client
+func sendInitialChatList(ws *websocket.Conn, userNickname string) error {
+	userList, err := dbConn.RetrieveChatListForDisplay(userNickname)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve chat list: %w", err)
+	}
+
+	chatList := ChatList{
+		AllUsers:    userList,
+		OnlineUsers: clientManager.GetOnlineUsers(),
+	}
+
+	payload := ChatPayload{
+		PayLoadType: PayloadTypeChatList,
+		Data:        chatList,
+	}
+
+	if err := ws.WriteJSON(payload); err != nil {
+		return fmt.Errorf("failed to write chat list: %w", err)
+	}
+	return nil
 }
 
+// sendMessageHistory sends the user's message history
+func sendMessageHistory(ws *websocket.Conn, userID int) error {
+	messagesMap, err := dbConn.RetieveMessagesMapForDisplayByUserID(userID)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve messages: %w", err)
+	}
+
+	payload := ChatPayload{
+		PayLoadType: PayloadTypePrivateMessages,
+		Data:        messagesMap,
+	}
+
+	if err := ws.WriteJSON(payload); err != nil {
+		return fmt.Errorf("failed to write messages: %w", err)
+	}
+	return nil
+}
+
+// processAndDeliverMessage handles the complete flow of processing and delivering a message
+func processAndDeliverMessage(ws *websocket.Conn, msg WSMessage) error {
+	// Validate message content
+	content := strings.TrimSpace(msg.Content)
+	if content == "" {
+		return fmt.Errorf("empty message content")
+	}
+
+	// Look up sender and receiver
+	sender, err := dbConn.GetUserIDByUserNickname(msg.From)
+	if err != nil {
+		return fmt.Errorf("failed to find sender '%s': %w", msg.From, err)
+	}
+
+	receiver, err := dbConn.GetUserIDByUserNickname(msg.To)
+	if err != nil {
+		return fmt.Errorf("failed to find receiver '%s': %w", msg.To, err)
+	}
+
+	// Persist message to database
+	dbMsg := dbConn.Message{
+		MessageText: content,
+		SenderID:    sender.User_ID,
+		ReceiverID:  receiver.User_ID,
+	}
+
+	messageID, err := dbConn.CreateNewMessage(dbMsg)
+	if err != nil {
+		return fmt.Errorf("failed to save message: %w", err)
+	}
+
+	// Retrieve the saved message for display
+	displayedMessage, err := dbConn.RetrieveMessageForDisplayByID(messageID)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve saved message: %w", err)
+	}
+
+	// Send confirmation to sender
+	payload := ChatPayload{
+		PayLoadType: PayloadTypeMessageSent,
+		Data:        displayedMessage,
+	}
+
+	if err := ws.WriteJSON(payload); err != nil {
+		return fmt.Errorf("failed to send confirmation: %w", err)
+	}
+
+	// Notify recipient asynchronously
+	go clientManager.NotifyMessageReceiver(displayedMessage.To, payload)
+
+	return nil
+}
+
+// =============================================================================
+// Client Manager
+// =============================================================================
+
+// ClientManager handles WebSocket client connections and provides
+// thread-safe operations for managing connected users.
+type ClientManager struct {
+	clients    sync.Map // map[string]*sync.Map (userNickname → connections)
+	connToUser sync.Map // map[*websocket.Conn]string (connection → userNickname)
+}
+
+// clientManager is the singleton instance for managing all WebSocket clients
 var clientManager = &ClientManager{}
 
-// Add a client connection
+// AddClient registers a new WebSocket connection for a user.
+// Supports multiple connections per user (e.g., multiple browser tabs).
 func (cm *ClientManager) AddClient(userNickname string, conn *websocket.Conn) {
 	val, _ := cm.clients.LoadOrStore(userNickname, &sync.Map{})
 	conns := val.(*sync.Map)
 	conns.Store(conn, true)
-
 	cm.connToUser.Store(conn, userNickname)
 }
 
-// Remove a specific client connection
+// RemoveClient removes a specific WebSocket connection.
+// If the user has no remaining connections, they are marked as offline.
 func (cm *ClientManager) RemoveClient(conn *websocket.Conn) {
-	// Lookup username by connection
-	userNicknameInterface, exists := cm.connToUser.Load(conn)
+	userNicknameVal, exists := cm.connToUser.Load(conn)
 	if !exists {
 		return
 	}
-	userNickname := userNicknameInterface.(string)
+	userNickname := userNicknameVal.(string)
 
 	val, exists := cm.clients.Load(userNickname)
 	if !exists {
@@ -198,47 +221,49 @@ func (cm *ClientManager) RemoveClient(conn *websocket.Conn) {
 	conns.Delete(conn)
 	cm.connToUser.Delete(conn)
 
-	// If no more connections, remove the username from clients map
-	hasConns := false
-	conns.Range(func(k, v interface{}) bool {
-		hasConns = true
-		return false // stop early if any connection found
-	})
-
-	if !hasConns {
+	// Check if user has any remaining connections
+	if !cm.hasConnections(conns) {
 		cm.clients.Delete(userNickname)
 	}
 }
 
+// RemoveClientByUsername forcefully disconnects all connections for a user.
 func (cm *ClientManager) RemoveClientByUsername(userNickname string) {
-	// Load user's connection map
 	val, exists := cm.clients.Load(userNickname)
 	if !exists {
 		return
 	}
 	conns := val.(*sync.Map)
 
-	// Remove all connections from connToUser
 	conns.Range(func(k, v interface{}) bool {
 		conn := k.(*websocket.Conn)
 		cm.connToUser.Delete(conn)
-		conns.Delete(conn) // Optional: clean up internal sync.Map too
+		conns.Delete(conn)
 		return true
 	})
 
-	// Finally, delete the user entry from clients map
 	cm.clients.Delete(userNickname)
 }
 
-// Check if user is online
+// hasConnections checks if a connection map has any active connections
+func (cm *ClientManager) hasConnections(conns *sync.Map) bool {
+	hasConns := false
+	conns.Range(func(k, v interface{}) bool {
+		hasConns = true
+		return false // stop early
+	})
+	return hasConns
+}
+
+// IsUserOnline checks if a user has any active WebSocket connections.
 func (cm *ClientManager) IsUserOnline(userNickname string) bool {
 	_, exists := cm.clients.Load(userNickname)
 	return exists
 }
 
-// Get list of online usernames
+// GetOnlineUsers returns a list of all currently connected usernames.
 func (cm *ClientManager) GetOnlineUsers() []string {
-	var users []string
+	users := make([]string, 0)
 	cm.clients.Range(func(key, value interface{}) bool {
 		users = append(users, key.(string))
 		return true
@@ -246,41 +271,42 @@ func (cm *ClientManager) GetOnlineUsers() []string {
 	return users
 }
 
-func (cm *ClientManager) UpdateUsersList(newWS *websocket.Conn) {
-	var chatList ChatList
-
-	var payLoad ChatPayload
-	payLoad.PayLoadType = "chatList"
-
-	chatList.OnlineUsers = cm.GetOnlineUsers()
+// UpdateUsersList broadcasts the updated user list to all connected clients
+// except the newly connected one (they already received it).
+func (cm *ClientManager) UpdateUsersList(excludeConn *websocket.Conn) {
+	onlineUsers := cm.GetOnlineUsers()
 
 	cm.connToUser.Range(func(key, value any) bool {
 		ws := key.(*websocket.Conn)
-		currentUser := value.(string)
+		if ws == excludeConn {
+			return true // skip the excluded connection
+		}
 
+		currentUser := value.(string)
 		userList, err := dbConn.RetrieveChatListForDisplay(currentUser)
 		if err != nil {
-			logs.LogError(err.Error())
+			logs.LogError("Failed to retrieve chat list for %s: %v", currentUser, err)
+			return true
 		}
 
-		chatList.AllUsers = userList
-		fmt.Println(chatList)
-		payLoad.Data = chatList
-		if ws != newWS {
-			ws.WriteJSON(payLoad)
+		payload := ChatPayload{
+			PayLoadType: PayloadTypeChatList,
+			Data: ChatList{
+				AllUsers:    userList,
+				OnlineUsers: onlineUsers,
+			},
 		}
 
+		if err := ws.WriteJSON(payload); err != nil {
+			logs.LogError("Failed to send user list update: %v", err)
+		}
 		return true
 	})
 }
 
+// UpdateAllUsersList broadcasts the updated user list to all connected clients.
 func (cm *ClientManager) UpdateAllUsersList() {
-	var chatList ChatList
-
-	var payLoad ChatPayload
-	payLoad.PayLoadType = "chatList"
-
-	chatList.OnlineUsers = cm.GetOnlineUsers()
+	onlineUsers := cm.GetOnlineUsers()
 
 	cm.connToUser.Range(func(key, value any) bool {
 		ws := key.(*websocket.Conn)
@@ -288,60 +314,56 @@ func (cm *ClientManager) UpdateAllUsersList() {
 
 		userList, err := dbConn.RetrieveChatListForDisplay(currentUser)
 		if err != nil {
-			logs.LogError(err.Error())
+			logs.LogError("Failed to retrieve chat list for %s: %v", currentUser, err)
+			return true
 		}
 
-		chatList.AllUsers = userList
-		payLoad.Data = chatList
+		payload := ChatPayload{
+			PayLoadType: PayloadTypeChatList,
+			Data: ChatList{
+				AllUsers:    userList,
+				OnlineUsers: onlineUsers,
+			},
+		}
 
-		ws.WriteJSON(payLoad)
+		if err := ws.WriteJSON(payload); err != nil {
+			logs.LogError("Failed to send user list update: %v", err)
+		}
 		return true
 	})
 }
 
+// GetConnByUsername finds and returns the first WebSocket connection for a user.
+// Returns nil if the user is not connected.
 func (cm *ClientManager) GetConnByUsername(username string) *websocket.Conn {
 	var result *websocket.Conn
 	cm.connToUser.Range(func(key, value interface{}) bool {
-		if val, ok := value.(string); ok && val == username {
+		if nickname, ok := value.(string); ok && nickname == username {
 			if conn, ok := key.(*websocket.Conn); ok {
 				result = conn
 				return false // found, stop iteration
 			}
 		}
-		return true // continue searching
+		return true
 	})
 	return result
 }
 
-func (cm *ClientManager) NotifyMessageReceiver(receiverNickname string, payLoad ChatPayload) error {
-	payLoad.PayLoadType = "messageReceived"
-	wsConnection := cm.GetConnByUsername(receiverNickname)
-	if wsConnection == nil {
-		logs.LogInfo(fmt.Sprintf("NotifyMessageReceiver: user %s is offline or has no active connection", receiverNickname))
-		return fmt.Errorf("no active websocket connection for user %s", receiverNickname)
+// NotifyMessageReceiver sends a message notification to the recipient.
+// Returns an error if the recipient is offline or the send fails.
+func (cm *ClientManager) NotifyMessageReceiver(receiverNickname string, payload ChatPayload) error {
+	payload.PayLoadType = PayloadTypeMessageReceived
+
+	wsConn := cm.GetConnByUsername(receiverNickname)
+	if wsConn == nil {
+		// User is offline - this is not necessarily an error
+		logs.LogInfo("User %s is offline, message will be delivered on next login", receiverNickname)
+		return nil
 	}
-	if err := wsConnection.WriteJSON(payLoad); err != nil {
-		return err
+
+	if err := wsConn.WriteJSON(payload); err != nil {
+		logs.LogError("Failed to notify receiver %s: %v", receiverNickname, err)
+		return fmt.Errorf("failed to notify receiver %s: %w", receiverNickname, err)
 	}
 	return nil
-}
-
-func MoreMessagesHandler(w http.ResponseWriter, r *http.Request) {
-	_, authenticated := auth.Authenticator(w, r)
-
-	if !authenticated {
-		util.Respond(w, r, http.StatusBadRequest, nil, "user not signed in")
-		return
-	}
-
-	var time string
-	err := json.NewDecoder(r.Body).Decode(&time)
-	if err != nil {
-		util.Respond(w, r, http.StatusInternalServerError, nil, "error loading more messges")
-		return
-	}
-
-	logs.LogInfo(fmt.Sprint(time))
-
-	util.Respond(w, r, http.StatusOK, nil, "loading more messges successful")
 }

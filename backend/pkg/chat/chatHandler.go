@@ -1,10 +1,13 @@
 package chat
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"social/backend/pkg/auth"
 	"social/backend/pkg/db/dbConn"
+	"social/backend/pkg/logs"
+	"social/backend/pkg/util"
 )
 
 func GetPrivateMessages(w http.ResponseWriter, r *http.Request) {
@@ -27,8 +30,6 @@ func GetPrivateMessages(w http.ResponseWriter, r *http.Request) {
 		auth.ErrorPage(w, http.StatusBadRequest)
 		return
 	}
-
-	
 
 	messages, err := dbConn.GetChatMessagesBetweenUsers(LoggedInUserID, data.ChatID)
 	if err != nil {
@@ -81,5 +82,29 @@ func GetChatList(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		http.Error(w, "hrar error", 500)
 	}
-	
+
+}
+
+// =============================================================================
+// HTTP Handlers
+// =============================================================================
+
+// FIXME: logic not implemented
+// MoreMessagesHandler handles pagination requests for loading older messages.
+func MoreMessagesHandler(w http.ResponseWriter, r *http.Request) {
+	_, authenticated := auth.Authenticator(w, r)
+	if !authenticated {
+		util.Respond(w, r, http.StatusUnauthorized, nil, "user not signed in")
+		return
+	}
+
+	var timestamp string
+	if err := json.NewDecoder(r.Body).Decode(&timestamp); err != nil {
+		util.Respond(w, r, http.StatusBadRequest, nil, "invalid request body")
+		return
+	}
+
+	logs.LogInfo("Loading more messages before: %s", timestamp)
+
+	util.Respond(w, r, http.StatusOK, nil, "loading more messages successful")
 }

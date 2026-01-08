@@ -12,13 +12,14 @@ import PostContent from '@/components/PostContent/PostContent';
 import { useEffect } from 'react';
 import GroupChatArea from '@/components/ChatArea/GroupChatArea';
 import Testing from '@/components/ChatArea/GroupChatArea';
+import CreateGroup from '@/components/CreateGroupForm/CreateGroup';
 
 export default function SocialFeed() {
     const [chatWith, setChatWith] = useState<string>('');
     const [chatter, setChatter] = useState<string>('');
     const [chatID, setchatID] = useState<string>('');
     const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);
-    const [isChatListPopupOpen, setIsChatListPopupOpen] = useState(false);
+    const [isChatGroupPopupOpen, setIsGroupListPopupOpen] = useState(false);
     const [isChatAreaPopupOpen, setIsChatAreaPopupOpen] = useState(false);
     const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false); // TODO: Need to Create EventsList Popup
     const [postListRefreshFn, setPostListRefreshFn] = useState<() => void>();
@@ -36,11 +37,11 @@ export default function SocialFeed() {
                 // setChatsData(data);
                 // console.log(data)
                 const mapped = data.map((item: any) => ({
-                    id: String(item.groupId),        
-                    username: item.title,    
+                    id: String(item.groupId),
+                    username: item.title,
                     lastMessage: item.last_message || ''
                 }));
-                
+
 
                 setChatsData(mapped);
             } catch (err) {
@@ -66,7 +67,7 @@ export default function SocialFeed() {
             <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
                 <GroupList
                     chats={chatsData}
-                    popupHandler={() => setIsChatListPopupOpen(true)}
+                    popupHandler={() => setIsGroupListPopupOpen(true)}
                     onSelectChat={(id, username) => {
 
                         console.log(id)
@@ -96,7 +97,7 @@ export default function SocialFeed() {
             <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
                 {/* <EventsList popupHandler={() => setIsEventsListPopupOpen(false)} /> */}
                 {/* <GroupChatArea chatID='1' chatWith='hrar' chatter='2'/> */}
-                <Testing chatID={chatID} chatWith={chatWith} chatter={chatter}/>
+                <Testing chatID={chatID} chatWith={chatWith} chatter={chatter} />
             </div>
 
             {/* Popups */}
@@ -130,6 +131,19 @@ export default function SocialFeed() {
                 className="max-w-9xl"
             >
                 <PostContent postID={selectedPostID} />
+            </Popup>
+
+            <Popup
+                isOpen={isChatGroupPopupOpen}
+                onClose={() => {
+                    setIsGroupListPopupOpen(false);
+                }}
+                className="max-w-9xl"
+            >
+                <CreateGroup
+                    onSubmit={() => {
+                        setIsGroupListPopupOpen(false);
+                    }} />
             </Popup>
         </div>
     );

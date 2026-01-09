@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import GroupChatArea from '@/components/ChatArea/GroupChatArea';
 import Testing from '@/components/ChatArea/GroupChatArea';
 import CreateGroup from '@/components/CreateGroupForm/CreateGroup';
+import GroupPostForm from '@/components/PostForm/GroupPostForm';
 
 export default function SocialFeed() {
     const [chatWith, setChatWith] = useState<string>('');
@@ -106,11 +107,12 @@ export default function SocialFeed() {
                 onClose={() => setIsPostFormPopupOpen(false)}
                 className="max-w-6xl"
             >
-                <PostForm
+                <GroupPostForm
                     onSubmit={() => {
                         setIsPostFormPopupOpen(false);
                         handleNewPostCreated();
                     }}
+                    groupId={Number(chatID)}
                 />
             </Popup>
             <Popup
@@ -138,7 +140,7 @@ export default function SocialFeed() {
                 onClose={() => {
                     setIsGroupListPopupOpen(false);
                 }}
-                className="max-w-9xl"
+                className="max-w-6xl"
             >
                 <CreateGroup
                     onSubmit={() => {

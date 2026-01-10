@@ -32,14 +32,15 @@ type groupInviteResponse struct {
 }
 
 type groupPostResponse struct {
-	GroupPostID  int                    `json:"groupPostId"`
-	GroupID      int                    `json:"groupId"`
-	PostID       int                    `json:"postId"`
-	Title        string                 `json:"title"`
-	Text         string                 `json:"text"`
-	AuthorID     int                    `json:"authorId"`
-	CreationTime string                 `json:"createdAt"`
-	Comments     []groupCommentResponse `json:"comments"`
+	GroupPostID    int                    `json:"groupPostId"`
+	GroupID        int                    `json:"groupId"`
+	PostID         int                    `json:"postId"`
+	Title          string                 `json:"title"`
+	Text           string                 `json:"text"`
+	AuthorID       int                    `json:"authorId"`
+	AuthorUsername string                 `json:"authorUsername"`
+	CreationTime   string                 `json:"createdAt"`
+	Comments       []groupCommentResponse `json:"comments"`
 }
 
 type groupCommentResponse struct {
@@ -559,14 +560,20 @@ func GetGroupPostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	responses := make([]groupPostResponse, 0, len(posts))
 	for _, post := range posts {
+		user, err := dbConn.GetUserByID(post.AuthorID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		postResp := groupPostResponse{
-			GroupPostID:  post.GroupPostID,
-			GroupID:      post.GroupID,
-			PostID:       post.PostID,
-			Title:        post.Title,
-			Text:         post.Text,
-			AuthorID:     post.AuthorID,
-			CreationTime: post.CreationTime.Format(time.RFC3339),
+			GroupPostID:    post.GroupPostID,
+			GroupID:        post.GroupID,
+			PostID:         post.PostID,
+			Title:          post.Title,
+			Text:           post.Text,
+			AuthorID:       post.AuthorID,
+			AuthorUsername: user.User_Name,
+			CreationTime:   post.CreationTime.Format(time.RFC3339),
 		}
 		for _, comment := range post.Comments {
 			postResp.Comments = append(postResp.Comments, groupCommentResponse{

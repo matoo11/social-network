@@ -14,6 +14,7 @@ import GroupChatArea from '@/components/ChatArea/GroupChatArea';
 import Testing from '@/components/ChatArea/GroupChatArea';
 import CreateGroup from '@/components/CreateGroupForm/CreateGroup';
 import GroupPostForm from '@/components/PostForm/GroupPostForm';
+import GroupPostList from '@/components/PostList/GroupPostList';
 
 export default function SocialFeed() {
     const [chatWith, setChatWith] = useState<string>('');
@@ -83,7 +84,8 @@ export default function SocialFeed() {
 
             {/* Middle column - 52.5% */}
             <div className="w-[52.5%] bg-gray-900 ml-[17.5%] fixed h-[90%]">
-                <PostList
+                <GroupPostList
+                    groupId={Number(chatID)}
                     popupHandler={() => setIsPostFormPopupOpen(true)}
                     onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
                     postContentPopupHandler={(postID: number) => {

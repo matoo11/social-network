@@ -1,8 +1,14 @@
 
-let ws: WebSocket;
+let ws: WebSocket | null = null;
+
 let forceDisconnect = false;
 import { UpdateUserList } from "../../components/UserList/UserList";
-import { AddChatBubble } from "@/components/ChatPopup/ChatPopup";
+
+type WSMessage = {
+    type: string;
+    data: any;
+};
+
 
 export function InitWebSocket() {
     console.log('fuck')
@@ -14,21 +20,17 @@ export function InitWebSocket() {
 
     ws.onmessage = function (event) {
         const msg = JSON.parse(event.data);
-        console.log("here10")
-        // console.log(msg)
-        if (msg.Type === "userlist") {
-            UpdateUserList(msg.Users);
-            console.log("here")
+        
+        if (msg.type === "userlist") {
+            UpdateUserList(msg.users);
         } else if (msg.type === "chat") {
-            console.log(msg)
-            // console.log(msg.data.message)
-            // AddChatBubble(msg.data, false)
             window.dispatchEvent(
                 new CustomEvent("ws-chat", { detail: msg.data })
             );
-        } else {
-
-            console.log(msg)
+        } else if (msg.type === "notification") {
+            window.dispatchEvent(
+                new CustomEvent("ws-notification", { detail: msg.data })
+            );
         }
     };
 
@@ -50,5 +52,5 @@ export function sendMessage(type: string, data: any) {
 
     console.log('sent')
     console.log(data)
-    ws.send(JSON.stringify({ type: type, data: data }));
+    ws?.send(JSON.stringify({ type: type, data: data }));
 }

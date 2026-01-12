@@ -15,6 +15,7 @@ import Testing from '@/components/ChatArea/GroupChatArea';
 import CreateGroup from '@/components/CreateGroupForm/CreateGroup';
 import GroupPostForm from '@/components/PostForm/GroupPostForm';
 import GroupPostList from '@/components/PostList/GroupPostList';
+import NotificationCenter from '@/components/Notifications/NotificationCenter';
 
 export default function SocialFeed() {
     const [chatWith, setChatWith] = useState<string>('');
@@ -109,13 +110,15 @@ export default function SocialFeed() {
                 onClose={() => setIsPostFormPopupOpen(false)}
                 className="max-w-6xl"
             >
-                <GroupPostForm
+                {/* <GroupPostForm
                     onSubmit={() => {
                         setIsPostFormPopupOpen(false);
                         handleNewPostCreated();
                     }}
                     groupId={Number(chatID)}
-                />
+                /> */}
+
+                <NotificationCenter />
             </Popup>
             <Popup
                 isOpen={isChatAreaPopupOpen}
@@ -148,7 +151,21 @@ export default function SocialFeed() {
                     onSubmit={() => {
                         setIsGroupListPopupOpen(false);
                     }} />
+                    {/* <NotificationCenter /> */}
             </Popup>
+
+            {/* <Popup
+                isOpen={isChatGroupPopupOpen}
+                onClose={() => {
+                    setIsGroupListPopupOpen(false);
+                }}
+                className="max-w-6xl"
+            >
+                <CreateGroup
+                    onSubmit={() => {
+                        setIsGroupListPopupOpen(false);
+                    }} />
+            </Popup> */}
         </div>
     );
 }

@@ -1,0 +1,173 @@
+package dbConn
+
+import (
+	"fmt"
+	"time"
+
+	"social/backend/pkg/db/dbHandler"
+)
+
+type Notification struct {
+	NotificationID     int
+	NotificationText   string
+	SourceID           int
+	TargetID           int
+	NotificationTypeID int
+	IsRead             bool
+	CreatedByID        int
+	CreationTime       time.Time
+	LastUpdatedByID    int
+	LastUpdatedTime    time.Time
+	IsActive           bool
+}
+
+type NotificationDisplay struct {
+	NotificationID     int
+	NotificationText   string
+	SourceID           int
+	NotificationTypeID int
+	IsRead             bool
+	CreationTime       time.Time
+}
+
+func CreateNotification(n Notification) (int64, error) {
+	statement := `
+	INSERT INTO Notifications (
+		Notification_Text,
+		Source_ID,
+		Target_ID,
+		Notification_Type_ID,
+		Is_Read,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	now := time.Now().Format("2006-01-02 15:04:05")
+
+	result, err := dbHandler.DB.Exec(
+		statement,
+		n.NotificationText,
+		n.SourceID,
+		n.TargetID,
+		n.NotificationTypeID,
+		false,
+		n.CreatedByID,
+		now,
+		n.CreatedByID,
+		now,
+		true,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create notification: %v", err)
+	}
+
+	notificationID, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get notification id: %v", err)
+	}
+
+	return notificationID, nil
+}
+
+
+func GetNotificationsByTargetID(targetID int) ([]NotificationDisplay, error) {
+	statement := `
+	SELECT
+		Notification_ID,
+		Notification_Text,
+		Source_ID,
+		Notification_Type_ID,
+		Is_Read,
+		Creation_Time
+	FROM Notifications
+	WHERE Target_ID = ? AND Is_Active = 1
+	ORDER BY Creation_Time DESC`
+
+	rows, err := dbHandler.DB.Query(statement, targetID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get notifications: %v", err)
+	}
+	defer rows.Close()
+
+	var notifications []NotificationDisplay
+
+	for rows.Next() {
+		var n NotificationDisplay
+		err := rows.Scan(
+			&n.NotificationID,
+			&n.NotificationText,
+			&n.SourceID,
+			&n.NotificationTypeID,
+			&n.IsRead,
+			&n.CreationTime,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan notification: %v", err)
+		}
+		notifications = append(notifications, n)
+	}
+
+	return notifications, nil
+}
+
+func DeleteNotification(notificationID int, userID int) error {
+	statement := `
+	UPDATE Notifications
+	SET Is_Active = 0,
+		Last_Updated_By_ID = ?,
+		Last_Updated_Time = ?
+	WHERE Notification_ID = ?`
+
+	now := time.Now().Format("2006-01-02 15:04:05")
+
+	_, err := dbHandler.DB.Exec(statement, userID, now, notificationID)
+	if err != nil {
+		return fmt.Errorf("failed to delete notification: %v", err)
+	}
+
+	return nil
+}
+
+func GetNotificationByID(notificationID int) (Notification, error) {
+	statement := `
+	SELECT
+		Notification_ID,
+		Notification_Text,
+		Source_ID,
+		Target_ID,
+		Notification_Type_ID,
+		Is_Read,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	FROM Notifications
+	WHERE Notification_ID = ? AND Is_Active = 1
+	LIMIT 1`
+
+	var n Notification
+
+	err := dbHandler.DB.QueryRow(statement, notificationID).Scan(
+		&n.NotificationID,
+		&n.NotificationText,
+		&n.SourceID,
+		&n.TargetID,
+		&n.NotificationTypeID,
+		&n.IsRead,
+		&n.CreatedByID,
+		&n.CreationTime,
+		&n.LastUpdatedByID,
+		&n.LastUpdatedTime,
+		&n.IsActive,
+	)
+
+	if err != nil {
+		return Notification{}, fmt.Errorf("notification not found: %v", err)
+	}
+
+	return n, nil
+}

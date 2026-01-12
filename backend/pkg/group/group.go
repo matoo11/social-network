@@ -10,6 +10,7 @@ import (
 
 	"social/backend/pkg/auth"
 	"social/backend/pkg/db/dbConn"
+	"social/backend/pkg/websocket"
 )
 
 type groupSummaryResponse struct {
@@ -248,11 +249,29 @@ func InviteToGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := dbConn.CreateGroupInvite(payload.GroupID, inviterID, payload.InviteeID)
+	inviteID, err := dbConn.CreateGroupInvite(payload.GroupID, inviterID, payload.InviteeID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	notification := dbConn.Notification {
+		NotificationText: "You have been invited to a group!",
+		NotificationTypeID: 6,
+		SourceID: inviteID,
+		TargetID: payload.InviteeID,
+		CreatedByID: inviterID,
+	}
+
+	nId, err := dbConn.CreateNotification(notification)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error creating invite here")
+		return
+	}
+
+	websocket.SendNotification(int(nId), payload.InviteeID, 6)
 
 	if err := auth.JsonEncode(w, map[string]string{"status": "invite sent"}); err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
@@ -540,7 +559,7 @@ func GetGroupPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	groupID, err := strconv.Atoi(groupIDStr)
 	if err != nil || groupID <= 0 {
-		http.Error(w, "groupId must be a positive integer", http.StatusBadRequest)
+		http.Error(w, "groupId 999 must be a positive integer", http.StatusBadRequest)
 		return
 	}
 

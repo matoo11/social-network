@@ -102,11 +102,9 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 				fmt.Println("unmarshal error 1")
 				continue
 			}
-			// fmt.Println("sento: " + sentom)
-			fmt.Println(data)
+
 			sento := data.ChatID
 			message := data.Message
-			fmt.Println(message)
 			ChatHandler(sento, message, conn, LoggedInUserID, LoggedInUsername, data.Type)
 
 		case "notification":
@@ -114,7 +112,6 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// log.Printf("Received: %+v", msg.Data)
 	clientsLock.Lock()
 	if storedConn, ok := clients[LoggedInUserID]; ok && storedConn == conn {
 		delete(clients, LoggedInUserID)
@@ -149,8 +146,8 @@ func UpdateUserList() {
 		return
 	}
 	response := struct {
-		Type  string
-		Users []dbConn.UserDisplay
+		Type  string               `json:"type"`
+		Users []dbConn.UserDisplay `json:"users"`
 	}{
 		Type:  "userlist",
 		Users: users,

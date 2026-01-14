@@ -2,7 +2,7 @@ import NotificationCard from './NotificationCard';
 
 type Props = {
     notificationId: number;
-    groupId: number;
+    inviteId: number;
     groupName: string;
     inviterName: string;
     onHandled: () => void;
@@ -10,12 +10,12 @@ type Props = {
 
 const GroupInviteNotification = ({
     notificationId,
-    groupId,
+    inviteId,
     groupName,
     inviterName,
     onHandled,
 }: Props) => {
-    const respond = async (action: 'accept' | 'reject') => {
+    const respond = async (accept: boolean) => {
         const res = await fetch(
             'http://localhost:8080/api/groups/invite/respond',
             {
@@ -24,8 +24,8 @@ const GroupInviteNotification = ({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     notificationId,
-                    groupId,
-                    action,
+                    inviteId,
+                    accept,
                 }),
             },
         );
@@ -44,13 +44,13 @@ const GroupInviteNotification = ({
 
             <div className="flex gap-2">
                 <button
-                    onClick={() => respond('accept')}
+                    onClick={() => respond(true)}
                     className="flex-1 bg-green-600 hover:bg-green-700 text-sm py-1 rounded"
                 >
                     Accept
                 </button>
                 <button
-                    onClick={() => respond('reject')}
+                    onClick={() => respond(false)}
                     className="flex-1 bg-red-600 hover:bg-red-700 text-sm py-1 rounded"
                 >
                     Reject

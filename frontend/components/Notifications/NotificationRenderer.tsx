@@ -13,7 +13,7 @@ const NotificationRenderer = ({ notification, onHandled }: Props) => {
             return (
                 <GroupInviteNotification
                     notificationId={notification.id}
-                    groupId={notification.data.groupId}
+                    inviteId={notification.data.inviteId}
                     groupName={notification.data.groupName}
                     inviterName={notification.data.inviterName}
                     onHandled={onHandled}

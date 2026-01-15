@@ -255,12 +255,12 @@ func InviteToGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	notification := dbConn.Notification {
-		NotificationText: "You have been invited to a group!",
+	notification := dbConn.Notification{
+		NotificationText:   "You have been invited to a group!",
 		NotificationTypeID: 6,
-		SourceID: inviteID,
-		TargetID: payload.InviteeID,
-		CreatedByID: inviterID,
+		SourceID:           inviteID,
+		TargetID:           payload.InviteeID,
+		CreatedByID:        inviterID,
 	}
 
 	nId, err := dbConn.CreateNotification(notification)
@@ -394,8 +394,9 @@ func RespondToInviteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload struct {
-		InviteID int  `json:"inviteId"`
-		Accept   bool `json:"accept"`
+		InviteID       int  `json:"inviteId"`
+		Accept         bool `json:"accept"`
+		NotificationId int  `json:"notificationId"`
 	}
 	if !decodeJSON(w, r, &payload) {
 		return
@@ -422,11 +423,22 @@ func RespondToInviteHandler(w http.ResponseWriter, r *http.Request) {
 		status = dbConn.StatusAccepted
 	}
 
+	err = dbConn.DeleteNotification(payload.NotificationId, actingUserID)
+	fmt.Println(payload.NotificationId)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		
+		return
+	}
 	updatedInvite, err := dbConn.UpdateGroupInviteStatus(payload.InviteID, actingUserID, status)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	
+	//
+	
 
 	if status == dbConn.StatusAccepted {
 		ownerID, err := dbConn.GetGroupOwnerID(invite.GroupID)

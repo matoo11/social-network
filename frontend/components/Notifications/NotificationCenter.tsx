@@ -22,6 +22,25 @@ const NotificationCenter = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
     useEffect(() => {
+
+        const fetchNotifications = async () => {
+            try {
+                const res = await fetch('http://localhost:8080/api/notifications/get',{
+                    credentials: "include",
+                });
+                if (!res.ok) throw new Error('Failed to fetch notifications');
+                const data = await res.json();
+                
+                const notifs = Array.isArray(data) ? data : data.data;
+                if (Array.isArray(notifs)) setNotifications(notifs);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchNotifications();
+    }, []);
+
+    useEffect(() => {
         const handler = (e: Event) => {
             const incoming = (e as CustomEvent).detail as Notification;
 

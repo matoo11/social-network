@@ -8,6 +8,7 @@ import (
 	"social/backend/pkg/follow"
 	"social/backend/pkg/group"
 	"social/backend/pkg/message"
+	"social/backend/pkg/notification"
 	"social/backend/pkg/post"
 	"social/backend/pkg/profile"
 	"social/backend/pkg/websocket"
@@ -86,6 +87,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		message.GetPrivateMessages(w, r)
 	case "/api/chat/getChatList":
 		message.GetChatList(w, r)
+	case "/api/notifications/get":
+		notification.GetGroupInviteNotificationsHandler(w, r)
 	default:
 		http.NotFound(w, r)
 	}

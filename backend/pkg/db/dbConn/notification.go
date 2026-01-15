@@ -72,7 +72,6 @@ func CreateNotification(n Notification) (int64, error) {
 	return notificationID, nil
 }
 
-
 func GetNotificationsByTargetID(targetID int) ([]NotificationDisplay, error) {
 	statement := `
 	SELECT
@@ -119,15 +118,24 @@ func DeleteNotification(notificationID int, userID int) error {
 	SET Is_Active = 0,
 		Last_Updated_By_ID = ?,
 		Last_Updated_Time = ?
-	WHERE Notification_ID = ?`
+	WHERE Notification_ID = ?
+	AND Target_ID = ?`
 
 	now := time.Now().Format("2006-01-02 15:04:05")
 
-	_, err := dbHandler.DB.Exec(statement, userID, now, notificationID)
+	res, err := dbHandler.DB.Exec(statement, userID, now, notificationID, userID)
 	if err != nil {
 		return fmt.Errorf("failed to delete notification: %v", err)
 	}
 
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return fmt.Errorf("no notification updated (wrong id or not owned by user)")
+	}
+	fmt.Println("Notification deleted successfully")
 	return nil
 }
 

@@ -16,6 +16,7 @@ import CreateGroup from '@/components/CreateGroupForm/CreateGroup';
 import GroupPostForm from '@/components/PostForm/GroupPostForm';
 import GroupPostList from '@/components/PostList/GroupPostList';
 import NotificationCenter from '@/components/Notifications/NotificationCenter';
+import Navbar from '@/components/Navbar/Navbar';
 
 export default function SocialFeed() {
     const [chatWith, setChatWith] = useState<string>('');
@@ -29,30 +30,28 @@ export default function SocialFeed() {
     const [isPostContentPopupOpen, setPostContentPopup] = useState(false);
     const [selectedPostID, setSelectedPostID] = useState<number>(0);
     const [chatsData, setChatsData] = useState([]);
+    const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
+
+    // GroupList refresh function
+    const refreshGroups = async () => {
+        try {
+            const res = await fetch("http://localhost:8080/api/groups/mine", {
+                credentials: 'include',
+            });
+            const data = await res.json();
+            const mapped = data.map((item: any) => ({
+                id: String(item.groupId),
+                username: item.title,
+                lastMessage: item.last_message || ''
+            }));
+            setChatsData(mapped);
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     useEffect(() => {
-        const loadGroups = async () => {
-            try {
-                const res = await fetch("http://localhost:8080/api/groups/mine", {
-                    credentials: 'include',
-                });
-                const data = await res.json();
-                // setChatsData(data);
-                // console.log(data)
-                const mapped = data.map((item: any) => ({
-                    id: String(item.groupId),
-                    username: item.title,
-                    lastMessage: item.last_message || ''
-                }));
-
-
-                setChatsData(mapped);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-
-        loadGroups();
+        refreshGroups();
     }, []);
 
 
@@ -66,15 +65,14 @@ export default function SocialFeed() {
 
     return (
         <div className="flex w-full h-full mt-[10vh]">
+            {/* Header with Navbar and Notifications button */}
+            <Navbar onNotificationsClick={() => setIsNotificationCenterOpen(true)} />
             {/* Left column - 17.5% */}
             <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
                 <GroupList
                     chats={chatsData}
                     popupHandler={() => setIsGroupListPopupOpen(true)}
                     onSelectChat={(id, username) => {
-
-                        console.log(id)
-                        // setIsChatAreaPopupOpen(true);
                         setchatID(id);
                         setChatWith(username);
                         setChatter("Me");
@@ -110,15 +108,15 @@ export default function SocialFeed() {
                 onClose={() => setIsPostFormPopupOpen(false)}
                 className="max-w-6xl"
             >
-                {/* <GroupPostForm
+                <GroupPostForm
                     onSubmit={() => {
                         setIsPostFormPopupOpen(false);
                         handleNewPostCreated();
                     }}
                     groupId={Number(chatID)}
-                /> */}
+                />
 
-                <NotificationCenter />
+                {/* <NotificationCenter /> */}
             </Popup>
             <Popup
                 isOpen={isChatAreaPopupOpen}
@@ -152,6 +150,16 @@ export default function SocialFeed() {
                         setIsGroupListPopupOpen(false);
                     }} />
                     {/* <NotificationCenter /> */}
+            </Popup>
+
+            {/* Notification Center Popup */}
+            {/* Pass refreshGroups to NotificationCenter as onGroupInviteHandled */}
+            <Popup
+                isOpen={isNotificationCenterOpen}
+                onClose={() => setIsNotificationCenterOpen(false)}
+                className="max-w-lg"
+            >
+                <NotificationCenter onGroupInviteHandled={refreshGroups} />
             </Popup>
 
             {/* <Popup

@@ -17,8 +17,11 @@ export type Notification = {
     data: any;
 };
 
+type NotificationCenterProps = {
+    onGroupInviteHandled?: () => void;
+};
 
-const NotificationCenter = () => {
+const NotificationCenter = ({ onGroupInviteHandled }: NotificationCenterProps) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
     useEffect(() => {
@@ -55,18 +58,28 @@ const NotificationCenter = () => {
         setNotifications((prev) => prev.filter((n) => n.id !== id));
     };
 
+    // Handler for when a group invite is accepted/rejected
+    const handleGroupInvite = () => {
+        removeNotification;
+        if (onGroupInviteHandled) onGroupInviteHandled();
+    };
+
     return (
         <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
             <div className="flex justify-center items-center h-[7.5%] pt-2 border-b-2 border-gray-600">
                 <Title text="Notifications" />
             </div>
-
             <div className="h-[92.5%] p-4 space-y-3 overflow-y-auto">
                 {notifications.map((n) => (
                     <NotificationRenderer
                         key={n.id}
                         notification={n}
-                        onHandled={() => removeNotification(n.id)}
+                        onHandled={() => {
+                            removeNotification(n.id);
+                            if (n.type === 'GROUP_INVITE' && onGroupInviteHandled) {
+                                onGroupInviteHandled();
+                            }
+                        }}
                     />
                 ))}
             </div>

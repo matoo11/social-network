@@ -7,8 +7,9 @@ import Image from 'next/image';
 import NavLink from '../NavLink/NavLink';
 import { logoutUser } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
+import { FaBell } from 'react-icons/fa';
 
-const Navbar = () => {
+const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void }) => {
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -55,10 +56,17 @@ const Navbar = () => {
                         Social Network
                     </span>
                 </a>
-                <div
-                    className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative"
-                    ref={dropdownRef}
-                >
+                <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative">
+                    {/* Notifications button */}
+                    <button
+                        type="button"
+                        className="mr-4 flex items-center justify-center bg-gray-800 text-white rounded-full w-10 h-10 hover:bg-gray-700"
+                        aria-label="Notifications"
+                        onClick={onNotificationsClick}
+                    >
+                        <FaBell size={20} />
+                    </button>
+
                     <button
                         type="button"
                         className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"

@@ -41,14 +41,14 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         const loadMessages = async () => {
             try {
                 const res = await fetch(
-                    "http://localhost:8080/api/message/getPrivateMessages",
+                    "http://localhost:8080/api/message/getGroupMessages",
                     {
                         method: "POST",
                         credentials: "include",
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ userID: Number(chatID) }),
+                        body: JSON.stringify({ groupID: Number(chatID) }),
                     }
                 );
 
@@ -56,7 +56,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 
                 const mapped = data.map((m: any) => ({
                     id: m.MessageID,
-                    username: m.SenderID === Number(chatter) ? chatter : chatWith,
+                    username: m.SenderUsername || (m.IsSender ? chatter : `User ${m.SenderID}`),
                     text: m.Content,
                     type: m.IsSender ? "sent" : "received",
                     time: m.CreationTime,
@@ -80,10 +80,13 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         const listener = (e: any) => {
             const data = e.detail;
 
-            // if (data.senderID !== chatWith && data.recieverID !== chatter) return;
-            if (String(data.senderID) !== chatID) return;
-            console.log(chatID)
-            console.log(data)
+
+            // Ignore private chat payloads (they carry receiver info).
+            if (data?.recieverUsername || data?.recieverID) {
+                if (data?.recieverID && String(data.recieverID) !== chatID) return;
+                if (data?.recieverUsername) return;
+            }
+
             const incoming: Message = {
                 id: Date.now(),
                 username: data.senderUsername,
@@ -108,16 +111,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     const handleSend = () => {
         if (!input.trim()) return;
 
-        const newMessage: Message = {
-            id: Date.now(),
-            username: chatter,
-            text: input,
-            type: 'sent',
-            time: new Date().toISOString()
-        };
-
-        setMessages([...messages, newMessage]);
-        SendChatMessage(Number(chatID), input, 1)
+        SendChatMessage(Number(chatID), input, 2)
         // sendMessage("chat", {
         //     from: chatter,
         //     to: chatWith,
@@ -188,7 +182,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 
 // export default GroupChatArea;
 
-const Testing: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
+const GroupChat: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 
     return (
         <>
@@ -207,4 +201,4 @@ const Testing: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     )
 }
 
-export default Testing
+export default GroupChat

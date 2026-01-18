@@ -85,6 +85,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		group.RespondToEventHandler(w, r)
 	case "/api/message/getPrivateMessages":
 		message.GetPrivateMessages(w, r)
+	case "/api/message/getGroupMessages":
+		message.GetGroupMessages(w, r)
 	case "/api/chat/getChatList":
 		message.GetChatList(w, r)
 	case "/api/notifications/get":

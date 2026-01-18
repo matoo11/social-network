@@ -18,7 +18,7 @@ type GroupMessage struct {
 
 func CreateGroupMessage(message GroupMessage) error {
 	
-	statement := `INSERT INTO GroupMessages
+	statement := `INSERT INTO Group_Messages
     (
         Message_Text,
         Sender_ID,
@@ -60,7 +60,7 @@ func GetGroupMessagesByID(GroupID int) ([]GroupMessage, error) {
         Created_By_ID,
         Creation_Time,
         Is_Active
-    FROM GroupMessages
+    FROM Group_Messages
     WHERE Group_ID = ?
     ORDER BY Creation_Time ASC`
 

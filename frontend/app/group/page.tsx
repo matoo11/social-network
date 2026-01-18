@@ -10,13 +10,13 @@ import EventCalendar from '@/components/EventCalendar/EventCalendar';
 import ChatArea from '@/components/ChatArea/ChatArea';
 import PostContent from '@/components/PostContent/PostContent';
 import { useEffect } from 'react';
-import GroupChatArea from '@/components/ChatArea/GroupChatArea';
 import Testing from '@/components/ChatArea/GroupChatArea';
 import CreateGroup from '@/components/CreateGroupForm/CreateGroup';
 import GroupPostForm from '@/components/PostForm/GroupPostForm';
 import GroupPostList from '@/components/PostList/GroupPostList';
 import NotificationCenter from '@/components/Notifications/NotificationCenter';
 import Navbar from '@/components/Navbar/Navbar';
+import GroupChat from '@/components/ChatArea/GroupChatArea';
 
 export default function SocialFeed() {
     const [chatWith, setChatWith] = useState<string>('');
@@ -99,7 +99,7 @@ export default function SocialFeed() {
             <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
                 {/* <EventsList popupHandler={() => setIsEventsListPopupOpen(false)} /> */}
                 {/* <GroupChatArea chatID='1' chatWith='hrar' chatter='2'/> */}
-                <Testing chatID={chatID} chatWith={chatWith} chatter={chatter} />
+                <GroupChat chatID={chatID} chatWith={chatWith} chatter={chatter} />
             </div>
 
             {/* Popups */}
@@ -149,7 +149,7 @@ export default function SocialFeed() {
                     onSubmit={() => {
                         setIsGroupListPopupOpen(false);
                     }} />
-                    {/* <NotificationCenter /> */}
+                    
             </Popup>
 
             {/* Notification Center Popup */}
@@ -162,18 +162,6 @@ export default function SocialFeed() {
                 <NotificationCenter onGroupInviteHandled={refreshGroups} />
             </Popup>
 
-            {/* <Popup
-                isOpen={isChatGroupPopupOpen}
-                onClose={() => {
-                    setIsGroupListPopupOpen(false);
-                }}
-                className="max-w-6xl"
-            >
-                <CreateGroup
-                    onSubmit={() => {
-                        setIsGroupListPopupOpen(false);
-                    }} />
-            </Popup> */}
         </div>
     );
 }

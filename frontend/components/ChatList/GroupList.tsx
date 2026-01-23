@@ -11,11 +11,12 @@ import Username from '../Username/Username';
 type ChatListProps = {
     chats: ChatCardProps[];
     onSelectChat?: (id: string, username: string) => void;
+    selectedChatId?: string;
 
     popupHandler: () => void;
 };
 
-const GroupList: React.FC<ChatListProps> = ({ chats, onSelectChat, popupHandler }) => {
+const GroupList: React.FC<ChatListProps> = ({ chats, onSelectChat, selectedChatId, popupHandler }) => {
     const handleChatClick = (id: string, username: string) => {
         onSelectChat?.(id, username);
     };
@@ -36,6 +37,7 @@ const GroupList: React.FC<ChatListProps> = ({ chats, onSelectChat, popupHandler 
                             username={chat.username}
                             lastMessage={chat.lastMessage}
                             avatarUrl={chat.avatarUrl}
+                            selected={String(chat.id) === String(selectedChatId)}
                             onChatClick={() => handleChatClick(String(chat.id), chat.username)}
 
                         />

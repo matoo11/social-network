@@ -72,6 +72,7 @@ export default function SocialFeed() {
                 <GroupList
                     chats={chatsData}
                     popupHandler={() => setIsGroupListPopupOpen(true)}
+                    selectedChatId={chatID}
                     onSelectChat={(id, username) => {
                         setchatID(id);
                         setChatWith(username);

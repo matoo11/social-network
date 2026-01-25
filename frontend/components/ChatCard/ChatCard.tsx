@@ -10,12 +10,13 @@ export type ChatCardProps = {
     lastMessage?: string;
     avatarUrl?: string;
     selected?: boolean;
+    actions?: React.ReactNode;
     onChatClick?: (username: string) => void;
 };
 
-const ChatCard: React.FC<ChatCardProps> = ({ username, lastMessage, avatarUrl, selected, onChatClick }) => {
+const ChatCard: React.FC<ChatCardProps> = ({ username, lastMessage, avatarUrl, selected, actions, onChatClick }) => {
     const className = [
-        'rounded-lg cursor-pointer shadow-sm overflow-hidden transition duration-300 ease-in-out',
+        'rounded-lg cursor-pointer shadow-sm transition duration-300 ease-in-out',
         selected
             ? 'bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600'
             : 'dark:bg-gray-800 hover:bg-gray-600 dark:hover:bg-gray-700',
@@ -40,6 +41,7 @@ const ChatCard: React.FC<ChatCardProps> = ({ username, lastMessage, avatarUrl, s
                         </p>
                     ) : null}
                 </div>
+                {actions ? <div className="flex items-center">{actions}</div> : null}
             </div>
         </div>
     );

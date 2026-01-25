@@ -278,6 +278,64 @@ func InviteToGroupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		auth.ErrorPage(w, http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, ok := getLoggedInUserID(w, r)
+	if !ok {
+		return
+	}
+
+	var payload struct {
+		GroupID int `json:"groupId"`
+	}
+	if !decodeJSON(w, r, &payload) {
+		return
+	}
+
+	if payload.GroupID <= 0 {
+		http.Error(w, "groupId must be a positive integer", http.StatusBadRequest)
+		return
+	}
+
+	isMember, err := dbConn.IsGroupMember(payload.GroupID, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !isMember {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
+	members, err := dbConn.GetGroupMembers(payload.GroupID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	type memberResponse struct {
+		UserID   int    `json:"userId"`
+		Username string `json:"username"`
+	}
+
+	resp := make([]memberResponse, 0, len(members))
+	for _, m := range members {
+		user, err := dbConn.GetUserByID(m.UserID)
+		if err != nil {
+			continue
+		}
+		resp = append(resp, memberResponse{UserID: m.UserID, Username: user.User_Name})
+	}
+
+	if err := auth.JsonEncode(w, resp); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
+}
+
 func RequestToJoinGroupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		auth.ErrorPage(w, http.StatusMethodNotAllowed)
@@ -428,7 +486,7 @@ func RespondToInviteHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		
+
 		return
 	}
 	updatedInvite, err := dbConn.UpdateGroupInviteStatus(payload.InviteID, actingUserID, status)
@@ -436,9 +494,8 @@ func RespondToInviteHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	//
-	
 
 	if status == dbConn.StatusAccepted {
 		ownerID, err := dbConn.GetGroupOwnerID(invite.GroupID)

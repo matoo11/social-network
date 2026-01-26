@@ -130,7 +130,7 @@ const GroupList: React.FC<ChatListProps> = ({
                                             disabled={Boolean(chat.joined)}
                                             onClick={() => onRequestToJoin?.(String(chat.id), chat.username)}
                                         >
-                                            {chat.joined ? 'Joined' : 'Request to join'}
+                                            {chat.joined ? 'Joined' : 'Join'}
                                         </button>
                                     </div>
                                 )

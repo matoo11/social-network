@@ -359,11 +359,33 @@ func RequestToJoinGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := dbConn.CreateGroupJoinRequest(payload.GroupID, requesterID)
+	requestID, err := dbConn.CreateGroupJoinRequest(payload.GroupID, requesterID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	ownerID, err := dbConn.GetGroupOwnerID(payload.GroupID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	notification := dbConn.Notification{
+		NotificationText:   "New group join request",
+		NotificationTypeID: 10,
+		SourceID:           requestID,
+		TargetID:           ownerID,
+		CreatedByID:        requesterID,
+	}
+
+	nId, err := dbConn.CreateNotification(notification)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	websocket.SendNotification(int(nId), ownerID, 10)
 
 	if err := auth.JsonEncode(w, map[string]string{"status": "request sent"}); err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)

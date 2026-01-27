@@ -13,13 +13,17 @@ type GroupInvite struct {
 	InviterName string `json:"inviterName"`
 }
 
+type JoinGroupRequest struct {
+	InviteId      int    `json:"inviteId"`
+	GroupName     string `json:"groupName"`
+	RequesterName string `json:"requesterName"`
+}
+
 type Notification struct {
 	Id   int    `json:"id"`
 	Type string `json:"type"`
 	Data any    `json:"data"`
 }
-
-
 
 func GetGroupInviteNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 	user, ok := auth.Authenticator(w, r)
@@ -40,6 +44,11 @@ func GetGroupInviteNotificationsHandler(w http.ResponseWriter, r *http.Request) 
 		switch n.NotificationTypeID {
 		case 6: // Group Invite
 			notif, ok := mapGroupInviteNotification(n)
+			if ok {
+				out = append(out, notif)
+			}
+		case 10: // Join Group Request
+			notif, ok := mapJoinGroupRequestNotification(n)
 			if ok {
 				out = append(out, notif)
 			}
@@ -76,6 +85,33 @@ func mapGroupInviteNotification(n dbConn.NotificationDisplay) (Notification, boo
 			InviteId:    inviteId,
 			GroupName:   group.Title,
 			InviterName: inviterName,
+		},
+	}, true
+}
+
+func mapJoinGroupRequestNotification(n dbConn.NotificationDisplay) (Notification, bool) {
+	inviteId := n.SourceID
+	inv, err := dbConn.GetGroupInviteByID(inviteId)
+	if err != nil {
+		return Notification{}, false
+	}
+	group, err := dbConn.GetGroupByID(inv.GroupID)
+	if err != nil {
+		return Notification{}, false
+	}
+	requester, err := dbConn.GetUserByID(inv.InviterID)
+	requesterName := ""
+	if err == nil {
+		requesterName = requester.User_Name
+	}
+
+	return Notification{
+		Id:   n.NotificationID,
+		Type: "JOIN_GROUP_REQUEST",
+		Data: JoinGroupRequest{
+			InviteId:      inviteId,
+			GroupName:     group.Title,
+			RequesterName: requesterName,
 		},
 	}, true
 }

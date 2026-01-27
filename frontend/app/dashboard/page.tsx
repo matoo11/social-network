@@ -11,6 +11,7 @@ import PostImage from '@/components/PostImage/PostImage';
 import ProfileImage from '@/components/ProfileImage/ProfileImage';
 import ChatPopup from '@/components/ChatPopup/ChatPopup';
 import { title } from 'process';
+import Navbar from '@/components/Navbar/Navbar';
 
 const Dashboard = () => {
     const router = useRouter();
@@ -214,6 +215,7 @@ const Dashboard = () => {
 
     return (
         <div className={styles.dashboardContainer}>
+            <Navbar />
             <ChatPopup />
             <UserList />
             <h1>Welcome to the Dashboard!</h1>

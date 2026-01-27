@@ -12,6 +12,12 @@ type GroupInvite struct {
 	InviterName string `json:"inviterName"`
 }
 
+type JoinGroupRequest struct {
+	InviteId      int    `json:"inviteId"`
+	GroupName     string `json:"groupName"`
+	RequesterName string `json:"requesterName"`
+}
+
 type Notification struct {
 	Id   int    `json:"Id"`
 	Type string `json:"type"`
@@ -65,6 +71,53 @@ func SendNotification(nId int, to int, nType int) {
 			conn.Conn.WriteJSON(res)
 			conn.Lock.Unlock()
 			fmt.Println("sentttt")
+		}
+	case 10:
+		conn := GetClientConn(to)
+		notification, err := dbConn.GetNotificationByID(nId)
+		if err != nil {
+			return
+		}
+
+		inviteId := notification.SourceID
+		inv, err := dbConn.GetGroupInviteByID(inviteId)
+		if err != nil {
+			return
+		}
+
+		group, err := dbConn.GetGroupByID(inv.GroupID)
+		if err != nil {
+			return
+		}
+
+		requester, err := dbConn.GetUserByID(inv.InviterID)
+		requesterName := ""
+		if err == nil {
+			requesterName = requester.User_Name
+		}
+
+		payload := JoinGroupRequest{
+			InviteId:      inviteId,
+			GroupName:     group.Title,
+			RequesterName: requesterName,
+		}
+
+		f := Notification{
+			Id:   nId,
+			Type: "JOIN_GROUP_REQUEST",
+			Data: payload,
+		}
+
+		data, _ := json.Marshal(f)
+		res := Response{
+			Type: "notification",
+			Data: data,
+		}
+
+		if conn != nil {
+			conn.Lock.Lock()
+			conn.Conn.WriteJSON(res)
+			conn.Lock.Unlock()
 		}
 	}
 }

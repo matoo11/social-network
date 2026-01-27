@@ -50,10 +50,9 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
     };
 
     useEffect(() => {
-        if (onSelectionChange) {
-            onSelectionChange(checkedList);
-        }
-    }, [checkedList, onSelectionChange]);
+        onSelectionChange?.(checkedList);
+    }, [checkedList]);
+
 
     useEffect(() => {
         const fetchData = async () => {

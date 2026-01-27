@@ -10,6 +10,7 @@ import (
 
 	"social/backend/pkg/auth"
 	"social/backend/pkg/db/dbConn"
+	"social/backend/pkg/websocket"
 )
 
 type groupSummaryResponse struct {
@@ -32,14 +33,15 @@ type groupInviteResponse struct {
 }
 
 type groupPostResponse struct {
-	GroupPostID  int                    `json:"groupPostId"`
-	GroupID      int                    `json:"groupId"`
-	PostID       int                    `json:"postId"`
-	Title        string                 `json:"title"`
-	Text         string                 `json:"text"`
-	AuthorID     int                    `json:"authorId"`
-	CreationTime string                 `json:"createdAt"`
-	Comments     []groupCommentResponse `json:"comments"`
+	GroupPostID    int                    `json:"groupPostId"`
+	GroupID        int                    `json:"groupId"`
+	PostID         int                    `json:"postId"`
+	Title          string                 `json:"title"`
+	Text           string                 `json:"text"`
+	AuthorID       int                    `json:"authorId"`
+	AuthorUsername string                 `json:"authorUsername"`
+	CreationTime   string                 `json:"createdAt"`
+	Comments       []groupCommentResponse `json:"comments"`
 }
 
 type groupCommentResponse struct {
@@ -247,13 +249,89 @@ func InviteToGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := dbConn.CreateGroupInvite(payload.GroupID, inviterID, payload.InviteeID)
+	inviteID, err := dbConn.CreateGroupInvite(payload.GroupID, inviterID, payload.InviteeID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	notification := dbConn.Notification{
+		NotificationText:   "You have been invited to a group!",
+		NotificationTypeID: 6,
+		SourceID:           inviteID,
+		TargetID:           payload.InviteeID,
+		CreatedByID:        inviterID,
+	}
+
+	nId, err := dbConn.CreateNotification(notification)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error creating invite here")
+		return
+	}
+
+	websocket.SendNotification(int(nId), payload.InviteeID, 6)
+
 	if err := auth.JsonEncode(w, map[string]string{"status": "invite sent"}); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
+}
+
+func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		auth.ErrorPage(w, http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, ok := getLoggedInUserID(w, r)
+	if !ok {
+		return
+	}
+
+	var payload struct {
+		GroupID int `json:"groupId"`
+	}
+	if !decodeJSON(w, r, &payload) {
+		return
+	}
+
+	if payload.GroupID <= 0 {
+		http.Error(w, "groupId must be a positive integer", http.StatusBadRequest)
+		return
+	}
+
+	isMember, err := dbConn.IsGroupMember(payload.GroupID, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !isMember {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
+	members, err := dbConn.GetGroupMembers(payload.GroupID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	type memberResponse struct {
+		UserID   int    `json:"userId"`
+		Username string `json:"username"`
+	}
+
+	resp := make([]memberResponse, 0, len(members))
+	for _, m := range members {
+		user, err := dbConn.GetUserByID(m.UserID)
+		if err != nil {
+			continue
+		}
+		resp = append(resp, memberResponse{UserID: m.UserID, Username: user.User_Name})
+	}
+
+	if err := auth.JsonEncode(w, resp); err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 	}
 }
@@ -281,11 +359,33 @@ func RequestToJoinGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := dbConn.CreateGroupJoinRequest(payload.GroupID, requesterID)
+	requestID, err := dbConn.CreateGroupJoinRequest(payload.GroupID, requesterID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	ownerID, err := dbConn.GetGroupOwnerID(payload.GroupID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	notification := dbConn.Notification{
+		NotificationText:   "New group join request",
+		NotificationTypeID: 10,
+		SourceID:           requestID,
+		TargetID:           ownerID,
+		CreatedByID:        requesterID,
+	}
+
+	nId, err := dbConn.CreateNotification(notification)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	websocket.SendNotification(int(nId), ownerID, 10)
 
 	if err := auth.JsonEncode(w, map[string]string{"status": "request sent"}); err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
@@ -374,8 +474,9 @@ func RespondToInviteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload struct {
-		InviteID int  `json:"inviteId"`
-		Accept   bool `json:"accept"`
+		InviteID       int  `json:"inviteId"`
+		Accept         bool `json:"accept"`
+		NotificationId int  `json:"notificationId"`
 	}
 	if !decodeJSON(w, r, &payload) {
 		return
@@ -402,11 +503,21 @@ func RespondToInviteHandler(w http.ResponseWriter, r *http.Request) {
 		status = dbConn.StatusAccepted
 	}
 
+	err = dbConn.DeleteNotification(payload.NotificationId, actingUserID)
+	fmt.Println(payload.NotificationId)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+
+		return
+	}
 	updatedInvite, err := dbConn.UpdateGroupInviteStatus(payload.InviteID, actingUserID, status)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	//
 
 	if status == dbConn.StatusAccepted {
 		ownerID, err := dbConn.GetGroupOwnerID(invite.GroupID)
@@ -539,7 +650,7 @@ func GetGroupPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	groupID, err := strconv.Atoi(groupIDStr)
 	if err != nil || groupID <= 0 {
-		http.Error(w, "groupId must be a positive integer", http.StatusBadRequest)
+		http.Error(w, "groupId 999 must be a positive integer", http.StatusBadRequest)
 		return
 	}
 
@@ -559,14 +670,20 @@ func GetGroupPostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	responses := make([]groupPostResponse, 0, len(posts))
 	for _, post := range posts {
+		user, err := dbConn.GetUserByID(post.AuthorID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		postResp := groupPostResponse{
-			GroupPostID:  post.GroupPostID,
-			GroupID:      post.GroupID,
-			PostID:       post.PostID,
-			Title:        post.Title,
-			Text:         post.Text,
-			AuthorID:     post.AuthorID,
-			CreationTime: post.CreationTime.Format(time.RFC3339),
+			GroupPostID:    post.GroupPostID,
+			GroupID:        post.GroupID,
+			PostID:         post.PostID,
+			Title:          post.Title,
+			Text:           post.Text,
+			AuthorID:       post.AuthorID,
+			AuthorUsername: user.User_Name,
+			CreationTime:   post.CreationTime.Format(time.RFC3339),
 		}
 		for _, comment := range post.Comments {
 			postResp.Comments = append(postResp.Comments, groupCommentResponse{

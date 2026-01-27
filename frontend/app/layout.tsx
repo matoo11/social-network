@@ -40,7 +40,7 @@ export default function RootLayout({
                 <UserProvider>
                     <WebSocketInit />
                     {children}
-                    <Navbar />
+                    {/* <Navbar /> */}
                 </UserProvider>
             </body>
         </html>

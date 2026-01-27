@@ -3,13 +3,14 @@
 import ChatList from '@/components/ChatList/ChatList';
 import PostList from '@/components/PostList/PostList';
 import Popup from '@/components/Popup/Popup';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PostForm from '@/components/PostForm/PostForm';
 import EventsList from '@/components/EventsList/EventsList';
 import ChatArea from '@/components/ChatArea/ChatArea';
 import PostContent from '@/components/PostContent/PostContent';
 import { useUser } from '../context/UserContext';
 import SignInForm from '@/components/SignInForm/SignInForm';
+import Navbar from '@/components/Navbar/Navbar';
 
 export default function SocialFeed() {
     const { user } = useUser();
@@ -26,7 +27,7 @@ export default function SocialFeed() {
     const [chatsData, setChatsData] = useState([]);
     const [isSignInPopupOpen, setIsSignInPopupOpen] = useState(false);
 
-    useEffect(() => {
+     useEffect(() => {
         const loadChats = async () => {
             try {
                 const res = await fetch("http://localhost:8080/api/chat/getChatList", {
@@ -61,28 +62,11 @@ export default function SocialFeed() {
 
     return (
         <div className="flex w-full h-full mt-[10vh]">
+            <Navbar />
             {/* Left column - 17.5% */}
             <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
                 <ChatList
-                    //TODO: Need to create a function to return the chat list data from the backend
-                    chats={[
-                        { id: '1', username: 'Alice', lastMessage: 'Hello!' },
-                        { id: '2', username: 'Bob', lastMessage: 'How are you?' },
-                        { id: '3', username: 'Charlie', lastMessage: 'See you later.' },
-                        { id: '4', username: 'Diana', lastMessage: 'Let’s meet tomorrow.' },
-                        { id: '5', username: 'Ethan', lastMessage: 'Can you call me?' },
-                        { id: '6', username: 'Fiona', lastMessage: 'Got the files, thanks!' },
-                        { id: '7', username: 'George', lastMessage: 'Where are you?' },
-                        { id: '8', username: 'Hannah', lastMessage: 'Lunch at 1?' },
-                        { id: '9', username: 'Ivan', lastMessage: 'I’ll check and let you know.' },
-                        { id: '10', username: 'Julia', lastMessage: 'Awesome work today!' },
-                        { id: '11', username: 'Kevin', lastMessage: 'I’ll be there in 10.' },
-                        { id: '12', username: 'Laura', lastMessage: 'Don’t forget the meeting.' },
-                        { id: '13', username: 'Mike', lastMessage: 'That sounds great!' },
-                        { id: '14', username: 'Nina', lastMessage: 'Thanks for the update.' },
-                        { id: '15', username: 'Oscar', lastMessage: 'Can we reschedule?' },
-                        { id: '16', username: 'Paula', lastMessage: 'See you at the event.' },
-                    ]}
+                    chats={chatsData}
                     popupHandler={() => setIsChatListPopupOpen(true)}
                     onSelectChat={(id, username) => {
                         setIsChatAreaPopupOpen(true);

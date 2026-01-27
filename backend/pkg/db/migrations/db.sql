@@ -428,9 +428,6 @@ CREATE TABLE Notifications
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Notification_ID AUTOINCREMENT),
-  FOREIGN KEY (Source_ID) REFERENCES Users (User_ID)
-    ON UPDATE CASCADE
-    ON DELETE CASCADE,
   FOREIGN KEY (Target_ID) REFERENCES Users (User_ID)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
@@ -482,7 +479,8 @@ INSERT INTO Notification_Types (Notification_Type_Name, Created_By_ID, Creation_
 ('Group Invite', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
 ('Group Invite Accepted', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
 ('Group Invite Rejected', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
-('Event Invitation', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);   
+('Event Invitation', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Join Group Request', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);   
 
 INSERT INTO EVENT_OPTIONS (Event_Option_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
 ('Going', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),

@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import PostList from '@/components/PostList/PostList';
 import FollowButton from '@/components/FollowButton/FollowButton';
-import UserList from '@/components/UserList/UserList';
-import UserListButton from '@/components/UserList/UserListButton';
 import PostImage from '@/components/PostImage/PostImage';
 import ProfileImage from '@/components/ProfileImage/ProfileImage';
 import ChatPopup from '@/components/ChatPopup/ChatPopup';
@@ -217,7 +215,6 @@ const Dashboard = () => {
         <div className={styles.dashboardContainer}>
             <Navbar />
             <ChatPopup />
-            <UserList />
             <h1>Welcome to the Dashboard!</h1>
             <div className={styles.logoutContainer}>
                 <h2>Logout Form</h2>

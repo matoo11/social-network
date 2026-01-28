@@ -160,11 +160,24 @@ func GetPublicPosts() ([]PostDisplay, error) {
 			return nil, fmt.Errorf("failed to scan chat message: %v", err)
 		}
 
-		post.Comments, err = GetDisplayedCommentsByPostID(post.PostID)
+		var comments []CommentDisplay
+		
+		commments, err := GetCommentsByPostID(post.PostID)
 		if err != nil {
-			fmt.Println(err)
-			return nil, err
+			return nil, fmt.Errorf("failed to fetch comments for post %d: %w", post.PostID, err)
 		}
+		
+		for _, c := range commments {
+			comments = append(comments, CommentDisplay{
+				CommentID:    c.CommentID,
+				PostID:       c.PostID,
+				CommentText:  c.CommentText,
+				CreationTime: c.CreationTime,
+				CreatedByID: c.CreatedByID,
+			})
+		}
+
+		post.Comments = comments
 		posts = append(posts, post)
 	}
 
@@ -349,10 +362,24 @@ func GetPostsByUserForViewer(ownerID, viewerID int) ([]PostDisplay, error) {
 			return nil, fmt.Errorf("failed to scan user post: %w", err)
 		}
 
-		post.Comments, err = GetDisplayedCommentsByPostID(post.PostID)
+		var comments []CommentDisplay
+		
+		commments, err := GetCommentsByPostID(post.PostID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch comments for post %d: %w", post.PostID, err)
 		}
+		
+		for _, c := range commments {
+			comments = append(comments, CommentDisplay{
+				CommentID:    c.CommentID,
+				PostID:       c.PostID,
+				CommentText:  c.CommentText,
+				CreationTime: c.CreationTime,
+				CreatedByID: c.CreatedByID,
+			})
+		}
+
+		post.Comments = comments
 
 		posts = append(posts, post)
 	}
@@ -470,10 +497,24 @@ func GetPostByID(postID int) (PostDisplay, error) {
 		return post, fmt.Errorf("failed to get post by ID: %v", err)
 	}
 
-	post.Comments, err = GetDisplayedCommentsByPostID(post.PostID)
-	if err != nil {
-		return post, fmt.Errorf("failed to get comments for post ID %d: %v", post.PostID, err)
-	}
+	var comments []CommentDisplay
+		
+		commments, err := GetCommentsByPostID(post.PostID)
+		if err != nil {
+			return PostDisplay{}, fmt.Errorf("failed to fetch comments for post %d: %w", post.PostID, err)
+		}
+		
+		for _, c := range commments {
+			comments = append(comments, CommentDisplay{
+				CommentID:    c.CommentID,
+				PostID:       c.PostID,
+				CommentText:  c.CommentText,
+				CreationTime: c.CreationTime,
+				CreatedByID: c.CreatedByID,
+			})
+		}
+
+		post.Comments = comments
 
 	return post, nil
 }

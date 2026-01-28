@@ -8,8 +8,34 @@ import (
 	"social/backend/pkg/db/dbConn"
 	"social/backend/pkg/util"
 	"strconv"
-	"strings"
+	"time"
 )
+
+type displayedCommentDTO struct {
+	PostID                int       `json:"postId"`
+	CommentID             int       `json:"commentId"`
+	CommentText           string    `json:"commentText"`
+	CommenterNickname     string    `json:"commenterNickname"`
+	CommentProfileImageID int       `json:"commentProfileImageId"`
+	CommentImageID        int       `json:"commentImageId"`
+	CommentTime           time.Time `json:"commentTime"`
+	NumberOfLikes         int       `json:"numberOfLikes"`
+	NumberOfDislikes      int       `json:"numberOfDislikes"`
+}
+
+type displayedPostDTO struct {
+	PostID           int                   `json:"postId"`
+	PostTitle        string                `json:"postTitle"`
+	PostText         string                `json:"postText"`
+	PostType         string                `json:"postType"`
+	PosterNickname   string                `json:"posterNickname"`
+	PostImageID      int                   `json:"postImageId"`
+	PostTime         time.Time             `json:"postTime"`
+	NumberOfLikes    int                   `json:"numberOfLikes"`
+	NumberOfDislikes int                   `json:"numberOfDislikes"`
+	NumberOfComments int                   `json:"numberOfComments"`
+	Comments         []displayedCommentDTO `json:"comments"`
+}
 
 type PostPayload struct {
 	Message      *string `json:"message"`
@@ -250,84 +276,74 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func FetchAllPostsHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := dbConn.RetrieveAllDataForDisplay()
-	if err != nil {
-		util.Respond(w, r, http.StatusInternalServerError, nil, err.Error())
-		return
-	}
-	util.Respond(w, r, http.StatusOK, data, "Fetch all posts successful")
-}
+// func FetchAllPostsHandler(w http.ResponseWriter, r *http.Request) {
+// 	user, authenticated := auth.Authenticator(w, r)
+// 	if !authenticated {
+// 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+// 		return
+// 	}
+
+// 	posts, err := fetchAllVisiblePostsForUser(user.User_ID)
+// 	if err != nil {
+// 		util.Respond(w, r, http.StatusInternalServerError, nil, err.Error())
+// 		return
+// 	}
+// 	util.Respond(w, r, http.StatusOK, posts, "Fetch all posts successful")
+// }
 
 func FetchPostByIDHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		util.Respond(w, r, http.StatusMethodNotAllowed, nil, "Method not allowed")
+		return
+	}
+
+	_, authenticated := auth.Authenticator(w, r)
+	if !authenticated {
+		util.Respond(w, r, http.StatusUnauthorized, nil, http.StatusText(http.StatusUnauthorized))
+		return
+	}
 
 	var req PostIDRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		util.Respond(w, r, http.StatusBadRequest, nil, "Invalid JSON")
 		return
 	}
-	fmt.Println("FetchPostByIDHandler called with ID:", req.ID)
-	data, err := dbConn.RetrieveAllDataForDisplayByPostID(req.ID)
-	if err != nil {
-		util.Respond(w, r, http.StatusInternalServerError, nil, err.Error())
+	if req.ID == 0 {
+		util.Respond(w, r, http.StatusBadRequest, nil, "Missing post id")
 		return
 	}
-	fmt.Println("Fetched Post Data:", data)
-	util.Respond(w, r, http.StatusOK, data, "Fetch post successful")
+
+	postData, err := dbConn.GetPostByID(req.ID)
+	if err != nil {
+		util.Respond(w, r, http.StatusNotFound, nil, "Post not found")
+		return
+	}
+
+	dto, err := buildDisplayedPost(postData)
+	if err != nil {
+		util.Respond(w, r, http.StatusInternalServerError, nil, "Failed to build post")
+		return
+	}
+
+	util.Respond(w, r, http.StatusOK, dto, "Fetch post successful")
 }
 
-func FetchPostsByUserIDHandler(w http.ResponseWriter, r *http.Request) {
+func FetchPosts(w http.ResponseWriter, r *http.Request) {
 	user, authenticated := auth.Authenticator(w, r)
 	if !authenticated {
-		// If not authenticated, return public posts
-		publicPosts, err := dbConn.RetrievePublicPostsForDisplay()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		util.Respond(w, r, http.StatusOK, publicPosts, "Fetch public posts successful")
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// If authenticated, return visible posts by user ID
-	postsData, err := dbConn.RetrievePostsByUserIDForDisplay(user.User_ID)
+	posts, err := fetchAllVisiblePostsForUser(user.User_ID)
 	if err != nil {
 		util.Respond(w, r, http.StatusInternalServerError, nil, err.Error())
 		return
 	}
-	util.Respond(w, r, http.StatusOK, postsData, "Fetch posts by user ID successful")
-}
 
-// helper functions
-func ValidatePostPayload(p *PostPayload) map[string]string {
-	errors := make(map[string]string)
-
-	// Validate title
-	if p.Title == nil || len(strings.TrimSpace(*p.Title)) == 0 {
-		errors["title"] = "Title is required"
-	} else if len(*p.Title) > 60 {
-		errors["title"] = "The post title length exceeded 60 characters"
-	}
-
-	// Validate message
-	if p.Message == nil || len(strings.TrimSpace(*p.Message)) == 0 {
-		errors["message"] = "Message is required"
-	} else if len(*p.Message) > 600 {
-		errors["message"] = "The post length exceeded 600 characters"
-	}
-
-	// Validate type ID
-	if p.PostTypeID == nil {
-		errors["typeId"] = "TypeID is required"
-	}
-
-	// Conditional validation: PrivateUsers required if PostTypeID == 3
-	if p.PostTypeID != nil && *p.PostTypeID == 3 {
-		if len(p.PrivateUsers) == 0 {
-			errors["privateUsers"] = "PrivateUsers cannot be empty when PostTypeID is 3"
-		}
-	}
-
-	return errors
+	util.Respond(w, r, http.StatusOK, posts, "Fetch posts by user ID successful")
 }

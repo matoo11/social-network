@@ -107,6 +107,9 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			message := data.Message
 			ChatHandler(sento, message, conn, LoggedInUserID, LoggedInUsername, data.Type)
 
+		case "get_userlist":
+			SendUserList(conn)
+
 		case "notification":
 
 		}
@@ -121,6 +124,25 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Client disconnected")
 	conn.Lock.Lock()
 	conn.Conn.Close()
+	conn.Lock.Unlock()
+}
+
+func SendUserList(conn *Conn) {
+	users, err := dbConn.GetAllUsers()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	response := struct {
+		Type  string               `json:"type"`
+		Users []dbConn.UserDisplay `json:"users"`
+	}{
+		Type:  "userlist",
+		Users: users,
+	}
+
+	conn.Lock.Lock()
+	_ = conn.Conn.WriteJSON(response)
 	conn.Lock.Unlock()
 }
 

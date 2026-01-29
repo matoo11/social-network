@@ -9,6 +9,7 @@ import { fetchUserData, logoutUser } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/context/UserContext';
 import { FaBell } from 'react-icons/fa';
+import UserListPopup from '../UserList/UserListPopup';
 
 export interface User {
     userId: number;
@@ -29,6 +30,7 @@ export interface User {
 const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void }) => {
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isUserListOpen, setIsUserListOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     const { user, setUser } = useUser();
@@ -202,10 +204,7 @@ const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void })
                             <li
                                 id="dropdownUsersButton"
                                 onClick={() => {
-                                    const menu = document.getElementById('dropdownUsers');
-                                    if (menu) {
-                                        menu.classList.toggle('hidden');
-                                    }
+                                    setIsUserListOpen(true);
                                 }}
                             >
                                 User list
@@ -224,6 +223,8 @@ const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void })
                     </div>
                 </div>
             </div>
+
+            <UserListPopup isOpen={isUserListOpen} onClose={() => setIsUserListOpen(false)} />
         </nav>
     );
 };

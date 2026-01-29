@@ -14,7 +14,6 @@ import Testing from '@/components/ChatArea/GroupChatArea';
 import CreateGroup from '@/components/CreateGroupForm/CreateGroup';
 import GroupPostForm from '@/components/PostForm/GroupPostForm';
 import GroupPostList from '@/components/PostList/GroupPostList';
-import NotificationCenter from '@/components/Notifications/NotificationCenter';
 import Navbar from '@/components/Navbar/Navbar';
 import GroupChat from '@/components/ChatArea/GroupChatArea';
 import FollowersList from '@/components/FollowersList/FollowersList';
@@ -35,7 +34,6 @@ export default function SocialFeed() {
     const [isPostContentPopupOpen, setPostContentPopup] = useState(false);
     const [selectedPostID, setSelectedPostID] = useState<number>(0);
     const [chatsData, setChatsData] = useState<GroupListItem[]>([]);
-    const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
 
     const [groupListMode, setGroupListMode] = useState<'mine' | 'all'>('mine');
 
@@ -182,7 +180,7 @@ export default function SocialFeed() {
     return (
         <div className="flex w-full h-full mt-[10vh]">
             {/* Header with Navbar and Notifications button */}
-            <Navbar onNotificationsClick={() => setIsNotificationCenterOpen(true)} />
+            <Navbar />
             {/* Left column - 17.5% */}
             <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
                 <GroupList
@@ -272,16 +270,6 @@ export default function SocialFeed() {
                         setIsGroupListPopupOpen(false);
                     }} />
                     
-            </Popup>
-
-            {/* Notification Center Popup */}
-            {/* Pass refreshGroups to NotificationCenter as onGroupInviteHandled */}
-            <Popup
-                isOpen={isNotificationCenterOpen}
-                onClose={() => setIsNotificationCenterOpen(false)}
-                className="max-w-lg"
-            >
-                <NotificationCenter onGroupInviteHandled={refreshGroups} />
             </Popup>
 
             <Popup

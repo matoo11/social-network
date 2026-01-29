@@ -11,6 +11,8 @@ import { useUser } from '@/app/context/UserContext';
 import { FaBell } from 'react-icons/fa';
 import UserListPopup from '../UserList/UserListPopup';
 import ProfilePopup from '../ProfilePopup/ProfilePopup';
+import NotificationCenter from '../Notifications/NotificationCenter';
+import Popup from '../Popup/Popup';
 
 export interface User {
     userId: number;
@@ -28,11 +30,12 @@ export interface User {
     isActive: boolean;
 }
 
-const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void }) => {
+const Navbar = () => {
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isUserListOpen, setIsUserListOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
     const [profileUserId, setProfileUserId] = useState<number | null>(null);
     const dropdownRef = useRef(null);
 
@@ -123,7 +126,7 @@ const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void })
                             type="button"
                             className="mr-4 flex items-center justify-center bg-gray-800 text-white rounded-full w-10 h-10 hover:bg-gray-700"
                             aria-label="Notifications"
-                            onClick={onNotificationsClick}
+                            onClick={() => setIsNotificationCenterOpen(true)}
                         >
                             <FaBell size={20} />
                         </button>
@@ -205,6 +208,7 @@ const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void })
                             <NavLink href="/register">Register</NavLink>
                             <NavLink href="/dashboard">Dashboard</NavLink>
                             <NavLink href="/social-feed">Social Feed</NavLink>
+                            <NavLink href="/group">Group</NavLink>
                             <li
                                 id="dropdownUsersButton"
                                 onClick={() => {
@@ -241,6 +245,13 @@ const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void })
                     setIsProfileOpen(true);
                 }}
             />
+            <Popup
+                isOpen={isNotificationCenterOpen}
+                onClose={() => setIsNotificationCenterOpen(false)}
+                className="max-w-lg"
+            >
+                <NotificationCenter />
+            </Popup>
         </nav>
     );
 };

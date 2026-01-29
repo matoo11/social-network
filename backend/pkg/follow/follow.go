@@ -28,6 +28,38 @@ func AddFollow(w http.ResponseWriter, r *http.Request) {
 		auth.ErrorPage(w, http.StatusBadRequest)
 		return
 	}
+
+	// Get the target user's profile details to check if it's private
+	targetProfile, err := dbConn.GetUserProfileDetails(data.FollowedID)
+	if err != nil {
+		auth.ErrorPage(w, http.StatusInternalServerError)
+		return
+	}
+
+	// Get the private profile type ID
+	privateTypeID, err := dbConn.GetProfileTypeIDByName("Private")
+	if err != nil {
+		auth.ErrorPage(w, http.StatusInternalServerError)
+		return
+	}
+
+	// If the target user has a private profile, create a follow request instead
+	if targetProfile.ProfileTypeID == privateTypeID {
+		err = dbConn.CreateFollowRequest(LoggedInUserID, data.FollowedID)
+		if err != nil {
+			fmt.Println(err)
+			if err.Error() == "follow request already sent" {
+				http.Error(w, err.Error(), 400)
+			} else {
+				auth.ErrorPage(w, http.StatusInternalServerError)
+			}
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// If public profile, follow directly
 	follow := dbConn.Follow{
 		FollowerID: LoggedInUserID,
 		FollowedID: data.FollowedID,

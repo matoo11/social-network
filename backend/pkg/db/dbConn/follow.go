@@ -15,10 +15,10 @@ type Follow struct {
 }
 
 type FollowDisplay struct {
-	FollowerID int
-	FollowerUsername string
-	FollowerAvatarURL  string
-	FollowedID int
+	FollowerID        int
+	FollowerUsername  string
+	FollowerAvatarURL string
+	FollowedID        int
 }
 
 func CreateFollow(follow Follow) error {
@@ -122,6 +122,56 @@ func DeleteFollow(followerID int, followedID int) error {
 	if err != nil {
 		log.Println("Error deleting follower:", err)
 		return fmt.Errorf("failed to delete follow")
+	}
+
+	return nil
+}
+
+func CreateFollowRequest(requesterID int, receiverID int) error {
+	// Check if request already exists
+	var exists bool
+	err := dbHandler.DB.QueryRow(`
+		SELECT EXISTS(
+			SELECT 1 FROM Follow_Requests
+			WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1
+		)`, requesterID, receiverID).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("failed to check existing request: %v", err)
+	}
+	if exists {
+		return fmt.Errorf("follow request already sent")
+	}
+
+	// Status_ID = 1 for pending request (you may need to adjust this based on your Statuses table)
+	statement := `INSERT INTO Follow_Requests
+	(
+		Requester_ID,
+		Receiver_ID,
+		Status_ID,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	)
+	VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?)`
+
+	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+
+	_, err = dbHandler.DB.Exec(
+		statement,
+		requesterID,
+		receiverID,
+		1, // Status_ID = 1 for pending
+		requesterID,
+		formattedCurrentTime,
+		requesterID,
+		formattedCurrentTime,
+		true,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create follow request: %v", err)
 	}
 
 	return nil

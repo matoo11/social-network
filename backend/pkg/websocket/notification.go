@@ -26,6 +26,49 @@ type Notification struct {
 
 func SendNotification(nId int, to int, nType int) {
 	switch nType {
+	case 3:
+		conn := GetClientConn(to)
+		notification, err := dbConn.GetNotificationByID(nId)
+		if err != nil {
+			fmt.Println("notification error getting notification:", err)
+			return
+		}
+
+		requester, err := dbConn.GetUserByID(notification.SourceID)
+		if err != nil {
+			fmt.Println("notification error getting requester:", err)
+			return
+		}
+
+		type FollowRequest struct {
+			RequesterID   int    `json:"requesterId"`
+			RequesterName string `json:"requesterName"`
+		}
+
+		followReq := FollowRequest{
+			RequesterID:   notification.SourceID,
+			RequesterName: requester.User_Name,
+		}
+
+		f := Notification{
+			Id:   nId,
+			Type: "FOLLOW_REQUEST",
+			Data: followReq,
+		}
+
+		data, _ := json.Marshal(f)
+		res := Response{
+			Type: "notification",
+			Data: data,
+		}
+
+		if conn != nil {
+			conn.Lock.Lock()
+			conn.Conn.WriteJSON(res)
+			conn.Lock.Unlock()
+			fmt.Println("Follow request notification sent")
+		}
+		fmt.Println("here123")
 	case 6:
 
 		conn := GetClientConn(to)

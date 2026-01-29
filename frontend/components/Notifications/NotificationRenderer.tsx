@@ -1,6 +1,7 @@
 import { Notification } from './NotificationCenter';
 import GroupInviteNotification from './GroupInviteNotification';
 import JoinGroupRequestNotification from './JoinGroupRequestNotification';
+import FollowRequestNotification from './FollowRequestNotification';
 
 type Props = {
     notification: Notification;
@@ -32,9 +33,18 @@ const NotificationRenderer = ({ notification, onHandled }: Props) => {
                 />
             );
 
+        case 'FOLLOW_REQUEST':
+            return (
+                <FollowRequestNotification
+                    notificationId={notification.id}
+                    requesterId={notification.data.requesterId}
+                    requesterName={notification.data.requesterName}
+                    onHandled={onHandled}
+                />
+            );
+
         // future cases:
         // case 'MESSAGE':
-        // case 'FOLLOW_REQUEST':
 
         default:
             return null;

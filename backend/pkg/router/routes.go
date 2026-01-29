@@ -59,6 +59,12 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		follow.FollowStatus(w, r)
 	case "/api/getFollowers":
 		follow.GetFollowers(w, r)
+	case "/api/follow/acceptRequest":
+		follow.AcceptFollowRequest(w, r)
+	case "/api/follow/rejectRequest":
+		follow.RejectFollowRequest(w, r)
+	case "/api/follow/cancelRequest":
+		follow.CancelFollowRequest(w, r)
 	// profile routes
 	case "/api/profile/get":
 		profile.GetProfileHandler(w, r)
@@ -105,7 +111,7 @@ func Router(w http.ResponseWriter, r *http.Request) {
 	case "/api/chat/getChatList":
 		message.GetChatList(w, r)
 	case "/api/notifications/get":
-		notification.GetGroupInviteNotificationsHandler(w, r)
+		notification.GetNotifications(w, r)
 	default:
 		http.NotFound(w, r)
 	}

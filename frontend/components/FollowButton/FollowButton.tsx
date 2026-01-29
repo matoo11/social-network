@@ -36,6 +36,17 @@ const unfollow = async (userID: number) => {
 
 };
 
+const cancelRequest = async (userID: number) => {
+    const res = await fetch('http://localhost:8080/api/follow/cancelRequest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ userID }),
+    });
+
+    if (!res.ok) throw new Error('Failed to cancel request');
+};
+
 type FollowButtonProps = {
     userID: number;
 };
@@ -65,6 +76,8 @@ export default function FollowButton({ userID }: FollowButtonProps) {
                 await follow(userID);
             } else if (status === 2) {
                 await unfollow(userID);
+            } else if (status === 1) {
+                await cancelRequest(userID);
             }
 
             const updated = await checkfollow(userID);

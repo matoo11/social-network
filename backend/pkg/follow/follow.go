@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"social/backend/pkg/auth"
 	"social/backend/pkg/db/dbConn"
+	wsManager "social/backend/pkg/websocket"
 )
 
 func AddFollow(w http.ResponseWriter, r *http.Request) {
@@ -29,21 +30,18 @@ func AddFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the target user's profile details to check if it's private
 	targetProfile, err := dbConn.GetUserProfileDetails(data.FollowedID)
 	if err != nil {
 		auth.ErrorPage(w, http.StatusInternalServerError)
 		return
 	}
 
-	// Get the private profile type ID
 	privateTypeID, err := dbConn.GetProfileTypeIDByName("Private")
 	if err != nil {
 		auth.ErrorPage(w, http.StatusInternalServerError)
 		return
 	}
 
-	// If the target user has a private profile, create a follow request instead
 	if targetProfile.ProfileTypeID == privateTypeID {
 		err = dbConn.CreateFollowRequest(LoggedInUserID, data.FollowedID)
 		if err != nil {
@@ -55,11 +53,28 @@ func AddFollow(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+
+		// Create notification for follow request
+		requester, err := dbConn.GetUserByID(LoggedInUserID)
+		if err == nil {
+			notification := dbConn.Notification{
+				NotificationText:   requester.User_Name + " wants to follow you",
+				SourceID:           LoggedInUserID,
+				TargetID:           data.FollowedID,
+				NotificationTypeID: 3,
+				CreatedByID:        LoggedInUserID,
+			}
+
+			notificationID, err := dbConn.CreateNotification(notification)
+			if err == nil {
+				wsManager.SendNotification(int(notificationID), data.FollowedID, 3)
+			}
+		}
+
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	// If public profile, follow directly
 	follow := dbConn.Follow{
 		FollowerID: LoggedInUserID,
 		FollowedID: data.FollowedID,
@@ -194,4 +209,89 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+func AcceptFollowRequest(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
+
+	session, err := dbConn.GetSessionFromCookie(r)
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	}
+	LoggedInUserID = session.UserID
+
+	data := struct {
+		RequesterID int `json:"requesterId"`
+	}{}
+
+	if err := auth.JsonDecode(w, r, &data); err != nil {
+		auth.ErrorPage(w, http.StatusBadRequest)
+		return
+	}
+
+	err = dbConn.AcceptFollowRequest(data.RequesterID, LoggedInUserID)
+	if err != nil {
+		fmt.Println("Error accepting follow request:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func RejectFollowRequest(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
+
+	session, err := dbConn.GetSessionFromCookie(r)
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	}
+	LoggedInUserID = session.UserID
+
+	data := struct {
+		RequesterID int `json:"requesterId"`
+	}{}
+
+	if err := auth.JsonDecode(w, r, &data); err != nil {
+		auth.ErrorPage(w, http.StatusBadRequest)
+		return
+	}
+
+	err = dbConn.RejectFollowRequest(data.RequesterID, LoggedInUserID)
+	if err != nil {
+		fmt.Println("Error rejecting follow request:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+func CancelFollowRequest(w http.ResponseWriter, r *http.Request) {
+	var LoggedInUserID int
+
+	session, err := dbConn.GetSessionFromCookie(r)
+	if err != nil {
+		auth.ErrorPage(w, 401)
+		return
+	}
+	LoggedInUserID = session.UserID
+
+	data := struct {
+		ReceiverID int `json:"userID"`
+	}{}
+
+	if err := auth.JsonDecode(w, r, &data); err != nil {
+		auth.ErrorPage(w, http.StatusBadRequest)
+		return
+	}
+
+	err = dbConn.CancelFollowRequest(LoggedInUserID, data.ReceiverID)
+	if err != nil {
+		fmt.Println("Error canceling follow request:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

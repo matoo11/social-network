@@ -19,13 +19,18 @@ type JoinGroupRequest struct {
 	RequesterName string `json:"requesterName"`
 }
 
+type FollowRequest struct {
+	RequesterID   int    `json:"requesterId"`
+	RequesterName string `json:"requesterName"`
+}
+
 type Notification struct {
 	Id   int    `json:"id"`
 	Type string `json:"type"`
 	Data any    `json:"data"`
 }
 
-func GetGroupInviteNotificationsHandler(w http.ResponseWriter, r *http.Request) {
+func GetNotifications(w http.ResponseWriter, r *http.Request) {
 	user, ok := auth.Authenticator(w, r)
 	if !ok {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -42,6 +47,11 @@ func GetGroupInviteNotificationsHandler(w http.ResponseWriter, r *http.Request) 
 	var out []Notification
 	for _, n := range notifs {
 		switch n.NotificationTypeID {
+		case 3: // Follow Request
+			notif, ok := mapFollowRequestNotification(n)
+			if ok {
+				out = append(out, notif)
+			}
 		case 6: // Group Invite
 			notif, ok := mapGroupInviteNotification(n)
 			if ok {
@@ -112,6 +122,23 @@ func mapJoinGroupRequestNotification(n dbConn.NotificationDisplay) (Notification
 			InviteId:      inviteId,
 			GroupName:     group.Title,
 			RequesterName: requesterName,
+		},
+	}, true
+}
+
+func mapFollowRequestNotification(n dbConn.NotificationDisplay) (Notification, bool) {
+	requesterID := n.SourceID
+	requester, err := dbConn.GetUserByID(requesterID)
+	if err != nil {
+		return Notification{}, false
+	}
+
+	return Notification{
+		Id:   n.NotificationID,
+		Type: "FOLLOW_REQUEST",
+		Data: FollowRequest{
+			RequesterID:   requesterID,
+			RequesterName: requester.User_Name,
 		},
 	}, true
 }

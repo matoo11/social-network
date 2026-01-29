@@ -5,6 +5,7 @@ import Popup from '../Popup/Popup';
 import FollowButton from '../FollowButton/FollowButton';
 import { sendMessage } from '@/lib/api/websocket';
 import { useUser } from '@/app/context/UserContext';
+import ProfilePopup from '../ProfilePopup/ProfilePopup';
 
 export type UserDisplay = {
     User_ID: number;
@@ -22,6 +23,8 @@ export default function UserListPopup({ isOpen, onClose }: UserListPopupProps) {
     const { user } = useUser();
     const [users, setUsers] = useState<UserDisplay[]>([]);
     const [search, setSearch] = useState('');
+    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     useEffect(() => {
         const handler = (event: Event) => {
@@ -47,8 +50,19 @@ export default function UserListPopup({ isOpen, onClose }: UserListPopupProps) {
         return users.filter((u) => (u.User_Name || '').toLowerCase().includes(term));
     }, [users, search]);
 
+    const handleUserClick = (userId: number) => {
+        setSelectedUserId(userId);
+        setIsProfileOpen(true);
+    };
+
+    const handleProfileClose = () => {
+        setIsProfileOpen(false);
+        setSelectedUserId(null);
+    };
+
     return (
-        <Popup isOpen={isOpen} onClose={onClose} className="max-w-lg">
+        <>
+            <Popup isOpen={isOpen} onClose={onClose} className="max-w-lg">
             <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
                 {/* Header */}
                 <div className="flex justify-center gap-5 items-center h-16 pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
@@ -95,9 +109,12 @@ export default function UserListPopup({ isOpen, onClose }: UserListPopupProps) {
                             filteredUsers.map((u) => (
                                 <li key={u.User_ID} className="mb-2">
                                     <div className="flex items-center justify-between px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                                        <div
+                                            className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                                            onClick={() => handleUserClick(u.User_ID)}
+                                        >
                                             <div className="flex-1 min-w-0">
-                                                <span className="block text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                <span className="block text-sm font-medium text-gray-900 dark:text-white truncate hover:text-blue-500">
                                                     {u.User_Name}
                                                 </span>
                                                 {(u.First_Name || u.Last_Name) && (
@@ -107,7 +124,7 @@ export default function UserListPopup({ isOpen, onClose }: UserListPopupProps) {
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="ml-3">
+                                        <div className="ml-3" onClick={(e) => e.stopPropagation()}>
                                             {user.userId !== 0 && u.User_ID !== user.userId ? (
                                                 <FollowButton userID={u.User_ID} />
                                             ) : null}
@@ -138,5 +155,13 @@ export default function UserListPopup({ isOpen, onClose }: UserListPopupProps) {
                 </div>
             </div>
         </Popup>
+
+        <ProfilePopup
+            isOpen={isProfileOpen}
+            onClose={handleProfileClose}
+            userId={selectedUserId}
+            onUserClick={handleUserClick}
+        />
+        </>
     );
 }

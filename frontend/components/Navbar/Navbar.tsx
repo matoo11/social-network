@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/context/UserContext';
 import { FaBell } from 'react-icons/fa';
 import UserListPopup from '../UserList/UserListPopup';
+import ProfilePopup from '../ProfilePopup/ProfilePopup';
 
 export interface User {
     userId: number;
@@ -31,6 +32,8 @@ const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void })
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isUserListOpen, setIsUserListOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [profileUserId, setProfileUserId] = useState<number | null>(null);
     const dropdownRef = useRef(null);
 
     const { user, setUser } = useUser();
@@ -160,14 +163,15 @@ const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void })
 
                                     {user.userId !== 0 && (
                                         <div>
-                                            <li>
-                                                {/* TODO: Need to create a profile component/page */}
-                                                <Link
-                                                    href="/profile"
-                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                                                >
-                                                    Profile
-                                                </Link>
+                                            <li
+                                                onClick={() => {
+                                                    setIsDropdownOpen(false);
+                                                    setProfileUserId(user.userId);
+                                                    setIsProfileOpen(true);
+                                                }}
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                            >
+                                                Profile
                                             </li>
                                             <li>
                                                 {/* TODO: Need to create a settings component/page */}
@@ -225,6 +229,18 @@ const Navbar = ({ onNotificationsClick }: { onNotificationsClick?: () => void })
             </div>
 
             <UserListPopup isOpen={isUserListOpen} onClose={() => setIsUserListOpen(false)} />
+            <ProfilePopup
+                isOpen={isProfileOpen}
+                onClose={() => {
+                    setIsProfileOpen(false);
+                    setProfileUserId(null);
+                }}
+                userId={profileUserId}
+                onUserClick={(userId) => {
+                    setProfileUserId(userId);
+                    setIsProfileOpen(true);
+                }}
+            />
         </nav>
     );
 };

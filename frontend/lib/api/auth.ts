@@ -39,7 +39,6 @@ export async function registerUser(signUpData: {
 }) {
     try {
         console.log('Registering user with data:', signUpData);
-        debugger;
         const res = await fetch('http://localhost:8080/api/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

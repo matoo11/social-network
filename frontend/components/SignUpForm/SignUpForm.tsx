@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { registerUser } from '@/lib/api/auth';
+import { loginUser, registerUser } from '@/lib/api/auth';
 import SignUpFormUI from './SignUpFormUI';
 
 const SignUpForm: React.FC = () => {
@@ -72,7 +72,8 @@ const SignUpForm: React.FC = () => {
             console.log('Submitting sign-up data:', signUpData);
 
             await registerUser(signUpData);
-            router.push('/dashboard');
+            await loginUser(formData.username, formData.password);
+            router.push('/social-feed');
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);

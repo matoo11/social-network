@@ -457,7 +457,8 @@ INSERT INTO Profile_Types (Profile_Type_Name, Created_By_ID, Creation_Time, Last
 INSERT INTO Post_Types (Post_Type_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
 ('Public', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
 ('Almost Private', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
-('Private', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);
+('Private', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Group', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);
 
 INSERT INTO Image_Usage_Types (Image_Usage_Type_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
 ('Profile Image', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),

@@ -12,6 +12,12 @@ import { useUser } from '../context/UserContext';
 import SignInForm from '@/components/SignInForm/SignInForm';
 import Navbar from '@/components/Navbar/Navbar';
 
+type ChatItem = {
+    id: string;
+    username: string;
+    lastMessage: string;
+};
+
 export default function SocialFeed() {
     const { user } = useUser();
     const [chatWith, setChatWith] = useState<string>('');
@@ -20,37 +26,47 @@ export default function SocialFeed() {
     const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);
     const [isChatListPopupOpen, setIsChatListPopupOpen] = useState(false);
     const [isChatAreaPopupOpen, setIsChatAreaPopupOpen] = useState(false);
-    const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false); // TODO: Need to Create EventsList Popup
+    const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false);
     const [postListRefreshFn, setPostListRefreshFn] = useState<() => void>();
     const [isPostContentPopupOpen, setPostContentPopup] = useState(false);
     const [selectedPostID, setSelectedPostID] = useState<number>(0);
-    const [chatsData, setChatsData] = useState([]);
+    const [chatsData, setChatsData] = useState<ChatItem[]>([]);
     const [isSignInPopupOpen, setIsSignInPopupOpen] = useState(false);
 
-     useEffect(() => {
+    useEffect(() => {
         const loadChats = async () => {
             try {
                 const res = await fetch("http://localhost:8080/api/chat/getChatList", {
                     credentials: 'include',
                 });
-                const data = await res.json();
-                // setChatsData(data);
-                const mapped = data.map((item: any) => ({
-                    id: String(item.UserID),        // or whatever your backend sends
-                    username: item.Username,    // match your API field
-                    lastMessage: item.last_message || '' // fallback if backend doesn't send
+
+                // Check if the response is OK
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(`HTTP ${res.status}: ${text}`);
+                }
+
+                // Parse JSON safely
+                const data: unknown = await res.json();
+
+                // Ensure data is an array before mapping
+                const list = Array.isArray(data) ? data : [];
+
+                const mapped: ChatItem[] = list.map((item: any) => ({
+                    id: String(item.UserID),
+                    username: item.Username,
+                    lastMessage: item.last_message || '',
                 }));
 
                 setChatsData(mapped);
-                // console.log(mapped)
             } catch (err) {
-                console.error(err);
+                console.error("Failed to load chats:", err);
+                setChatsData([]); // fallback to empty array on error
             }
         };
 
         loadChats();
     }, []);
-
 
     const handleNewPostCreated = () => {
         if (postListRefreshFn) {
@@ -58,11 +74,10 @@ export default function SocialFeed() {
         }
     };
 
-
-
     return (
         <div className="flex w-full h-full mt-[10vh]">
             <Navbar />
+
             {/* Left column - 17.5% */}
             <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
                 <ChatList
@@ -71,11 +86,9 @@ export default function SocialFeed() {
                     onSelectChat={(id, username) => {
                         setIsChatAreaPopupOpen(true);
                         setchatID(id);
-                        console.log(id)
                         setChatWith(username);
                         setChatter("Me");
                     }}
-
                 />
             </div>
 
@@ -91,7 +104,6 @@ export default function SocialFeed() {
                     }}
                     onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
                     postContentPopupHandler={(postID: number) => {
-                        console.log('Open post content popup for post ID:', postID);
                         setSelectedPostID(postID);
                         setPostContentPopup(true);
                     }}
@@ -101,9 +113,7 @@ export default function SocialFeed() {
             {/* Right column - 30% */}
             <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
                 <EventsList
-                    popupHandler={() => {
-                        setIsEventsListPopupOpen(false);
-                    }}
+                    popupHandler={() => setIsEventsListPopupOpen(false)}
                 />
             </div>
 
@@ -120,13 +130,13 @@ export default function SocialFeed() {
                     }}
                 />
             </Popup>
+
             <Popup
                 isOpen={isChatAreaPopupOpen}
                 onClose={() => setIsChatAreaPopupOpen(false)}
                 className="max-w-3xl"
             >
                 <ChatArea chatWith={chatWith} chatter={chatter} chatID={chatID} />
-
             </Popup>
 
             <Popup
@@ -142,9 +152,7 @@ export default function SocialFeed() {
 
             <Popup
                 isOpen={isSignInPopupOpen}
-                onClose={() => {
-                    setIsSignInPopupOpen(false);
-                }}
+                onClose={() => setIsSignInPopupOpen(false)}
                 className="max-w-sm"
             >
                 <SignInForm onSuccess={() => setIsSignInPopupOpen(false)} />

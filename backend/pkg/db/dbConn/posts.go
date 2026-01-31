@@ -339,6 +339,7 @@ func GetPostsByUserForViewer(ownerID, viewerID int) ([]PostDisplay, error) {
 		        )
 		     )
 		  )
+			 AND p.Post_Type_ID != 4
 		ORDER BY p.Creation_Time DESC`
 
 	rows, err := dbHandler.DB.Query(query, ownerID, boolToInt(isOwner), boolToInt(isFollower), viewerID)

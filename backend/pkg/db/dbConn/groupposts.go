@@ -45,7 +45,7 @@ func CreateGroupPost(groupID, authorID int, title, text string) (GroupPost, erro
 	) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, 1)`
 
 	now := formattedNow()
-	res, err := dbHandler.DB.Exec(postStatement, title, text, authorID, 3, authorID, now, authorID, now)
+	res, err := dbHandler.DB.Exec(postStatement, title, text, authorID, 4, authorID, now, authorID, now)
 	if err != nil {
 		return GroupPost{}, fmt.Errorf("failed to create post: %w", err)
 	}

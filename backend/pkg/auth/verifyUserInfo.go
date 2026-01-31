@@ -82,10 +82,10 @@ func VerifyDateOfBirth(dob *time.Time) error {
 }
 
 func VerifyNickname(nickname string) error {
-	if len(nickname) < MinNicknameLength {
+	if len(nickname) <= MinNicknameLength {
 		return fmt.Errorf("nickname must be at least %d characters long", MinNicknameLength)
 	}
-	if len(nickname) > MaxNicknameLength {
+	if len(nickname) >= MaxNicknameLength {
 		return fmt.Errorf("nickname must not exceed max length of %d characters", MaxNicknameLength)
 	}
 

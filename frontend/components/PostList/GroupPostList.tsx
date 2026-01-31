@@ -5,13 +5,10 @@ import PostListUI from './PostListUI';
 import { PostListUIProps } from './PostListUI';
 
 const fetchGroupPosts = async (groupId: number) => {
-    const res = await fetch(
-        `http://localhost:8080/api/groups/posts?groupId=${groupId}`,
-        {
-            method: 'GET',
-            credentials: 'include',
-        },
-    );
+    const res = await fetch(`http://localhost:8080/api/groups/posts?groupId=${groupId}`, {
+        method: 'GET',
+        credentials: 'include',
+    });
 
     if (!res.ok) {
         const msg = await res.text();
@@ -21,14 +18,12 @@ const fetchGroupPosts = async (groupId: number) => {
     return res.json();
 };
 
-
 type GroupPostListProps = {
     groupId: number;
     popupHandler: () => void;
     onRef?: (refreshFn: () => void) => void;
     postContentPopupHandler?: (postID: number) => void;
 };
-
 
 const GroupPostList: React.FC<GroupPostListProps> = ({
     groupId,
@@ -47,7 +42,7 @@ const GroupPostList: React.FC<GroupPostListProps> = ({
             content: p.text,
             posterNickname: p.authorUsername, // until backend sends usernames
             posterProfileImageUrl: '',
-            postImageUrl: '', // group posts don’t support images
+            postImageUrl: '', // group posts don't support images
             createdAt: p.creationTime,
             likesCount: 0,
             dislikesCount: 0,
@@ -62,7 +57,11 @@ const GroupPostList: React.FC<GroupPostListProps> = ({
         onRef?.(fetchPostsFromAPI);
     }, [groupId]);
 
-    return <PostListUI posts={posts} popupHandler={popupHandler} />;
+    return (
+        <div className="flex flex-col h-full w-full rounded-lg shadow-sm overflow-hidden bg-gray-900">
+            <PostListUI posts={posts} popupHandler={popupHandler} />
+        </div>
+    );
 };
 
 export default GroupPostList;

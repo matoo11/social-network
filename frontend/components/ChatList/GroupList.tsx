@@ -47,24 +47,25 @@ const GroupList: React.FC<ChatListProps> = ({
         setOpenMenuId((prev) => (prev === id ? null : id));
     };
 
-
     return (
-        <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
-            <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
+        <div className="flex flex-col h-full w-full border-2 border-gray-600 rounded-lg shadow-sm overflow-hidden bg-gray-900">
+            {/* Header */}
+            <div className="flex-shrink-0 flex justify-center items-center gap-3 px-4 py-3 border-b-2 border-gray-600 bg-gray-900 flex-wrap">
                 <Title text="Groups" />
                 <button
                     type="button"
-                    className="mb-2 bg-gray-700 text-white px-3 py-1 rounded-md hover:bg-gray-600"
+                    className="bg-gray-700 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm"
                     onClick={onToggleMode}
                 >
                     {mode === 'mine' ? 'All groups' : 'My groups'}
                 </button>
-                <PopupBtn className="mb-2" onClick={popupHandler} />
+                <PopupBtn className="" onClick={popupHandler} />
             </div>
-            <div className="h-[92.5%] overflow-y-auto hide-scrollbar">
-                <div className="flex flex-col gap-2 p-4 ">
+
+            {/* Groups List */}
+            <div className="flex-1 overflow-y-auto hide-scrollbar">
+                <div className="flex flex-col gap-2 p-4">
                     {chats.map((chat) => (
-                        // console.log(chat)
                         <ChatCard
                             key={chat.id}
                             username={chat.username}
@@ -81,7 +82,7 @@ const GroupList: React.FC<ChatListProps> = ({
                                         <button
                                             type="button"
                                             aria-label={`Group actions for ${chat.username}`}
-                                            className="p-2 rounded-md hover:bg-gray-700 dark:hover:bg-gray-600"
+                                            className="p-2 rounded-md hover:bg-gray-600"
                                             onClick={() => toggleMenu(String(chat.id))}
                                         >
                                             <svg
@@ -104,7 +105,10 @@ const GroupList: React.FC<ChatListProps> = ({
                                                     className="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700"
                                                     onClick={() => {
                                                         setOpenMenuId(null);
-                                                        onInviteMembers?.(String(chat.id), chat.username);
+                                                        onInviteMembers?.(
+                                                            String(chat.id),
+                                                            chat.username,
+                                                        );
                                                     }}
                                                 >
                                                     Invite members
@@ -114,7 +118,10 @@ const GroupList: React.FC<ChatListProps> = ({
                                                     className="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700"
                                                     onClick={() => {
                                                         setOpenMenuId(null);
-                                                        onSeeMembers?.(String(chat.id), chat.username);
+                                                        onSeeMembers?.(
+                                                            String(chat.id),
+                                                            chat.username,
+                                                        );
                                                     }}
                                                 >
                                                     See members
@@ -126,16 +133,17 @@ const GroupList: React.FC<ChatListProps> = ({
                                     <div onClick={(e) => e.stopPropagation()}>
                                         <button
                                             type="button"
-                                            className="bg-gray-700 text-white px-3 py-1 rounded-md hover:bg-gray-600 disabled:opacity-50"
+                                            className="bg-gray-700 text-white px-3 py-1 rounded-md hover:bg-gray-600 disabled:opacity-50 text-sm"
                                             disabled={Boolean(chat.joined)}
-                                            onClick={() => onRequestToJoin?.(String(chat.id), chat.username)}
+                                            onClick={() =>
+                                                onRequestToJoin?.(String(chat.id), chat.username)
+                                            }
                                         >
                                             {chat.joined ? 'Joined' : 'Join'}
                                         </button>
                                     </div>
                                 )
                             }
-
                         />
                     ))}
                 </div>

@@ -14,34 +14,38 @@ export type ChatCardProps = {
     onChatClick?: (username: string) => void;
 };
 
-const ChatCard: React.FC<ChatCardProps> = ({ username, lastMessage, avatarUrl, selected, actions, onChatClick }) => {
+const ChatCard: React.FC<ChatCardProps> = ({
+    username,
+    lastMessage,
+    avatarUrl,
+    selected,
+    actions,
+    onChatClick,
+}) => {
     const className = [
-        'rounded-lg cursor-pointer shadow-sm transition duration-300 ease-in-out',
+        'rounded-xl cursor-pointer shadow-md border transition-all duration-200 ease-in-out',
         selected
-            ? 'bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600'
-            : 'dark:bg-gray-800 hover:bg-gray-600 dark:hover:bg-gray-700',
+            ? 'bg-blue-900/30 border-blue-700 hover:bg-blue-900/40'
+            : 'bg-gray-800 border-gray-700 hover:bg-gray-700 hover:shadow-lg',
     ].join(' ');
 
     return (
-        <div
-            className={className}
-            onClick={() => onChatClick?.(username)}
-        >
-            <div className="flex items-center space-x-4 rtl:space-x-reverse p-2">
-                <div className="w-8 h-8">
+        <div className={className} onClick={() => onChatClick?.(username)}>
+            <div className="flex items-center space-x-3 rtl:space-x-reverse p-3">
+                <div className="w-10 h-10 flex-shrink-0">
                     <ProfileImage imageUrl={avatarUrl || ''} />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
+                    <p className="text-sm font-semibold  truncate text-white mb-0.5">
                         {username}
                     </p>
                     {!lastMessage ? (
-                        <p className="text-sm text-gray-500 truncate dark:text-gray-400">
+                        <p className="text-xs truncate text-gray-400">
                             {lastMessage}
                         </p>
                     ) : null}
                 </div>
-                {actions ? <div className="flex items-center">{actions}</div> : null}
+                {actions ? <div className="flex items-center flex-shrink-0">{actions}</div> : null}
             </div>
         </div>
     );

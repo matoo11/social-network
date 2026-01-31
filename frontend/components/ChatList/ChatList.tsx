@@ -20,15 +20,14 @@ const ChatList: React.FC<ChatListProps> = ({ chats, onSelectChat, popupHandler }
         onSelectChat?.(id, username);
     };
 
-
     return (
-        <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
-            <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
+        <div className="flex flex-col h-full w-full border-2 border-gray-600 rounded-lg shadow-sm overflow-hidden bg-gray-900">
+            <div className="flex flex-shrink-0 justify-center gap-5 items-center pt-3 pb-3 px-4 border-b-2 border-gray-600 shadow-sm overflow-hidden bg-gray-900">
                 <Title text="Chats" />
                 <PopupBtn className="mb-2" onClick={popupHandler} />
             </div>
-            <div className="h-[92.5%] overflow-y-auto hide-scrollbar">
-                <div className="flex flex-col gap-2 p-4 ">
+            <div className="flex-1 overflow-y-auto hide-scrollbar">
+                <div className="flex flex-col gap-2 p-4">
                     {chats.map((chat) => (
                         <ChatCard
                             key={chat.id}
@@ -36,7 +35,6 @@ const ChatList: React.FC<ChatListProps> = ({ chats, onSelectChat, popupHandler }
                             lastMessage={chat.lastMessage}
                             avatarUrl={chat.avatarUrl}
                             onChatClick={() => handleChatClick(String(chat.id), chat.username)}
-
                         />
                     ))}
                 </div>

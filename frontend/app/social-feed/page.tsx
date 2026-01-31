@@ -134,7 +134,7 @@ export default function SocialFeed() {
             <Popup
                 isOpen={isChatAreaPopupOpen}
                 onClose={() => setIsChatAreaPopupOpen(false)}
-                className="max-w-3xl"
+                className="max-w-6xl"
             >
                 <ChatArea chatWith={chatWith} chatter={chatter} chatID={chatID} />
             </Popup>

@@ -43,7 +43,7 @@ const EventCalendar: React.FC = () => {
             flex items-center justify-center h-10 w-10 rounded-full cursor-pointer transition
             ${isSelected ? 'bg-blue-500 text-white' : ''}
             ${!isSelected && isToday ? 'border border-blue-500' : ''}
-            ${!isSelected && !isToday ? 'hover:bg-blue-100 dark:hover:bg-gray-700' : ''}
+            ${!isSelected && !isToday ? 'hover:bg-gray-700' : ''}
           `}
                 >
                     {day}
@@ -66,35 +66,35 @@ const EventCalendar: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col items-center justify-start gap-4">
-            <div className="w-full bg-white dark:bg-gray-800 p-6">
+        <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-start gap-4">
+            <div className="w-full bg-gray-800 p-6">
                 <div className="flex justify-between items-center mb-4">
                     <button
                         onClick={prevMonth}
-                        className="cursor-pointer px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                        className="cursor-pointer px-3 py-1 bg-gray-700 rounded hover:bg-gray-600"
                     >
                         ←
                     </button>
 
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-200">
                         {currentDate.toLocaleString('default', { month: 'long' })} {currentYear}
                     </h2>
 
                     <button
                         onClick={nextMonth}
-                        className="cursor-pointer px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                        className="cursor-pointer px-3 py-1 bg-gray-700 rounded hover:bg-gray-600"
                     >
                         →
                     </button>
                 </div>
 
-                <div className="grid grid-cols-7 gap-1 mb-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                <div className="grid grid-cols-7 gap-1 mb-2 text-center text-sm font-medium text-gray-400">
                     {weekdays.map((day) => (
                         <div key={day}>{day}</div>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-7 gap-1 text-center">{generateCalendarDays()}</div>
+                <div className="grid grid-cols-7 gap-1 text-center text-white">{generateCalendarDays()}</div>
             </div>
 
             {/* Show events for the selected date */}

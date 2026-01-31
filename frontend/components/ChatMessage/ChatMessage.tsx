@@ -13,30 +13,32 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ username, userImage, message,
     const isSent = type === 'sent';
 
     return (
-        <div className={`flex items-end mb-3 justify-start`}>
-            {/* Image on left for received, right for sent */}
-            <div className="flex items-center gap-3 px-2 py-5">
-                <div className="flex w-10 h-10 rounded-none items-center justify-center">
+        <div className="flex gap-3 px-4 py-1.5 hover:bg-gray-800/50 transition-colors group rounded-lg">
+            {/* Profile Image */}
+            <div className="flex-shrink-0 mt-1">
+                <div className="w-10 h-10 rounded-full overflow-hidden">
                     <ProfileImage imageUrl={userImage} className="w-full h-full object-cover" />
                 </div>
             </div>
 
-            <div className="flex flex-col max-w-xs">
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-                    {username}
-                </span>
-
-                <div
-                    className={`px-4 py-2 rounded-lg break-words ${
-                        isSent
-                            ? 'bg-blue-500 text-white self-end rounded-br-none'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none'
-                    }`}
-                >
-                    {message}
+            {/* Message Content */}
+            <div className="flex-1 min-w-0">
+                {/* Username and Time */}
+                <div className="flex items-baseline gap-2 mb-0.5">
+                    <span
+                        className={`text-sm font-semibold ${isSent ? 'text-blue-400' : 'text-gray-100'}`}
+                    >
+                        {username}
+                    </span>
+                    <span className="text-xs text-gray-400 whitespace-nowrap">
+                        {time}
+                    </span>
                 </div>
 
-                <span className={`text-xs mt-1 text-gray-200 text-left`}>{time}</span>
+                {/* Message Text */}
+                <div className="text-sm text-gray-200 leading-relaxed break-words whitespace-pre-wrap min-w-[200px]">
+                    {message}
+                </div>
             </div>
         </div>
     );

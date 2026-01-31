@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ChatMessage from '../ChatMessage/ChatMessage';
-import { sendMessage } from '@/lib/api/websocket'
+import { sendMessage } from '@/lib/api/websocket';
 import Title from '../Title/Title';
 import PopupBtn from '../PopupBtn/PopupBtn';
 
@@ -18,14 +18,13 @@ interface ChatProps {
     chatID: string;
 }
 
-
 function SendChatMessage(chatID: number, text: string, type: number) {
     const data = {
         type: type,
         chatID: chatID,
-        message: text
-    }
-    sendMessage("chat", data)
+        message: text,
+    };
+    sendMessage('chat', data);
 }
 
 const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
@@ -36,21 +35,18 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
-    console.log(chatWith)
+    console.log(chatWith);
     useEffect(() => {
         const loadMessages = async () => {
             try {
-                const res = await fetch(
-                    "http://localhost:8080/api/message/getGroupMessages",
-                    {
-                        method: "POST",
-                        credentials: "include",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ groupID: Number(chatID) }),
-                    }
-                );
+                const res = await fetch('http://localhost:8080/api/message/getGroupMessages', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ groupID: Number(chatID) }),
+                });
 
                 const data = await res.json();
 
@@ -58,7 +54,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
                     id: m.MessageID,
                     username: m.SenderUsername || (m.IsSender ? chatter : `User ${m.SenderID}`),
                     text: m.Content,
-                    type: m.IsSender ? "sent" : "received",
+                    type: m.IsSender ? 'sent' : 'received',
                     time: m.CreationTime,
                 }));
 
@@ -71,7 +67,6 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         loadMessages();
     }, [chatID, chatter, chatWith]);
 
-
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
@@ -79,7 +74,6 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     useEffect(() => {
         const listener = (e: any) => {
             const data = e.detail;
-
 
             // Ignore private chat payloads (they carry receiver info).
             if (data?.recieverUsername || data?.recieverID) {
@@ -91,27 +85,22 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
                 id: Date.now(),
                 username: data.senderUsername,
                 text: data.message,
-                type: "received",
-                time: new Date().toISOString()
-
-
+                type: 'received',
+                time: new Date().toISOString(),
             };
 
-            setMessages(prev => [...prev, incoming]);
+            setMessages((prev) => [...prev, incoming]);
         };
 
-        window.addEventListener("ws-chat", listener);
+        window.addEventListener('ws-chat', listener);
 
-        return () => window.removeEventListener("ws-chat", listener);
+        return () => window.removeEventListener('ws-chat', listener);
     }, [chatWith, chatter]);
-
-
-
 
     const handleSend = () => {
         if (!input.trim()) return;
 
-        SendChatMessage(Number(chatID), input, 2)
+        SendChatMessage(Number(chatID), input, 2);
         // sendMessage("chat", {
         //     from: chatter,
         //     to: chatWith,
@@ -134,36 +123,34 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-white dark:bg-gray-900 rounded-lg">
-            {/* Header */}
-            {/* <div className="px-4 py-3 bg-blue-500 dark:bg-gray-900 text-white font-semibold rounded-t-lg">
-                Chatting with {chatWith}
-            </div> */}
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <div className="flex flex-col h-full w-full bg-gray-900">
+            {/* Messages Container */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-1 hide-scrollbar">
                 {messages.map((msg) => (
                     <ChatMessage
-                        username={msg.username || "Unknown"}
+                        username={msg.username || 'Unknown'}
                         userImage=""
                         type={msg.type}
                         message={msg.text}
-                        time={msg.time ? new Date(msg.time).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                        }) : ""}
-
+                        time={
+                            msg.time
+                                ? new Date(msg.time).toLocaleTimeString([], {
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                  })
+                                : ''
+                        }
                         key={msg.id}
                     />
                 ))}
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <div className="flex items-center border-t border-gray-300 dark:border-gray-600 p-2">
+            {/* Input Area */}
+            <div className="flex-shrink-0 flex items-center gap-2 border-t border-gray-400 p-3">
                 <input
                     type="text"
-                    className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="flex-1 min-w-0 rounded-lg border border-gray-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-blue-500 bg-gray-100 bg-gray-700 text-gray-900 text-white text-sm sm:text-base"
                     placeholder="Type a message..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -171,7 +158,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
                 />
                 <button
                     onClick={handleSend}
-                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg font-semibold"
+                    className="flex-shrink-0 cursor-pointer px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg font-semibold text-sm sm:text-base transition-colors"
                 >
                     Send
                 </button>
@@ -183,22 +170,21 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 // export default GroupChatArea;
 
 const GroupChat: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
-
     return (
-        <>
-            <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
-                <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
-                    <Title text="Chat" />
-                    {/* <PopupBtn className="mb-2" onClick={popupHandler} /> */}
-                </div>
-                <div className="h-[92.5%] overflow-y-auto hide-scrollbar">
-                    <div className="flex flex-col gap-2 p-4 h-full w-full">
-                        <GroupChatArea chatID={chatID} chatWith={chatWith} chatter={chatter} />
-                    </div>
+        <div className="flex flex-col h-full w-full border-2 border-gray-600 rounded-lg shadow-sm overflow-hidden dark:bg-gray-900">
+            {/* Header */}
+            <div className="flex-shrink-0 flex justify-center items-center gap-5 px-4 py-3 border-b-2 border-gray-600 dark:bg-gray-900">
+                <Title text="Chat" />
+            </div>
+
+            {/* Chat Area */}
+            <div className="flex-1 overflow-hidden">
+                <div className="h-full w-full">
+                    <GroupChatArea chatID={chatID} chatWith={chatWith} chatter={chatter} />
                 </div>
             </div>
-        </>
-    )
-}
+        </div>
+    );
+};
 
-export default GroupChat
+export default GroupChat;

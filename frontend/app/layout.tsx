@@ -4,6 +4,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar/Navbar';
 import WebSocketInit from './WebSocketInit';
 import { UserProvider } from './context/UserContext';
+import AuthGuard from '@/components/AuthGuard/AuthGuard';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -38,9 +39,11 @@ export default function RootLayout({
             </head>
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <UserProvider>
-                    <WebSocketInit />
-                    {children}
-                    {/* <Navbar /> */}
+                    <AuthGuard>
+                        <WebSocketInit />
+                        {children}
+                        {/* <Navbar /> */}
+                    </AuthGuard>
                 </UserProvider>
             </body>
         </html>

@@ -24,12 +24,13 @@ const InputField: React.FC<InputFieldProps> = ({
     isRequired = false,
 }) => {
     return (
-        <div className="relative z-0 w-full mb-5 group">
+        <div className="w-full group">
             <label
                 htmlFor={htmlFor}
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                className="block mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
             >
                 {labelText}
+                {/* {isRequired && <span className="text-red-500 ml-1">*</span>} */}
             </label>
             <input
                 type={inputType}
@@ -38,7 +39,7 @@ const InputField: React.FC<InputFieldProps> = ({
                 value={inputValue}
                 onChange={onInputChange}
                 placeholder={placeholderText}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                className="w-full px-3 py-2 border-2 border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 dark:placeholder-gray-500"
                 required={isRequired}
             />
         </div>

@@ -53,7 +53,6 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
         onSelectionChange?.(checkedList);
     }, [checkedList]);
 
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -70,7 +69,11 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
     }, []); // empty deps array → runs only once after first render
 
     if (loading) {
-        return <div>Loading followers...</div>;
+        return (
+            <div className="flex items-center justify-center py-8">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Loading followers...</p>
+            </div>
+        );
     }
 
     const filteredFollowers = followersListData.filter((follower) =>
@@ -78,19 +81,19 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
     );
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="h-[15%] flex-shrink-0 mb-10">
-                <p className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    Select Followers
-                </p>
+        <div className="flex flex-col w-full gap-2">
+            {/* Search Section - Fixed at top */}
+            <div className="flex-shrink-0">
                 <SearchInput
-                    className="mt-2"
+                    placeholder="Search followers..."
                     onSearch={(query) => {
                         setSearchQuery(query);
                     }}
                 />
             </div>
-            <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col gap-2 hide-scrollbar">
+
+            {/* Followers List - Scrollable, shows 3 cards then scrolls */}
+            <div className="max-h-[156px] overflow-y-auto overflow-x-hidden space-y-2 pr-1 hide-scrollbar">
                 {filteredFollowers.length > 0 ? (
                     filteredFollowers.map((follower) => (
                         <FollowerCard
@@ -105,7 +108,7 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
                         />
                     ))
                 ) : (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm italic">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm italic py-2">
                         No followers found.
                     </p>
                 )}

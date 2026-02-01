@@ -1,13 +1,10 @@
 'use client';
 
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Title from '../Title/Title';
 import InputField from '../InputField/InputField';
 import ImageInputField from '../ImageInputField/ImageInputField';
 import SelectInput from '../SelectInput/SelectInput';
-import SearchInput from '../SearchInput/SearchInput';
-import FollowerCard from '../FollowerCard/FollowerCard';
 import FollowersList from '../FollowersList/FollowersList';
 
 type FormData = {
@@ -19,110 +16,123 @@ type FormData = {
 };
 
 type PostFormUIProps = {
-  formData: FormData;
-  error: string;
-  onInputChange: (
-    field: keyof FormData
-  ) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+    formData: FormData;
+    error: string;
+    onInputChange: (
+        field: keyof FormData,
+    ) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+    onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 };
 
-
-const selectInputOptions = [
+const POST_TYPE_OPTIONS = [
     { optionText: 'Public', optionValue: 1 },
     { optionText: 'Followers Only', optionValue: 2 },
     { optionText: 'Private', optionValue: 3 },
 ];
 
+const PRIVATE_POST_TYPE = 3;
+
 const PostFormUI: React.FC<PostFormUIProps> = ({ formData, error, onInputChange, onSubmit }) => {
-    const [isVisible, setIsVisible] = useState(false);
+    const [showPrivateUsersList, setShowPrivateUsersList] = useState(false);
+
+    const handlePostTypeChange = (option: { optionText: string; optionValue: number }) => {
+        formData.postType = option.optionValue;
+        onInputChange('postType');
+        setShowPrivateUsersList(option.optionValue === PRIVATE_POST_TYPE);
+    };
 
     return (
-        <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
-            <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md border border-gray-200 dark:border-slate-700 overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 px-6 py-2 border-b border-gray-200 dark:border-slate-700 flex justify-center">
                 <Title text="Create New Post" />
             </div>
-            <div className="h-[92.5%] p-6">
-                <form onSubmit={onSubmit} className="flex flex-col w-full h-full">
-                    <div className="flex flex-col md:flex-row gap-6 h-[90%]">
-                        <div className="flex-1 flex flex-col h-[90%] bg-gray-900">
-                            <SelectInput
-                                selectOptions={selectInputOptions}
-                                selectedOption={selectInputOptions[0]}
-                                selectLabel="Post Type"
-                                className="h-[15%] w-full"
-                                onChange={(option) => {
-                                    formData.postType = option.optionValue;
-                                    onInputChange('postType');
-                                    setIsVisible(formData.postType === 3);
-                                }}
-                            />
-                            <div className="h-[80%] max-w-md mx-auto mt-5 space-y-2 flex flex-col w-full">
-                                {isVisible && (
-                                    <div className="h-full">
-                                        <FollowersList
-                                            onSelectionChange={(selectedIDs) => {
-                                                formData.privateUsers = selectedIDs;
-                                            }}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
 
-                        {/* Separator */}
-                        <div className="hidden md:block w-px bg-gray-300 dark:bg-gray-600 h-[95%]"></div>
+            {/* Form Container */}
+            <div className="p-6 max-h-[calc(100vh-180px)] overflow-y-auto">
+                <form onSubmit={onSubmit} className="space-y-5">
+                    {/* Post Type & Private Users Section */}
+                    <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 space-y-3">
+                        <SelectInput
+                            selectOptions={POST_TYPE_OPTIONS}
+                            selectedOption={POST_TYPE_OPTIONS[0]}
+                            selectLabel="Post Privacy"
+                            className="!max-w-none"
+                            onChange={handlePostTypeChange}
+                        />
 
-                        {/* Left column: stacked inputs */}
-                        <div className="flex-1 flex flex-col h-[90%]">
-                            <div className="h-[25%]">
-                                <InputField
-                                    htmlFor="title"
-                                    labelText="Post Title"
-                                    inputType="text"
-                                    inputName="title"
-                                    inputID="title"
-                                    inputValue={formData.title}
-                                    onInputChange={onInputChange('title')}
-                                    placeholderText="Post Title"
-                                    isRequired={true}
+                        {/* Private Users List - Conditional Render */}
+                        {showPrivateUsersList && (
+                            <div className="border border-gray-300 dark:border-slate-600 rounded-lg p-3 bg-white dark:bg-slate-700">
+                                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                                    Select Users
+                                </p>
+                                <FollowersList
+                                    onSelectionChange={(selectedIDs) => {
+                                        formData.privateUsers = selectedIDs;
+                                    }}
                                 />
                             </div>
+                        )}
+                    </div>
 
-                            <div className="flex-1 w-full h-[75%]">
-                                <label
-                                    htmlFor="message"
-                                    className="block text-sm font-medium text-gray-900 dark:text-white h-[10%]"
-                                >
-                                    Post Content
-                                </label>
-                                <textarea
-                                    id="message"
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white resize-none h-[90%]"
-                                    placeholder="Your post content..."
-                                    value={formData.content}
-                                    onChange={onInputChange('content')}
-                                ></textarea>
-                            </div>
+                    {/* Title Input */}
+                    <div>
+                        <InputField
+                            htmlFor="title"
+                            labelText="Post Title"
+                            inputType="text"
+                            inputName="title"
+                            inputID="title"
+                            inputValue={formData.title}
+                            onInputChange={onInputChange('title')}
+                            placeholderText="What's on your mind?"
+                            isRequired={true}
+                        />
+                    </div>
+
+                    {/* Content & Image Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        {/* Content - Takes 2 columns on large screens */}
+                        <div className="lg:col-span-2 flex flex-col">
+                            <label
+                                htmlFor="message"
+                                className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                            >
+                                Post Content
+                            </label>
+                            <textarea
+                                id="message"
+                                className="flex-1 min-h-32 bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3 dark:bg-slate-800 dark:border-slate-600 dark:placeholder-gray-500 dark:text-gray-100 resize-none transition-colors"
+                                placeholder="Share your thoughts, photos, and news..."
+                                value={formData.content}
+                                onChange={onInputChange('content')}
+                            />
                         </div>
 
-                        {/* Separator */}
-                        <div className="hidden md:block w-px bg-gray-300 dark:bg-gray-600 h-[95%]"></div>
-
-                        {/* Right column: image input */}
-                        <div className="flex-1 h-[90%]">
+                        {/* Image Input */}
+                        <div className="lg:col-span-1">
+                            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                                Add Image
+                            </label>
                             <ImageInputField showPreview={true} />
                         </div>
                     </div>
 
-                    {/* Full-width submit button */}
-                    <div className="mt-auto h-[10%]">
-                        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+                    {/* Footer: Error & Submit Button */}
+                    <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-slate-700">
+                        {error && (
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                                <p className="text-red-700 dark:text-red-400 text-sm font-medium">
+                                    {error}
+                                </p>
+                            </div>
+                        )}
                         <button
                             type="submit"
-                            className="cursor-pointer w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+                            className="w-full px-4 py-2.5 text-white font-semibold text-sm rounded-lg transition-all duration-200 cursor-pointer bg-blue-600 hover:bg-blue-700 active:scale-95 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-700 dark:hover:bg-blue-600 dark:focus:ring-blue-800 shadow-sm hover:shadow-md"
                         >
-                            Submit Post
+                            Post
                         </button>
                     </div>
                 </form>

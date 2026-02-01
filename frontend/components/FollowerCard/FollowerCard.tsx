@@ -43,20 +43,20 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
                 setIsChecked(newValue);
                 onCheckChange?.(newValue);
             }}
-            className="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer shadow-sm bg-gray-800 transition duration-300 ease-in-out"
+            className="h-11 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-600 transition duration-200 ease-in-out shadow-sm"
         >
-            <div className="flex items-center justify-between p-3">
+            <div className="flex items-center justify-between h-full px-3">
                 {/* Left: Avatar + Info */}
-                <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div className="w-10 h-10">
+                <div className="flex items-center space-x-3 rtl:space-x-reverse flex-1 min-w-0">
+                    <div className="w-8 h-8 flex-shrink-0">
                         <ProfileImage imageUrl={avatarUrl || ''} />
                     </div>
                     <div className="flex flex-col min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
+                        <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">
                             {username}
                         </p>
                         {description && (
-                            <p className="text-sm text-gray-500 truncate dark:text-gray-400">
+                            <p className="text-xs text-gray-500 truncate dark:text-gray-400">
                                 {description}
                             </p>
                         )}
@@ -68,7 +68,7 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
                     type="checkbox"
                     checked={isChecked}
                     onChange={handleCheckboxChange}
-                    className="cursor-pointer w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+                    className="ml-2 flex-shrink-0 w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 dark:ring-offset-slate-700 dark:bg-slate-600 dark:border-slate-500 cursor-pointer"
                 />
             </div>
         </div>

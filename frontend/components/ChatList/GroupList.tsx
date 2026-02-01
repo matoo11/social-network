@@ -20,6 +20,7 @@ type ChatListProps = {
     onInviteMembers?: (groupId: string, groupTitle: string) => void;
     onSeeMembers?: (groupId: string, groupTitle: string) => void;
     onRequestToJoin?: (groupId: string, groupTitle: string) => void;
+    onOpenEvents?: (groupId: string) => void;
 
     popupHandler: () => void;
 };
@@ -33,6 +34,7 @@ const GroupList: React.FC<ChatListProps> = ({
     onInviteMembers,
     onSeeMembers,
     onRequestToJoin,
+    onOpenEvents,
     popupHandler,
 }) => {
     const handleChatClick = (id: string, username: string) => {
@@ -125,6 +127,16 @@ const GroupList: React.FC<ChatListProps> = ({
                                                     }}
                                                 >
                                                     See members
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700"
+                                                    onClick={() => {
+                                                        setOpenMenuId(null);
+                                                        onOpenEvents?.(String(chat.id));
+                                                    }}
+                                                >
+                                                    Events
                                                 </button>
                                             </div>
                                         ) : null}

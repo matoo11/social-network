@@ -6,7 +6,6 @@ import Popup from '@/components/Popup/Popup';
 import { useState } from 'react';
 import PostForm from '@/components/PostForm/PostForm';
 import EventsList from '@/components/EventsList/EventsList';
-import EventCalendar from '@/components/EventCalendar/EventCalendar';
 import ChatArea from '@/components/ChatArea/ChatArea';
 import PostContent from '@/components/PostContent/PostContent';
 import { useEffect } from 'react';
@@ -29,7 +28,7 @@ export default function SocialFeed() {
     const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);
     const [isChatGroupPopupOpen, setIsGroupListPopupOpen] = useState(false);
     const [isChatAreaPopupOpen, setIsChatAreaPopupOpen] = useState(false);
-    const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false); // TODO: Need to Create EventsList Popup
+    const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false);
     const [postListRefreshFn, setPostListRefreshFn] = useState<() => void>();
     const [isPostContentPopupOpen, setPostContentPopup] = useState(false);
     const [selectedPostID, setSelectedPostID] = useState<number>(0);
@@ -197,7 +196,10 @@ export default function SocialFeed() {
                     onInviteMembers={openInviteMembers}
                     onSeeMembers={openSeeMembers}
                     onRequestToJoin={(groupId) => requestToJoin(groupId)}
-
+                    onOpenEvents={(groupId) => {
+                        setchatID(groupId);
+                        setIsEventsListPopupOpen(true);
+                    }}
                 />
             </div>
 
@@ -316,6 +318,14 @@ export default function SocialFeed() {
                         )}
                     </div>
                 </div>
+            </Popup>
+
+            <Popup
+                isOpen={isEventsListPopupOpen}
+                onClose={() => setIsEventsListPopupOpen(false)}
+                className="max-w-4xl"
+            >
+                {chatID && <EventsList groupId={Number(chatID)} />}
             </Popup>
 
         </div>

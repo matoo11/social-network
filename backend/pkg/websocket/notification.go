@@ -18,6 +18,15 @@ type JoinGroupRequest struct {
 	RequesterName string `json:"requesterName"`
 }
 
+type EventResponse struct {
+	EventID  int    `json:"eventId"`
+	GroupID  int    `json:"groupId"`
+	UserID   int    `json:"userId"`
+	UserName string `json:"userName"`
+	OptionID int    `json:"optionId"`
+	Option   string `json:"option"`
+}
+
 type Notification struct {
 	Id   int    `json:"Id"`
 	Type string `json:"type"`
@@ -163,4 +172,48 @@ func SendNotification(nId int, to int, nType int) {
 			conn.Lock.Unlock()
 		}
 	}
+}
+
+// SendEventResponse broadcasts event response updates to all group members
+func SendEventResponse(eventID, groupID, userID, optionID int, userName, optionName string) {
+	// Get all group members
+	groupMembers, err := dbConn.GetGroupMembers(groupID)
+	if err != nil {
+		fmt.Println("Error getting group members for event response:", err)
+		return
+	}
+
+	// Create event response payload
+	eventResponse := EventResponse{
+		EventID:  eventID,
+		GroupID:  groupID,
+		UserID:   userID,
+		UserName: userName,
+		OptionID: optionID,
+		Option:   optionName,
+	}
+
+	responseData, err := json.Marshal(eventResponse)
+	if err != nil {
+		fmt.Println("Error marshaling event response:", err)
+		return
+	}
+
+	res := Response{
+		Type: "event_response",
+		Data: responseData,
+	}
+
+	// Send to all group members
+	for _, member := range groupMembers {
+		memberConn := GetClientConn(member.UserID)
+		if memberConn != nil {
+			memberConn.Lock.Lock()
+			if err := memberConn.Conn.WriteJSON(res); err != nil {
+				fmt.Printf("Error sending event response to user %d: %v\n", member.UserID, err)
+			}
+			memberConn.Lock.Unlock()
+		}
+	}
+	fmt.Printf("Event response broadcasted to %d group members\n", len(groupMembers))
 }

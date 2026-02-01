@@ -31,6 +31,10 @@ export function InitWebSocket() {
             window.dispatchEvent(
                 new CustomEvent("ws-notification", { detail: msg.data })
             );
+        } else if (msg.type === "event_response") {
+            window.dispatchEvent(
+                new CustomEvent("ws-event-response", { detail: msg.data })
+            );
         }
     };
 

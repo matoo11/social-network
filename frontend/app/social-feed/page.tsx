@@ -5,7 +5,6 @@ import PostList from '@/components/PostList/PostList';
 import Popup from '@/components/Popup/Popup';
 import { useEffect, useState } from 'react';
 import PostForm from '@/components/PostForm/PostForm';
-import EventsList from '@/components/EventsList/EventsList';
 import ChatArea from '@/components/ChatArea/ChatArea';
 import PostContent from '@/components/PostContent/PostContent';
 import { useUser } from '../context/UserContext';
@@ -26,7 +25,6 @@ export default function SocialFeed() {
     const [isPostFormPopupOpen, setIsPostFormPopupOpen] = useState(false);
     const [isChatListPopupOpen, setIsChatListPopupOpen] = useState(false);
     const [isChatAreaPopupOpen, setIsChatAreaPopupOpen] = useState(false);
-    const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false);
     const [postListRefreshFn, setPostListRefreshFn] = useState<() => void>();
     const [isPostContentPopupOpen, setPostContentPopup] = useState(false);
     const [selectedPostID, setSelectedPostID] = useState<number>(0);
@@ -112,9 +110,7 @@ export default function SocialFeed() {
 
             {/* Right column - 30% */}
             <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
-                <EventsList
-                    popupHandler={() => setIsEventsListPopupOpen(false)}
-                />
+                {/* Reserved for future features */}
             </div>
 
             {/* Popups */}

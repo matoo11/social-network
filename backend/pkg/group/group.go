@@ -1042,6 +1042,13 @@ func RespondToEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get user info for WebSocket notification
+	user, err := dbConn.GetUserByID(userID)
+	if err == nil {
+		// Send real-time update to all group members via WebSocket
+		websocket.SendEventResponse(payload.EventID, groupID, userID, payload.OptionID, user.User_Name, optionName)
+	}
+
 	if err := auth.JsonEncode(w, map[string]string{"status": "response recorded"}); err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 	}

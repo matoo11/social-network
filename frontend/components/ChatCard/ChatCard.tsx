@@ -32,11 +32,11 @@ const ChatCard: React.FC<ChatCardProps> = ({
     return (
         <div className={className} onClick={() => onChatClick?.(username)}>
             <div className="flex items-center space-x-3 rtl:space-x-reverse p-3">
-                <div className="w-10 h-10 flex-shrink-0">
+                <div className="w-8 h-8 flex-shrink-0">
                     <ProfileImage imageUrl={avatarUrl || ''} />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold  truncate text-white mb-0.5">
+                    <p className="text-md font-semibold  truncate text-white mb-0.5">
                         {username}
                     </p>
                     {!lastMessage ? (

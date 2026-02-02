@@ -10,6 +10,7 @@ import PostContent from '@/components/PostContent/PostContent';
 import { useUser } from '../context/UserContext';
 import SignInForm from '@/components/SignInForm/SignInForm';
 import Navbar from '@/components/Navbar/Navbar';
+import PrivateChatArea from '@/components/ChatArea/PrivateChatArea';
 
 type ChatItem = {
     id: string;
@@ -103,8 +104,8 @@ export default function SocialFeed() {
                 <ChatList
                     chats={chatsData}
                     popupHandler={() => setIsChatListPopupOpen(true)}
+                    selectedChatId={chatID}
                     onSelectChat={(id, username) => {
-                        setIsChatAreaPopupOpen(true);
                         setchatID(id);
                         setChatWith(username);
                         setChatter("Me");
@@ -132,7 +133,7 @@ export default function SocialFeed() {
 
             {/* Right column - 30% */}
             <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
-                {/* Reserved for future features */}
+                <PrivateChatArea chatWith={chatWith} chatter={chatter} chatID={chatID} />
             </div>
 
             {/* Popups */}
@@ -149,13 +150,13 @@ export default function SocialFeed() {
                 />
             </Popup>
 
-            <Popup
+            {/* <Popup
                 isOpen={isChatAreaPopupOpen}
                 onClose={() => setIsChatAreaPopupOpen(false)}
                 className="max-w-6xl"
             >
                 <ChatArea chatWith={chatWith} chatter={chatter} chatID={chatID} />
-            </Popup>
+            </Popup> */}
 
             <Popup
                 isOpen={isPostContentPopupOpen}

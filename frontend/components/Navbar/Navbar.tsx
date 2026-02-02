@@ -8,7 +8,7 @@ import NavLink from '../NavLink/NavLink';
 import { fetchUserData, logoutUser } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/context/UserContext';
-import { FaBell } from 'react-icons/fa';
+import { FaBell, FaUsers } from 'react-icons/fa';
 import UserListPopup from '../UserList/UserListPopup';
 import ProfilePopup from '../ProfilePopup/ProfilePopup';
 import NotificationCenter from '../Notifications/NotificationCenter';
@@ -102,8 +102,12 @@ const Navbar = () => {
 
     return (
         <nav className="bg-white border-gray-200 dark:bg-gray-900 items-center fixed top-0 left-0 w-full z-50 h-[10vh]">
-            <div className="max-w-full h-full flex flex-wrap justify-between p-4">
-                <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
+            <div className="max-w-full h-full flex items-center justify-between p-4">
+                {/* Left: Logo */}
+                <a
+                    href="/"
+                    className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0"
+                >
                     <Image
                         src="http://localhost:3000/uploads/reboot01-logo.jpeg"
                         className="h-10 w-10 rounded-full"
@@ -116,119 +120,105 @@ const Navbar = () => {
                     </span>
                 </a>
 
+                {/* Center: Navigation Links */}
+                <div className="flex-1 flex justify-center">
+                    <ul className="flex font-medium space-x-8 rtl:space-x-reverse">
+                        <NavLink href="/social-feed">Social Feed</NavLink>
+                        <NavLink href="/group">Group</NavLink>
+                    </ul>
+                </div>
+
+                {/* Right: User Menu */}
                 <div
-                    className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative"
+                    className="flex items-center space-x-3 rtl:space-x-reverse relative flex-shrink-0"
                     ref={dropdownRef}
                 >
-                    <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative">
-                        {/* Notifications button */}
-                        <button
-                            type="button"
-                            className="mr-4 flex items-center justify-center bg-gray-800 text-white rounded-full w-10 h-10 hover:bg-gray-700"
-                            aria-label="Notifications"
-                            onClick={() => setIsNotificationCenterOpen(true)}
-                        >
-                            <FaBell size={20} />
-                        </button>
+                    {/* User list button */}
+                    <button
+                        type="button"
+                        id="dropdownUsersButton"
+                        className="cursor-pointer flex items-center justify-center bg-gray-800 text-white rounded-full w-10 h-10 hover:bg-gray-700"
+                        aria-label="User list"
+                        onClick={() => setIsUserListOpen(true)}
+                    >
+                        <FaUsers size={20} />
+                    </button>
 
-                        <button
-                            type="button"
-                            className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                            onClick={() => setIsDropdownOpen((prev) => !prev)}
-                        >
-                            <div className="w-8 h-8">
-                                <ProfileImage imageUrl="" />
+                    {/* Notifications button */}
+                    <button
+                        type="button"
+                        className="cursor-pointer flex items-center justify-center bg-gray-800 text-white rounded-full w-10 h-10 hover:bg-gray-700"
+                        aria-label="Notifications"
+                        onClick={() => setIsNotificationCenterOpen(true)}
+                    >
+                        <FaBell size={20} />
+                    </button>
+
+                    <button
+                        type="button"
+                        className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                        onClick={() => setIsDropdownOpen((prev) => !prev)}
+                    >
+                        <div className="w-8 h-8">
+                            <ProfileImage imageUrl="" />
+                        </div>
+                    </button>
+
+                    {isDropdownOpen && (
+                        <div className="absolute top-12 right-0 z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 w-44">
+                            <div className="px-4 py-3">
+                                <span className="block text-sm text-gray-900 dark:text-white">
+                                    {user?.userName ?? 'Guest'}
+                                </span>
+                                <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+                                    {user?.email ?? 'Not logged in'}
+                                </span>
                             </div>
-                        </button>
+                            <ul className="py-2">
+                                {user.userId === 0 && (
+                                    <li
+                                        onClick={() => {
+                                            setIsDropdownOpen(false);
+                                            router.push('/login');
+                                        }}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                    >
+                                        Login
+                                    </li>
+                                )}
 
-                        {isDropdownOpen && (
-                            <div className="absolute top-8 right-0 z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 w-44">
-                                <div className="px-4 py-3">
-                                    <span className="block text-sm text-gray-900 dark:text-white">
-                                        {user?.userName ?? 'Guest'}
-                                    </span>
-                                    <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-                                        {user?.email ?? 'Not logged in'}
-                                    </span>
-                                </div>
-                                <ul className="py-2">
-                                    {user.userId === 0 && (
+                                {user.userId !== 0 && (
+                                    <div>
                                         <li
                                             onClick={() => {
                                                 setIsDropdownOpen(false);
-                                                router.push('/login');
+                                                setProfileUserId(user.userId);
+                                                setIsProfileOpen(true);
                                             }}
                                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
                                         >
-                                            Login
+                                            Profile
                                         </li>
-                                    )}
-
-                                    {user.userId !== 0 && (
-                                        <div>
-                                            <li
-                                                onClick={() => {
-                                                    setIsDropdownOpen(false);
-                                                    setProfileUserId(user.userId);
-                                                    setIsProfileOpen(true);
-                                                }}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                        <li>
+                                            {/* TODO: Need to create a settings component/page */}
+                                            <Link
+                                                href="/settings"
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                                             >
-                                                Profile
-                                            </li>
-                                            <li>
-                                                {/* TODO: Need to create a settings component/page */}
-                                                <Link
-                                                    href="/settings"
-                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                                                >
-                                                    Settings
-                                                </Link>
-                                            </li>
-                                            <li
-                                                onClick={handleLogout}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
-                                            >
-                                                Sign out
-                                            </li>
-                                        </div>
-                                    )}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-
-                    <div
-                        className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
-                        id="navbar-user"
-                    >
-                        <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-                            <NavLink href="/">Home</NavLink>
-                            <NavLink href="/login">Login </NavLink>
-                            <NavLink href="/register">Register</NavLink>
-                            <NavLink href="/dashboard">Dashboard</NavLink>
-                            <NavLink href="/social-feed">Social Feed</NavLink>
-                            <NavLink href="/group">Group</NavLink>
-                            <li
-                                id="dropdownUsersButton"
-                                onClick={() => {
-                                    setIsUserListOpen(true);
-                                }}
-                            >
-                                User list
-                            </li>
-                            <li
-                                onClick={() => {
-                                    const menu = document.getElementById('openchat');
-                                    if (menu) {
-                                        menu.classList.toggle('hidden');
-                                    }
-                                }}
-                            >
-                                open chat
-                            </li>
-                        </ul>
-                    </div>
+                                                Settings
+                                            </Link>
+                                        </li>
+                                        <li
+                                            onClick={handleLogout}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                        >
+                                            Sign out
+                                        </li>
+                                    </div>
+                                )}
+                            </ul>
+                        </div>
+                    )}
                 </div>
             </div>
 

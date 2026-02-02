@@ -3,7 +3,7 @@
 import React from 'react';
 import Title from '../Title/Title';
 import InputField from '../InputField/InputField';
-import FollowersList from '../FollowersList/FollowersList';
+import AllUsersList from '../AllUsersList/AllUsersList';
 
 type FormData = {
     title: string;
@@ -77,7 +77,7 @@ const CreateGroupUI: React.FC<CreateGroupUIProps> = ({
                             <h3 className="text-sm font-medium text-white mb-2">
                                 Invite Members
                             </h3>
-                            <FollowersList onSelectionChange={onInviteChange} />
+                            <AllUsersList onSelectionChange={onInviteChange} />
                         </div>
                     </div>
 

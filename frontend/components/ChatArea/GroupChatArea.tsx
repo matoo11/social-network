@@ -38,6 +38,12 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     console.log(chatWith);
     useEffect(() => {
         const loadMessages = async () => {
+
+            if (!chatID || Number(chatID) === 0) {
+                setMessages([]);
+                return;
+            }
+
             try {
                 const res = await fetch('http://localhost:8080/api/message/getGroupMessages', {
                     method: 'POST',

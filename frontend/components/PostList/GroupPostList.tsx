@@ -34,6 +34,12 @@ const GroupPostList: React.FC<GroupPostListProps> = ({
     const [posts, setPosts] = useState<PostListUIProps['posts']>([]);
 
     const fetchPostsFromAPI = async () => {
+
+        if (groupId === 0) {
+            setPosts([]);
+            return;
+        }
+
         const data = await fetchGroupPosts(groupId);
 
         const mappedPosts: PostListUIProps['posts'] = data.map((p: any) => ({

@@ -37,6 +37,12 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 
     useEffect(() => {
         const loadMessages = async () => {
+
+            if (!chatID || Number(chatID) === 0) {
+                setMessages([]);
+                return;
+            }
+
             try {
                 const res = await fetch('http://localhost:8080/api/message/getPrivateMessages', {
                     method: 'POST',

@@ -73,6 +73,12 @@ export default function SocialFeed() {
                 joined: mode === 'all' ? myGroupIds.has(String(item.groupId)) : undefined,
             }));
             setChatsData(mapped);
+
+            if (mapped.length > 0 && !chatID) {
+                setchatID(mapped[0].id);
+                setChatWith(mapped[0].username);
+                setChatter('Me');
+            }
         } catch (err) {
             console.error(err);
         }

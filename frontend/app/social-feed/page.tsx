@@ -57,6 +57,12 @@ export default function SocialFeed() {
             }));
 
             setChatsData(mapped);
+
+            if (mapped.length > 0 && !chatID) {
+                setchatID(mapped[0].id);
+                setChatWith(mapped[0].username);
+                setChatter("Me");
+            }
         } catch (err) {
             console.error("Failed to load chats:", err);
             setChatsData([]); // fallback to empty array on error

@@ -28,6 +28,40 @@ func ChatHandler(sento int, message string, conn *Conn, LoggedInUserID int, Logg
 }
 
 func PrivateChat(sento int, message string, conn *Conn, LoggedInUserID int, LoggedInUsername string) {
+
+	isFollowing1, err1 := dbConn.IsFollowing(LoggedInUserID, sento)
+	isFollowing2, err2 := dbConn.IsFollowing(sento, LoggedInUserID)
+
+	if err1 != nil || err2 != nil {
+		chat := ChatData{
+			Message: "Failed to verify follow relationship",
+		}
+		chatJson, _ := json.Marshal(chat)
+		response := Response{
+			Type: "chat",
+			Data: chatJson,
+		}
+		conn.Lock.Lock()
+		conn.Conn.WriteJSON(response)
+		conn.Lock.Unlock()
+		return
+	}
+
+	if !isFollowing1 && !isFollowing2 {
+		chat := ChatData{
+			Message: "You can only send messages to users you follow or who follow you",
+		}
+		chatJson, _ := json.Marshal(chat)
+		response := Response{
+			Type: "chat",
+			Data: chatJson,
+		}
+		conn.Lock.Lock()
+		conn.Conn.WriteJSON(response)
+		conn.Lock.Unlock()
+		return
+	}
+
 	if len(message) >= 100 {
 		chat := ChatData{
 			Message: "The message is too long",

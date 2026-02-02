@@ -49,11 +49,14 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 
                 const data = await res.json();
 
-                const mapped = data.map((m: any) => ({
+                // Ensure data is an array before mapping
+                const list = Array.isArray(data) ? data : [];
+
+                const mapped: Message[] = list.map((m: any) => ({
                     id: m.MessageID,
                     username: m.SenderID === Number(chatter) ? chatter : chatWith,
                     text: m.Content,
-                    type: m.IsSender ? 'sent' : 'received',
+                    type: (m.IsSender ? 'sent' : 'received') as 'sent' | 'received',
                     time: m.CreationTime,
                 }));
 

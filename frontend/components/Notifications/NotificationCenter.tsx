@@ -32,13 +32,23 @@ const NotificationCenter = ({ onGroupInviteHandled }: NotificationCenterProps) =
                 const res = await fetch('http://localhost:8080/api/notifications/get',{
                     credentials: "include",
                 });
-                if (!res.ok) throw new Error('Failed to fetch notifications');
+                if (!res.ok) {
+                    console.error('Failed to fetch notifications');
+                    setNotifications([]);
+                    return;
+                }
                 const data = await res.json();
                 
-                const notifs = Array.isArray(data) ? data : data.data;
-                if (Array.isArray(notifs)) setNotifications(notifs);
+                if (!data) {
+                    setNotifications([]);
+                    return;
+                }
+                
+                const notifs = Array.isArray(data) ? data : (data.data || []);
+                setNotifications(Array.isArray(notifs) ? notifs : []);
             } catch (err) {
                 console.error(err);
+                setNotifications([]);
             }
         };
         fetchNotifications();

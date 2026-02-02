@@ -51,7 +51,7 @@ func GetNotifications(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var out []Notification
+	out := make([]Notification, 0)
 	for _, n := range notifs {
 		switch n.NotificationTypeID {
 		case 3: // Follow Request

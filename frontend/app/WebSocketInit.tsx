@@ -1,11 +1,21 @@
 "use client";
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { InitWebSocket } from "../lib/api/websocket";
 
-export default function WebSocketInit() {
-  useEffect(() => {
-    InitWebSocket(); // start once on client
-  }, []);
+const authRoutes = ['/login', '/register'];
 
-  return null; // renders nothing
+export default function WebSocketInit() {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    
+    if (authRoutes.includes(pathname)) {
+      return;
+    }
+    
+    InitWebSocket();
+  }, [pathname]);
+
+  return null;
 }

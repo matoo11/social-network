@@ -9,6 +9,7 @@ type AuthGuardProps = {
 };
 
 const publicRoutes = ['/', '/login', '/register'];
+const authRoutes = ['/login', '/register'];
 
 export default function AuthGuard({ children }: AuthGuardProps) {
     const router = useRouter();
@@ -18,23 +19,26 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
     useEffect(() => {
         const checkAuth = async () => {
-            // If current route is public, allow access
-            if (publicRoutes.includes(pathname)) {
-                setIsChecking(false);
-                setIsAuthenticated(true);
-                return;
-            }
-
-            // Check authentication for protected routes
+            // Check if user is authenticated
             try {
                 await fetchUserData();
+                // User is authenticated
                 setIsAuthenticated(true);
                 setIsChecking(false);
+                
+                // If authenticated user tries to access login/register, redirect to social-feed
+                if (authRoutes.includes(pathname)) {
+                    router.push('/social-feed');
+                }
             } catch (error) {
-                console.error('Authentication check failed:', error);
+                // User is not authenticated
                 setIsAuthenticated(false);
                 setIsChecking(false);
-                router.push('/login');
+                
+                // If not authenticated and trying to access protected route, redirect to login
+                if (!publicRoutes.includes(pathname)) {
+                    router.push('/login');
+                }
             }
         };
 

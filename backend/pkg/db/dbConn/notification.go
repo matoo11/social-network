@@ -179,3 +179,18 @@ func GetNotificationByID(notificationID int) (Notification, error) {
 
 	return n, nil
 }
+
+func DeactivateNotification(notificationID int) error {
+	statement := `
+	UPDATE Notifications
+	SET Is_Active = 0, Last_Updated_Time = ?
+	WHERE Notification_ID = ?`
+
+	now := time.Now().Format("2006-01-02 15:04:05")
+	_, err := dbHandler.DB.Exec(statement, now, notificationID)
+	if err != nil {
+		return fmt.Errorf("failed to deactivate notification: %v", err)
+	}
+
+	return nil
+}

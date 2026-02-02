@@ -889,6 +889,25 @@ func CreateGroupEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	groupMembers, err := dbConn.GetGroupMembers(payload.GroupID)
+	if err == nil {
+		for _, member := range groupMembers {
+			if member.UserID != creatorID {
+				notification := dbConn.Notification{
+					NotificationText:   "New event created in " + title,
+					SourceID:           event.EventID,
+					TargetID:           member.UserID,
+					NotificationTypeID: 11,
+					CreatedByID:        creatorID,
+				}
+				notifID, err := dbConn.CreateNotification(notification)
+				if err == nil {
+					websocket.SendNotification(int(notifID), member.UserID, 11)
+				}
+			}
+		}
+	}
+
 	counts, err := dbConn.GetEventResponseCounts(event.EventID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

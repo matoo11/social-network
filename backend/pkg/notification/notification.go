@@ -24,6 +24,13 @@ type FollowRequest struct {
 	RequesterName string `json:"requesterName"`
 }
 
+type EventCreated struct {
+	EventID   int    `json:"eventId"`
+	GroupID   int    `json:"groupId"`
+	GroupName string `json:"groupName"`
+	EventName string `json:"eventName"`
+}
+
 type Notification struct {
 	Id   int    `json:"id"`
 	Type string `json:"type"`
@@ -59,6 +66,11 @@ func GetNotifications(w http.ResponseWriter, r *http.Request) {
 			}
 		case 10: // Join Group Request
 			notif, ok := mapJoinGroupRequestNotification(n)
+			if ok {
+				out = append(out, notif)
+			}
+		case 11: // Event Created
+			notif, ok := mapEventCreatedNotification(n)
 			if ok {
 				out = append(out, notif)
 			}
@@ -141,4 +153,67 @@ func mapFollowRequestNotification(n dbConn.NotificationDisplay) (Notification, b
 			RequesterName: requester.User_Name,
 		},
 	}, true
+}
+
+func mapEventCreatedNotification(n dbConn.NotificationDisplay) (Notification, bool) {
+	eventID := n.SourceID
+	event, err := dbConn.GetGroupEventByID(eventID)
+	if err != nil {
+		return Notification{}, false
+	}
+	group, err := dbConn.GetGroupByID(event.GroupID)
+	if err != nil {
+		return Notification{}, false
+	}
+
+	return Notification{
+		Id:   n.NotificationID,
+		Type: "EVENT_CREATED",
+		Data: EventCreated{
+			EventID:   eventID,
+			GroupID:   event.GroupID,
+			GroupName: group.Title,
+			EventName: event.Title,
+		},
+	}, true
+}
+
+func DismissNotification(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+
+	user, ok := auth.Authenticator(w, r)
+	if !ok {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+
+	var payload struct {
+		NotificationID int `json:"notificationId"`
+	}
+
+	if err := auth.JsonDecode(w, r, &payload); err != nil {
+		http.Error(w, "invalid JSON payload", http.StatusBadRequest)
+		return
+	}
+
+	notif, err := dbConn.GetNotificationByID(payload.NotificationID)
+	if err != nil {
+		http.Error(w, "notification not found", http.StatusNotFound)
+		return
+	}
+
+	if notif.TargetID != user.User_ID {
+		http.Error(w, "unauthorized", http.StatusForbidden)
+		return
+	}
+
+	if err := dbConn.DeactivateNotification(payload.NotificationID); err != nil {
+		http.Error(w, "failed to dismiss notification", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

@@ -9,7 +9,8 @@ export type NotificationType =
     | 'MESSAGE'
     | 'FOLLOW_REQUEST'
     | 'JOIN_GROUP_REQUEST'
-    | 'GROUP_CREATED';
+    | 'GROUP_CREATED'
+    | 'EVENT_CREATED';
 
 export type Notification = {
     id: number;

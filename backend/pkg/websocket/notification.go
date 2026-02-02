@@ -18,6 +18,13 @@ type JoinGroupRequest struct {
 	RequesterName string `json:"requesterName"`
 }
 
+type EventCreated struct {
+	EventID   int    `json:"eventId"`
+	GroupID   int    `json:"groupId"`
+	GroupName string `json:"groupName"`
+	EventName string `json:"eventName"`
+}
+
 type Notification struct {
 	Id   int    `json:"Id"`
 	Type string `json:"type"`
@@ -148,6 +155,48 @@ func SendNotification(nId int, to int, nType int) {
 		f := Notification{
 			Id:   nId,
 			Type: "JOIN_GROUP_REQUEST",
+			Data: payload,
+		}
+
+		data, _ := json.Marshal(f)
+		res := Response{
+			Type: "notification",
+			Data: data,
+		}
+
+		if conn != nil {
+			conn.Lock.Lock()
+			conn.Conn.WriteJSON(res)
+			conn.Lock.Unlock()
+		}
+	case 11:
+		conn := GetClientConn(to)
+		notification, err := dbConn.GetNotificationByID(nId)
+		if err != nil {
+			return
+		}
+
+		eventID := notification.SourceID
+		event, err := dbConn.GetGroupEventByID(eventID)
+		if err != nil {
+			return
+		}
+
+		group, err := dbConn.GetGroupByID(event.GroupID)
+		if err != nil {
+			return
+		}
+
+		payload := EventCreated{
+			EventID:   eventID,
+			GroupID:   event.GroupID,
+			GroupName: group.Title,
+			EventName: event.Title,
+		}
+
+		f := Notification{
+			Id:   nId,
+			Type: "EVENT_CREATED",
 			Data: payload,
 		}
 

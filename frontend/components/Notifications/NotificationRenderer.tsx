@@ -2,6 +2,7 @@ import { Notification } from './NotificationCenter';
 import GroupInviteNotification from './GroupInviteNotification';
 import JoinGroupRequestNotification from './JoinGroupRequestNotification';
 import FollowRequestNotification from './FollowRequestNotification';
+import EventCreatedNotification from './EventCreatedNotification';
 
 type Props = {
     notification: Notification;
@@ -39,6 +40,18 @@ const NotificationRenderer = ({ notification, onHandled }: Props) => {
                     notificationId={notification.id}
                     requesterId={notification.data.requesterId}
                     requesterName={notification.data.requesterName}
+                    onHandled={onHandled}
+                />
+            );
+
+        case 'EVENT_CREATED':
+            return (
+                <EventCreatedNotification
+                    notificationId={notification.id}
+                    eventId={notification.data.eventId}
+                    groupId={notification.data.groupId}
+                    groupName={notification.data.groupName}
+                    eventName={notification.data.eventName}
                     onHandled={onHandled}
                 />
             );

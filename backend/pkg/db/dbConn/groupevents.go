@@ -145,6 +145,50 @@ func GetGroupEvents(groupID int) ([]GroupEvent, error) {
 	return events, nil
 }
 
+func GetGroupEventByID(eventID int) (GroupEvent, error) {
+	if err := ensureGroupEventTable(); err != nil {
+		return GroupEvent{}, err
+	}
+
+	statement := `
+		SELECT e.Event_ID,
+		       ge.Group_ID,
+		       e.Event_Title,
+		       e.Event_Description,
+		       e.Event_Time,
+		       e.User_ID
+		FROM Group_Events ge
+		JOIN Events e ON ge.Event_ID = e.Event_ID
+		WHERE e.Event_ID = ? AND ge.Is_Active = 1 AND e.Is_Active = 1
+		LIMIT 1`
+
+	var evt GroupEvent
+	var eventTimeStr string
+	err := dbHandler.DB.QueryRow(statement, eventID).Scan(
+		&evt.EventID,
+		&evt.GroupID,
+		&evt.Title,
+		&evt.Description,
+		&eventTimeStr,
+		&evt.CreatorID,
+	)
+	if err != nil {
+		return GroupEvent{}, fmt.Errorf("failed to fetch group event: %w", err)
+	}
+
+	if parsed, parseErr := time.Parse("2006-01-02 15:04:05", eventTimeStr); parseErr == nil {
+		evt.EventTime = parsed
+	}
+
+	counts, err := GetEventResponseCounts(evt.EventID)
+	if err != nil {
+		return GroupEvent{}, err
+	}
+	evt.Responses = counts
+
+	return evt, nil
+}
+
 func GetUserEventResponse(eventID, userID int) (*int, error) {
 	var optionID sql.NullInt64
 	err := dbHandler.DB.QueryRow(`
@@ -257,4 +301,3 @@ func GetEventOptionByID(optionID int) (string, error) {
 	}
 	return optionName, nil
 }
-

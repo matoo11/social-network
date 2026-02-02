@@ -112,6 +112,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		message.GetChatList(w, r)
 	case "/api/notifications/get":
 		notification.GetNotifications(w, r)
+	case "/api/notifications/dismiss":
+		notification.DismissNotification(w, r)
 	default:
 		http.NotFound(w, r)
 	}

@@ -35,24 +35,24 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
-    console.log(chatWith);
+
     useEffect(() => {
         const loadMessages = async () => {
             try {
-                const res = await fetch('http://localhost:8080/api/message/getGroupMessages', {
+                const res = await fetch('http://localhost:8080/api/message/getPrivateMessages', {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ groupID: Number(chatID) }),
+                    body: JSON.stringify({ userID: Number(chatID) }),
                 });
 
                 const data = await res.json();
 
                 const mapped = data.map((m: any) => ({
                     id: m.MessageID,
-                    username: m.SenderUsername || (m.IsSender ? chatter : `User ${m.SenderID}`),
+                    username: m.IsSender ? 'Me' : chatWith,
                     text: m.Content,
                     type: m.IsSender ? 'sent' : 'received',
                     time: m.CreationTime,
@@ -75,12 +75,10 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
         const listener = (e: any) => {
             const data = e.detail;
 
-            // Ignore private chat payloads (they carry receiver info).
-            if (data?.recieverUsername || data?.recieverID) {
-                if (data?.recieverID && String(data.recieverID) !== chatID) return;
-                if (data?.recieverUsername) return;
-            }
-
+            // if (data.senderID !== chatWith && data.recieverID !== chatter) return;
+            if (String(data.senderID) !== chatID) return;
+            console.log(chatID);
+            console.log(data);
             const incoming: Message = {
                 id: Date.now(),
                 username: data.senderUsername,
@@ -95,12 +93,21 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
         window.addEventListener('ws-chat', listener);
 
         return () => window.removeEventListener('ws-chat', listener);
-    }, [chatWith, chatter]);
+    }, [chatWith, chatter, chatID]);
 
     const handleSend = () => {
         if (!input.trim()) return;
 
-        SendChatMessage(Number(chatID), input, 2);
+        const newMessage: Message = {
+            id: Date.now(),
+            username: 'Me',
+            text: input,
+            type: 'sent',
+            time: new Date().toISOString(),
+        };
+
+        setMessages([...messages, newMessage]);
+        SendChatMessage(Number(chatID), input, 1);
         // sendMessage("chat", {
         //     from: chatter,
         //     to: chatWith,

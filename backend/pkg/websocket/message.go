@@ -14,6 +14,7 @@ type ChatData struct {
 	SenderID         int       `json:"senderID"`
 	SenderUsername   string    `json:"senderUsername"`
 	RecieverUsername string    `json:"recieverUsername"`
+	GroupID          int       `json:"groupID"`
 	Time             time.Time `json:"time"`
 }
 
@@ -160,6 +161,7 @@ func GroupChat(groupID int, message string, conn *Conn, LoggedInUserID int, Logg
 		Message:        message,
 		SenderID:       LoggedInUserID,
 		SenderUsername: LoggedInUsername,
+		GroupID:        groupID,
 		Time:           time.Now(),
 	}
 

@@ -52,7 +52,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 
                 const mapped = data.map((m: any) => ({
                     id: m.MessageID,
-                    username: m.SenderUsername || (m.IsSender ? chatter : `User ${m.SenderID}`),
+                    username: m.IsSender ? 'Me' : (m.SenderUsername || `User ${m.SenderID}`),
                     text: m.Content,
                     type: m.IsSender ? 'sent' : 'received',
                     time: m.CreationTime,
@@ -75,11 +75,11 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         const listener = (e: any) => {
             const data = e.detail;
 
-            // Ignore private chat payloads (they carry receiver info).
-            if (data?.recieverUsername || data?.recieverID) {
-                if (data?.recieverID && String(data.recieverID) !== chatID) return;
-                if (data?.recieverUsername) return;
-            }
+            // Ignore private chat messages (they have receiverID)
+            if (data?.recieverID) return;
+
+            // Only add messages that belong to this group
+            if (data?.groupID && String(data.groupID) !== chatID) return;
 
             const incoming: Message = {
                 id: Date.now(),
@@ -95,7 +95,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         window.addEventListener('ws-chat', listener);
 
         return () => window.removeEventListener('ws-chat', listener);
-    }, [chatWith, chatter]);
+    }, [chatWith, chatter, chatID]);
 
     const handleSend = () => {
         if (!input.trim()) return;

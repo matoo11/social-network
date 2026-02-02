@@ -113,6 +113,9 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         //     message: input,
         // });
 
+        // Trigger chat list refresh after sending message
+        window.dispatchEvent(new CustomEvent('message-sent'));
+
         setInput('');
 
         // Simulate a response

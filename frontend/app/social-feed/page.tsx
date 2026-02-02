@@ -31,39 +31,61 @@ export default function SocialFeed() {
     const [chatsData, setChatsData] = useState<ChatItem[]>([]);
     const [isSignInPopupOpen, setIsSignInPopupOpen] = useState(false);
 
-    useEffect(() => {
-        const loadChats = async () => {
-            try {
-                const res = await fetch("http://localhost:8080/api/chat/getChatList", {
-                    credentials: 'include',
-                });
+    const loadChats = async () => {
+        try {
+            const res = await fetch("http://localhost:8080/api/chat/getChatList", {
+                credentials: 'include',
+            });
 
-                // Check if the response is OK
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(`HTTP ${res.status}: ${text}`);
-                }
-
-                // Parse JSON safely
-                const data: unknown = await res.json();
-
-                // Ensure data is an array before mapping
-                const list = Array.isArray(data) ? data : [];
-
-                const mapped: ChatItem[] = list.map((item: any) => ({
-                    id: String(item.UserID),
-                    username: item.Username,
-                    lastMessage: item.last_message || '',
-                }));
-
-                setChatsData(mapped);
-            } catch (err) {
-                console.error("Failed to load chats:", err);
-                setChatsData([]); // fallback to empty array on error
+            // Check if the response is OK
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(`HTTP ${res.status}: ${text}`);
             }
+
+            // Parse JSON safely
+            const data: unknown = await res.json();
+
+            // Ensure data is an array before mapping
+            const list = Array.isArray(data) ? data : [];
+
+            const mapped: ChatItem[] = list.map((item: any) => ({
+                id: String(item.UserID),
+                username: item.Username,
+                lastMessage: item.last_message || '',
+            }));
+
+            setChatsData(mapped);
+        } catch (err) {
+            console.error("Failed to load chats:", err);
+            setChatsData([]); // fallback to empty array on error
+        }
+    };
+
+    useEffect(() => {
+        loadChats();
+    }, []);
+
+    useEffect(() => {
+        // Listen for WebSocket chat messages to refresh chat list
+        const handleChatMessage = () => {
+            loadChats();
+            console.log("Chat list refreshed due to WebSocket message");
         };
 
-        loadChats();
+        // Listen for sent messages to refresh chat list
+        const handleMessageSent = () => {
+            loadChats();
+            console.log("Chat list refreshed due to sent message");
+        };
+
+        window.addEventListener('ws-chat', handleChatMessage);
+        window.addEventListener('message-sent', handleMessageSent);
+
+        return () => {
+            window.removeEventListener('ws-chat', handleChatMessage);
+            window.removeEventListener('message-sent', handleMessageSent);
+        };
     }, []);
 
     const handleNewPostCreated = () => {

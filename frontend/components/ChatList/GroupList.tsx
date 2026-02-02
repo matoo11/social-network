@@ -51,20 +51,19 @@ const GroupList: React.FC<ChatListProps> = ({
 
     return (
         <div className="flex flex-col h-full w-full border-2 border-gray-600 rounded-lg shadow-sm overflow-hidden bg-gray-900">
-            {/* Header */}
-            <div className="flex-shrink-0 flex justify-center items-center gap-3 px-4 py-3 border-b-2 border-gray-600 bg-gray-900 flex-wrap">
-                <Title text="Groups" />
+            <div className="flex flex-nowrap flex-shrink-0 justify-center gap-2 items-center py-3 px-3 border-b-2 border-gray-600 shadow-sm bg-gray-900">
+                <span className="truncate min-w-0">
+                    <Title text="Groups" />
+                </span>
                 <button
                     type="button"
-                    className="bg-gray-700 text-white px-3 py-1 rounded-md hover:bg-gray-600 text-sm"
+                    className="bg-gray-700 text-white px-2 py-1 rounded-md hover:bg-gray-600 text-xs whitespace-nowrap flex-shrink-0"
                     onClick={onToggleMode}
                 >
-                    {mode === 'mine' ? 'All groups' : 'My groups'}
+                    {mode === 'mine' ? 'All Groups' : 'My Groups'}
                 </button>
-                <PopupBtn className="" onClick={popupHandler} />
+                <PopupBtn className="h-8 w-8 !aspect-auto flex-shrink-0" onClick={popupHandler} />
             </div>
-
-            {/* Groups List */}
             <div className="flex-1 overflow-y-auto hide-scrollbar">
                 <div className="flex flex-col gap-2 p-4">
                     {chats.map((chat) => (

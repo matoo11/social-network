@@ -131,15 +131,26 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
     }, [postID]);
 
     return (
-        <div className="border-2 border-gray-600 rounded-lg h-full bg-gray-900 flex flex-col">
-            <div className="flex justify-center gap-5 items-center h-[7.5%] pt-2 border-b-2 border-gray-600 dark:bg-gray-900">
+        <div className="border-2 border-gray-600 rounded-lg h-full bg-gray-900 flex flex-col overflow-hidden">
+            {/* Header */}
+            <div className="flex-shrink-0 flex justify-center items-center py-3 px-4 border-b-2 border-gray-600 bg-gray-900">
                 <Title text="Post Content" />
             </div>
 
-            <div className="grid grid-cols-[1fr_2fr] divide-x divide-gray-300 h-[92.5%]">
-                <div className="p-4 h-[65vh] flex flex-col">
-                    {loading && <p>Loading post...</p>}
-                    {error && <p className="text-red-500">{error}</p>}
+            {/* Content Area */}
+            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
+                {/* Post Section */}
+                <div className="lg:w-2/5 p-4 overflow-y-auto hide-scrollbar border-b-2 lg:border-b-0 lg:border-r-2 border-gray-600">
+                    {loading && (
+                        <div className="flex items-center justify-center h-full">
+                            <p className="text-gray-400">Loading post...</p>
+                        </div>
+                    )}
+                    {error && (
+                        <div className="flex items-center justify-center h-full">
+                            <p className="text-red-500">{error}</p>
+                        </div>
+                    )}
                     {currentPostData && (
                         <PostCard
                             postID={postID}
@@ -159,7 +170,9 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
                         />
                     )}
                 </div>
-                <div className="p-4 h-[70vh] flex flex-col">
+
+                {/* Comments Section */}
+                <div className="lg:w-3/5 flex-1 min-h-0 p-4">
                     <CommentList
                         postID={postID}
                         comments={currentCommentsData}

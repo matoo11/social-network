@@ -94,22 +94,26 @@ export default function SocialFeed() {
     }, [groupListMode]);
 
     useEffect(() => {
-        // Listen for WebSocket chat messages to refresh group list
         const handleChatMessage = () => {
             refreshGroups();
         };
 
-        // Listen for sent messages to refresh group list
         const handleMessageSent = () => {
+            refreshGroups();
+        };
+
+        const handleGroupInviteAccepted = () => {
             refreshGroups();
         };
 
         window.addEventListener('ws-chat', handleChatMessage);
         window.addEventListener('message-sent', handleMessageSent);
+        window.addEventListener('group-invite-accepted', handleGroupInviteAccepted);
 
         return () => {
             window.removeEventListener('ws-chat', handleChatMessage);
             window.removeEventListener('message-sent', handleMessageSent);
+            window.removeEventListener('group-invite-accepted', handleGroupInviteAccepted);
         };
     }, [groupListMode]);
 

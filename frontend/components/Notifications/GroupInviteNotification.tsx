@@ -32,6 +32,9 @@ const GroupInviteNotification = ({
 
         if (res.ok) {
             onHandled();
+            if (accept) {
+                window.dispatchEvent(new CustomEvent('group-invite-accepted'));
+            }
         }
     };
 

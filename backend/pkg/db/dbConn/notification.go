@@ -45,7 +45,7 @@ func CreateNotification(n Notification) (int64, error) {
 		Is_Active
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	now := time.Now().Format("2006-01-02 15:04:05")
+	now := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	result, err := dbHandler.DB.Exec(
 		statement,
@@ -121,7 +121,7 @@ func DeleteNotification(notificationID int, userID int) error {
 	WHERE Notification_ID = ?
 	AND Target_ID = ?`
 
-	now := time.Now().Format("2006-01-02 15:04:05")
+	now := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	res, err := dbHandler.DB.Exec(statement, userID, now, notificationID, userID)
 	if err != nil {
@@ -186,7 +186,7 @@ func DeactivateNotification(notificationID int) error {
 	SET Is_Active = 0, Last_Updated_Time = ?
 	WHERE Notification_ID = ?`
 
-	now := time.Now().Format("2006-01-02 15:04:05")
+	now := time.Now().UTC().Format("2006-01-02 15:04:05")
 	_, err := dbHandler.DB.Exec(statement, now, notificationID)
 	if err != nil {
 		return fmt.Errorf("failed to deactivate notification: %v", err)

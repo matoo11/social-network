@@ -14,7 +14,7 @@ const (
 )
 
 func formattedNow() string {
-	return time.Now().Format("2006-01-02 15:04:05")
+	return time.Now().UTC().Format("2006-01-02 15:04:05")
 }
 
 type Group struct {
@@ -186,7 +186,6 @@ func GetGroupByID(groupID int) (Group, error) {
 	}
 	return g, nil
 }
-
 
 func GetAllGroups() ([]GroupSummary, error) {
 	statement := `

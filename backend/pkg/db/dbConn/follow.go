@@ -41,7 +41,7 @@ func CreateFollow(follow Follow) error {
 	VALUES
 	(?, ?, ?, ?, ?, ?, ?)`
 
-	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	_, err := dbHandler.DB.Exec(
 		statement,
@@ -157,7 +157,7 @@ func CreateFollowRequest(requesterID int, receiverID int) error {
 	VALUES
 	(?, ?, ?, ?, ?, ?, ?, ?)`
 
-	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	_, err = dbHandler.DB.Exec(
 		statement,
@@ -201,7 +201,7 @@ func AcceptFollowRequest(requesterID int, receiverID int) error {
 	}
 
 	// Update the request status to accepted (Status_ID = 2)
-	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 	statement := `UPDATE Follow_Requests
 		SET Status_ID = 2,
 			Last_Updated_By_ID = ?,
@@ -231,7 +231,7 @@ func CancelFollowRequest(requesterID int, receiverID int) error {
 	}
 
 	// Deactivate the follow request
-	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 	statement := `UPDATE Follow_Requests
 		SET Last_Updated_By_ID = ?,
 			Last_Updated_Time = ?,
@@ -261,7 +261,7 @@ func RejectFollowRequest(requesterID int, receiverID int) error {
 	}
 
 	// Update the request status to rejected (Status_ID = 3) and set Is_Active to 0
-	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 	statement := `UPDATE Follow_Requests
 		SET Status_ID = 3,
 			Last_Updated_By_ID = ?,

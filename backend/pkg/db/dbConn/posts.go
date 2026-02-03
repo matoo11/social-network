@@ -37,7 +37,7 @@ type PostData struct {
 	LastUpdatedByID int
 	LastUpdatedTime time.Time
 	IsActive        bool
-	PrivateUsersIDs   []int
+	PrivateUsersIDs []int
 }
 
 type PostDisplay struct {
@@ -75,7 +75,7 @@ func CreatePost(post PostData) error {
 	VALUES
     (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	_, err := dbHandler.DB.Exec(
 		statement,
@@ -161,19 +161,19 @@ func GetPublicPosts() ([]PostDisplay, error) {
 		}
 
 		var comments []CommentDisplay
-		
+
 		commments, err := GetCommentsByPostID(post.PostID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch comments for post %d: %w", post.PostID, err)
 		}
-		
+
 		for _, c := range commments {
 			comments = append(comments, CommentDisplay{
 				CommentID:    c.CommentID,
 				PostID:       c.PostID,
 				CommentText:  c.CommentText,
 				CreationTime: c.CreationTime,
-				CreatedByID: c.CreatedByID,
+				CreatedByID:  c.CreatedByID,
 			})
 		}
 
@@ -364,19 +364,19 @@ func GetPostsByUserForViewer(ownerID, viewerID int) ([]PostDisplay, error) {
 		}
 
 		var comments []CommentDisplay
-		
+
 		commments, err := GetCommentsByPostID(post.PostID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch comments for post %d: %w", post.PostID, err)
 		}
-		
+
 		for _, c := range commments {
 			comments = append(comments, CommentDisplay{
 				CommentID:    c.CommentID,
 				PostID:       c.PostID,
 				CommentText:  c.CommentText,
 				CreationTime: c.CreationTime,
-				CreatedByID: c.CreatedByID,
+				CreatedByID:  c.CreatedByID,
 			})
 		}
 
@@ -426,7 +426,7 @@ func SaveImage(file multipart.File, filename string, userID int) (int, error) {
 	)
 	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	formattedTime := time.Now().Format("2006-01-02 15:04:05")
+	formattedTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	result, err := dbHandler.DB.Exec(
 		query,
@@ -499,23 +499,23 @@ func GetPostByID(postID int) (PostDisplay, error) {
 	}
 
 	var comments []CommentDisplay
-		
-		commments, err := GetCommentsByPostID(post.PostID)
-		if err != nil {
-			return PostDisplay{}, fmt.Errorf("failed to fetch comments for post %d: %w", post.PostID, err)
-		}
-		
-		for _, c := range commments {
-			comments = append(comments, CommentDisplay{
-				CommentID:    c.CommentID,
-				PostID:       c.PostID,
-				CommentText:  c.CommentText,
-				CreationTime: c.CreationTime,
-				CreatedByID: c.CreatedByID,
-			})
-		}
 
-		post.Comments = comments
+	commments, err := GetCommentsByPostID(post.PostID)
+	if err != nil {
+		return PostDisplay{}, fmt.Errorf("failed to fetch comments for post %d: %w", post.PostID, err)
+	}
+
+	for _, c := range commments {
+		comments = append(comments, CommentDisplay{
+			CommentID:    c.CommentID,
+			PostID:       c.PostID,
+			CommentText:  c.CommentText,
+			CreationTime: c.CreationTime,
+			CreatedByID:  c.CreatedByID,
+		})
+	}
+
+	post.Comments = comments
 
 	return post, nil
 }

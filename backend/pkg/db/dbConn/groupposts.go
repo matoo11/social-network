@@ -76,8 +76,6 @@ func CreateGroupPost(groupID, authorID int, title, text string) (GroupPost, erro
 		return GroupPost{}, fmt.Errorf("failed to fetch group post id: %w", err)
 	}
 
-	createdAt, _ := time.Parse("2006-01-02 15:04:05", now)
-
 	return GroupPost{
 		GroupPostID:  int(groupPostID64),
 		GroupID:      groupID,
@@ -85,7 +83,7 @@ func CreateGroupPost(groupID, authorID int, title, text string) (GroupPost, erro
 		Title:        title,
 		Text:         text,
 		AuthorID:     authorID,
-		CreationTime: createdAt,
+		CreationTime: time.Now().UTC(),
 	}, nil
 }
 
@@ -112,14 +110,18 @@ func GetGroupPosts(groupID int) ([]GroupPostDisplay, error) {
 	var posts []GroupPostDisplay
 	for rows.Next() {
 		var gp GroupPost
-		var creationTimeStr string
-		err := rows.Scan(&gp.GroupPostID, &gp.GroupID, &gp.PostID, &gp.Title, &gp.Text, &gp.AuthorID, &creationTimeStr)
+		var creationTime time.Time
+
+		// rows.Scan(..., &creationTime)
+
+		err := rows.Scan(&gp.GroupPostID, &gp.GroupID, &gp.PostID, &gp.Title, &gp.Text, &gp.AuthorID, &creationTime)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan group post: %w", err)
 		}
-		if parsed, parseErr := time.Parse("2006-01-02 15:04:05", creationTimeStr); parseErr == nil {
-			gp.CreationTime = parsed
-		}
+		// if parsed, parseErr := time.Parse("2006-01-02 15:04:05", creationTimeStr); parseErr == nil {
+		// 	gp.CreationTime = parsed
+		// }
+		gp.CreationTime = creationTime
 		comments, err := GetGroupComments(gp.GroupPostID)
 		if err != nil {
 			return nil, err

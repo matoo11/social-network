@@ -143,7 +143,7 @@ func CreateAdminUser() error {
 		Is_Active
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	currentTime := time.Now().Format("2006-01-02 15:04:05")
+	currentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	_, err = DB.Exec(statement,
 		user.UserName,

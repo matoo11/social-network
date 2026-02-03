@@ -6,9 +6,11 @@ import (
 	"log"
 	"os"
 	"social/backend/pkg/logs"
-	"strings"
 	"time"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,83 +18,77 @@ import (
 var DB *sql.DB
 
 func OpenDB() error {
-	dbFile := "social.db"
 	dbFilePath := "backend/pkg/db/social.db"
-	sqlCommandsFilePath := "backend/pkg/db/migrations/db.sql"
+	migrationsPath := "file://backend/pkg/db/migrations/sqlite"
 	var err error
-	var recreatedFlag bool
-
-	// Check if the database file exists and recreate it if it doesn't
-	if FileExists(dbFilePath) {
-		logs.LogInfo(fmt.Sprintf("Database file %s already exists. Skipping recreation.", dbFile))
-	} else {
-		err := ReCreateDB(sqlCommandsFilePath, dbFilePath)
-		if err != nil {
-			return err
-		}
-		recreatedFlag = true
-	}
 
 	DB, err = sql.Open("sqlite3", dbFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to open DB: %v", err)
 	}
 
-	// ✅ Enable foreign key constraints
 	_, err = DB.Exec("PRAGMA foreign_keys = ON;")
 	if err != nil {
 		return fmt.Errorf("failed to enable foreign key constraints: %v", err)
 	}
 
-	if recreatedFlag {
-		err = CreateAdminUser()
-		if err != nil {
-			log.Print(err)
+	if err := runMigrations(DB, migrationsPath); err != nil {
+		return fmt.Errorf("migration failed: %v", err)
+	}
 
-		}
-		err = CreateTestUsers()
-		if err != nil {
-			log.Print(err)
-		}
+	logs.LogInfo("Database migrations completed successfully")
+
+	if err := ensureTestData(); err != nil {
+		log.Printf("Warning: failed to create test data: %v", err)
 	}
 
 	return nil
 }
 
-func ReCreateDB(sqlCommandsFilePath, dbFilePath string) error {
-	sqlCommands, err := os.ReadFile(sqlCommandsFilePath)
+func runMigrations(db *sql.DB, migrationsPath string) error {
+	driver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
 	if err != nil {
-		return fmt.Errorf("failed to read SQL file: %v", err)
+		return fmt.Errorf("could not create database driver: %v", err)
 	}
 
-	DB, err := sql.Open("sqlite3", dbFilePath)
+	m, err := migrate.NewWithDatabaseInstance(
+		migrationsPath,
+		"sqlite3",
+		driver,
+	)
 	if err != nil {
-		return fmt.Errorf("failed to open DB: %v", err)
+		return fmt.Errorf("could not create migrate instance: %v", err)
 	}
 
-	// ✅ Enable foreign key constraints
-	_, err = DB.Exec("PRAGMA foreign_keys = ON;")
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return fmt.Errorf("could not run migrations: %v", err)
+	}
+
+	logs.LogInfo("Migrations applied successfully")
+	return nil
+}
+
+func ensureTestData() error {
+	var count int
+	err := DB.QueryRow("SELECT COUNT(*) FROM Users WHERE User_ID = 1").Scan(&count)
 	if err != nil {
-		return fmt.Errorf("failed to enable foreign key constraints: %v", err)
+		return err
 	}
 
-	defer DB.Close()
-
-	// Split SQL commands and Convert it to string
-	commands := strings.Split(string(sqlCommands), ";")
-
-	// Execute each SQL command
-	for _, command := range commands {
-		trimmedCommand := strings.TrimSpace(command)
-		if trimmedCommand == "" {
-			continue
-		}
-		if _, err := DB.Exec(trimmedCommand); err != nil {
-			return fmt.Errorf("failed to execute SQL command: %s, error: %v", trimmedCommand, err)
-		}
+	if count > 0 {
+		logs.LogInfo("Test data already exists")
+		return nil
 	}
 
-	logs.LogInfo("Database has been successfully re-created")
+	logs.LogInfo("Creating test users...")
+	if err := CreateAdminUser(); err != nil {
+		return err
+	}
+	if err := CreateTestUsers(); err != nil {
+		return err
+	}
+
+	logs.LogInfo("Test data created successfully")
 	return nil
 }
 

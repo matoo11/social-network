@@ -1,0 +1,15 @@
+CREATE TABLE Group_Users
+(
+  Group_ID INTEGER NOT NULL,
+  User_ID  INTEGER NOT NULL,
+  Created_By_ID      INTEGER  NOT NULL,
+  Creation_Time      DATETIME NOT NULL,
+  Last_Updated_By_ID INTEGER  NOT NULL,
+  Last_Updated_Time  DATETIME NOT NULL,
+  Is_Active          BOOL     NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (Group_ID, User_ID),
+  FOREIGN KEY (Group_ID) REFERENCES User_Groups (Group_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);

@@ -1,0 +1,18 @@
+CREATE TABLE Events_Users_Options
+(
+  Event_ID INTEGER NOT NULL,
+  User_ID  INTEGER NOT NULL,
+  Event_Option_ID INTEGER NOT NULL,
+  Created_By_ID      INTEGER  NOT NULL,
+  Creation_Time      DATETIME NOT NULL,
+  Last_Updated_By_ID INTEGER  NOT NULL,
+  Last_Updated_Time  DATETIME NOT NULL,
+  Is_Active          BOOL     NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (Event_ID, User_ID),
+  FOREIGN KEY (Event_ID) REFERENCES Events (Event_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Event_Option_ID) REFERENCES Event_Options (Event_Option_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);

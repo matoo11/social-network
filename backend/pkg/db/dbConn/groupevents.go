@@ -4,11 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"social/backend/pkg/db/dbHandler"
-	"sync"
 	"time"
 )
-
-var ensureGroupEventTableOnce sync.Once
 
 type GroupEvent struct {
 	EventID      int
@@ -27,32 +24,7 @@ type EventResponseCount struct {
 	Count      int
 }
 
-func ensureGroupEventTable() error {
-	var err error
-	ensureGroupEventTableOnce.Do(func() {
-		statement := `CREATE TABLE IF NOT EXISTS Group_Events (
-			Group_Event_ID INTEGER NOT NULL,
-			Group_ID INTEGER NOT NULL,
-			Event_ID INTEGER NOT NULL,
-			Created_By_ID INTEGER NOT NULL,
-			Creation_Time DATETIME NOT NULL,
-			Last_Updated_By_ID INTEGER NOT NULL,
-			Last_Updated_Time DATETIME NOT NULL,
-			Is_Active BOOL NOT NULL DEFAULT TRUE,
-			PRIMARY KEY (Group_Event_ID AUTOINCREMENT),
-			FOREIGN KEY (Group_ID) REFERENCES User_Groups (Group_ID) ON UPDATE CASCADE ON DELETE CASCADE,
-			FOREIGN KEY (Event_ID) REFERENCES Events (Event_ID) ON UPDATE CASCADE ON DELETE CASCADE
-		)`
-		_, err = dbHandler.DB.Exec(statement)
-	})
-	return err
-}
-
 func CreateGroupEvent(groupID, creatorID int, title, description string, eventTime time.Time) (GroupEvent, error) {
-	if err := ensureGroupEventTable(); err != nil {
-		return GroupEvent{}, err
-	}
-
 	eventStatement := `INSERT INTO Events (
 		Event_Title,
 		Event_Description,
@@ -102,10 +74,6 @@ func CreateGroupEvent(groupID, creatorID int, title, description string, eventTi
 }
 
 func GetGroupEvents(groupID int) ([]GroupEvent, error) {
-	if err := ensureGroupEventTable(); err != nil {
-		return nil, err
-	}
-
 	statement := `
 		SELECT e.Event_ID,
 		       ge.Group_ID,
@@ -146,10 +114,6 @@ func GetGroupEvents(groupID int) ([]GroupEvent, error) {
 }
 
 func GetGroupEventByID(eventID int) (GroupEvent, error) {
-	if err := ensureGroupEventTable(); err != nil {
-		return GroupEvent{}, err
-	}
-
 	statement := `
 		SELECT e.Event_ID,
 		       ge.Group_ID,
@@ -246,10 +210,6 @@ func GetEventResponseCounts(eventID int) ([]EventResponseCount, error) {
 }
 
 func SetEventResponse(eventID, userID, optionID int) error {
-	if err := ensureGroupEventTable(); err != nil {
-		return err
-	}
-
 	statement := `INSERT INTO Events_Users_Options (
 		Event_ID,
 		User_ID,
@@ -275,10 +235,6 @@ func SetEventResponse(eventID, userID, optionID int) error {
 }
 
 func GetGroupIDForEvent(eventID int) (int, error) {
-	if err := ensureGroupEventTable(); err != nil {
-		return 0, err
-	}
-
 	var groupID int
 	err := dbHandler.DB.QueryRow(`SELECT Group_ID FROM Group_Events WHERE Event_ID = ? AND Is_Active = 1`, eventID).Scan(&groupID)
 	if err != nil {

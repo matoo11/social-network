@@ -1,4 +1,4 @@
-'use clinet';
+'use client';
 
 import React from 'react';
 import { useState } from 'react';
@@ -42,7 +42,36 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // console.log('Form data on submit:', formData);
+        setError('');
+
+        // Frontend validation
+        const title = formData.title.trim();
+        const content = formData.content.trim();
+
+        if (!title) {
+            setError('Title is required');
+            return;
+        }
+
+        if (title.length > 60) {
+            setError('Title must be 60 characters or less');
+            return;
+        }
+
+        if (!content) {
+            setError('Message is required');
+            return;
+        }
+
+        if (content.length > 600) {
+            setError('Message must be 600 characters or less');
+            return;
+        }
+
+        if (formData.postType === 3 && formData.privateUsers.length === 0) {
+            setError('Please select at least one user for private posts');
+            return;
+        }
 
         const formDataa = new FormData();
         const postDataa = {
@@ -58,20 +87,14 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
             formDataa.append('image', fileInput.files[0]);
         }
 
-        try {
-            console.log(postDataa);
-            await handleCreatePost(formDataa);
-            onSubmit?.(); // notify parent if callback provided
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('Unexpected error occurred');
-            }
+        console.log(postDataa);
+        const success = await handleCreatePost(formDataa);
+        if (success) {
+            onSubmit?.();
         }
     };
 
-    async function handleCreatePost(formData: FormData) {
+    async function handleCreatePost(formData: FormData): Promise<boolean> {
         setError('');
 
         try {
@@ -81,15 +104,40 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
                 body: formData,
             });
 
-            if (res.status === 401) {
-                throw new Error('unauthorized user');
-            }
-
             if (!res.ok) {
-                throw new Error('Failed to create post');
+                // Try to extract error message from response
+                let errorMessage = 'Failed to create post';
+                
+                try {
+                    const contentType = res.headers.get('content-type');
+                    if (contentType?.includes('application/json')) {
+                        const errorData = await res.json();
+                        // Handle different error response formats
+                        if (errorData.message) {
+                            errorMessage = errorData.message;
+                        } else if (errorData.error) {
+                            errorMessage = errorData.error;
+                            // If there are field-specific errors, append them
+                            if (errorData.fields) {
+                                const fieldErrors = Object.entries(errorData.fields)
+                                    .map(([field, msg]) => `${field}: ${msg}`)
+                                    .join(', ');
+                                errorMessage += ` - ${fieldErrors}`;
+                            }
+                        }
+                    } else {
+                        const errorText = await res.text();
+                        errorMessage = errorText || errorMessage;
+                        console.log("here")
+                    }
+                } catch {
+                    // If parsing fails, use default message
+                }
+                
+                setError(errorMessage);
+                return false;
             }
-
-            //   router.push('/login');
+            return true;
         } catch (err: unknown) {
             console.error('Error creating post:', err);
             if (err instanceof Error) {
@@ -97,6 +145,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
             } else {
                 setError('Unexpected error occurred');
             }
+            return false;
         }
     }
 

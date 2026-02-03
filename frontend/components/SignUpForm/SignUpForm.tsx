@@ -75,8 +75,14 @@ const SignUpForm: React.FC = () => {
             await loginUser(formData.username, formData.password);
             router.push('/social-feed');
         } catch (err: unknown) {
+            console.error('Registration error:', err);
             if (err instanceof Error) {
-                setError(err.message);
+                // Clean up error message if it's too technical
+                let errorMsg = err.message;
+                if (errorMsg.includes('fetch')) {
+                    errorMsg = 'Unable to connect to server. Please try again.';
+                }
+                setError(errorMsg);
             } else {
                 setError('Unexpected error occurred during registration');
             }

@@ -14,6 +14,7 @@ type GroupPost struct {
 	Title        string
 	Text         string
 	AuthorID     int
+	ImageID      *int
 	CreationTime time.Time
 }
 
@@ -30,7 +31,7 @@ type GroupComment struct {
 	CreationTime time.Time
 }
 
-func CreateGroupPost(groupID, authorID int, title, text string) (GroupPost, error) {
+func CreateGroupPost(groupID, authorID int, title, text string, imageID *int) (GroupPost, error) {
 	postStatement := `INSERT INTO Posts (
 		Post_Title,
 		Post_Text,
@@ -42,10 +43,10 @@ func CreateGroupPost(groupID, authorID int, title, text string) (GroupPost, erro
 		Last_Updated_By_ID,
 		Last_Updated_Time,
 		Is_Active
-	) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, 1)`
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`
 
 	now := formattedNow()
-	res, err := dbHandler.DB.Exec(postStatement, title, text, authorID, 4, authorID, now, authorID, now)
+	res, err := dbHandler.DB.Exec(postStatement, title, text, authorID, 4, imageID, authorID, now, authorID, now)
 	if err != nil {
 		return GroupPost{}, fmt.Errorf("failed to create post: %w", err)
 	}
@@ -83,6 +84,7 @@ func CreateGroupPost(groupID, authorID int, title, text string) (GroupPost, erro
 		Title:        title,
 		Text:         text,
 		AuthorID:     authorID,
+		ImageID:      imageID,
 		CreationTime: time.Now().UTC(),
 	}, nil
 }
@@ -95,6 +97,7 @@ func GetGroupPosts(groupID int) ([]GroupPostDisplay, error) {
 		       p.Post_Title,
 		       p.Post_Text,
 		       p.User_ID,
+		       p.Image_ID,
 		       p.Creation_Time
 		FROM Group_Posts gp
 		JOIN Posts p ON gp.Post_ID = p.Post_ID
@@ -114,7 +117,7 @@ func GetGroupPosts(groupID int) ([]GroupPostDisplay, error) {
 
 		// rows.Scan(..., &creationTime)
 
-		err := rows.Scan(&gp.GroupPostID, &gp.GroupID, &gp.PostID, &gp.Title, &gp.Text, &gp.AuthorID, &creationTime)
+		err := rows.Scan(&gp.GroupPostID, &gp.GroupID, &gp.PostID, &gp.Title, &gp.Text, &gp.AuthorID, &gp.ImageID, &creationTime)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan group post: %w", err)
 		}

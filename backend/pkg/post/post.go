@@ -71,10 +71,11 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	validationErrors := ValidatePostPayload(&payload)
 	if len(validationErrors) > 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]any{
-			"error":  "Validation failed",
-			"fields": validationErrors,
-		})
+		// json.NewEncoder(w).Encode(map[string]any{
+		// 	"error":  "Validation failed",
+		// 	"fields": validationErrors,
+		// })
+		auth.JsonEncode(w, validationErrors)
 		return
 	}
 

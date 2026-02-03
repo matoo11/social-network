@@ -48,7 +48,7 @@ const GroupPostList: React.FC<GroupPostListProps> = ({
             content: p.text,
             posterNickname: p.authorUsername, // until backend sends usernames
             posterProfileImageUrl: '',
-            postImageUrl: '', // group posts don't support images
+            postImageUrl: p.imageId ? `http://localhost:8080/api/image?id=${p.imageId}` : '',
             createdAt: p.createdAt,
             likesCount: 0,
             dislikesCount: 0,

@@ -36,6 +36,31 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onSubmit }) => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
+        
+        // Frontend validation
+        const title = formData.title.trim();
+        const description = formData.description.trim();
+
+        if (!title) {
+            setError('Group title is required');
+            return;
+        }
+
+        if (title.length > 100) {
+            setError('Group title must be 100 characters or less');
+            return;
+        }
+
+        if (!description) {
+            setError('Group description is required');
+            return;
+        }
+
+        if (description.length > 500) {
+            setError('Group description must be 500 characters or less');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -51,14 +76,42 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onSubmit }) => {
             });
 
             if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || 'Failed to create group');
+                // Try to extract error message from response
+                let errorMessage = 'Failed to create group';
+                
+                try {
+                    const contentType = res.headers.get('content-type');
+                    if (contentType?.includes('application/json')) {
+                        const errorData = await res.json();
+                        // Handle different error response formats
+                        if (errorData.message) {
+                            errorMessage = errorData.message;
+                        } else if (errorData.error) {
+                            errorMessage = errorData.error;
+                            // If there are field-specific errors, append them
+                            if (errorData.fields) {
+                                const fieldErrors = Object.entries(errorData.fields)
+                                    .map(([field, msg]) => `${field}: ${msg}`)
+                                    .join(', ');
+                                errorMessage += ` - ${fieldErrors}`;
+                            }
+                        }
+                    } else {
+                        const errorText = await res.text();
+                        errorMessage = errorText || errorMessage;
+                    }
+                } catch {
+                    // If parsing fails, use default message
+                }
+                
+                setError(errorMessage);
+                return;
             }
 
             const group = await res.json(); // contains GroupID
             console.log(group)
             // 2️⃣ Send invites (fire & forget or await all)
-            await Promise.all(
+            const inviteResults = await Promise.allSettled(
                 formData.invitees.map((userId) =>
                     fetch('http://localhost:8080/api/groups/invite', {
                         method: 'POST',
@@ -71,6 +124,12 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onSubmit }) => {
                     }),
                 ),
             );
+
+            // Check if any invites failed
+            const failedInvites = inviteResults.filter(r => r.status === 'rejected');
+            if (failedInvites.length > 0) {
+                console.warn(`${failedInvites.length} invite(s) failed`);
+            }
 
             onSubmit?.();
         } catch (err) {

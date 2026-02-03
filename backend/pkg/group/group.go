@@ -40,6 +40,7 @@ type groupPostResponse struct {
 	Text           string                 `json:"text"`
 	AuthorID       int                    `json:"authorId"`
 	AuthorUsername string                 `json:"authorUsername"`
+	ImageID        *int                   `json:"imageId"`
 	CreationTime   string                 `json:"createdAt"`
 	Comments       []groupCommentResponse `json:"comments"`
 }
@@ -568,12 +569,27 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Parse multipart form to handle image upload
+	err := r.ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	// Decode the JSON string from "data" field
+	jsonData := r.FormValue("data")
+	if jsonData == "" {
+		http.Error(w, "Missing data field", http.StatusBadRequest)
+		return
+	}
+
 	var payload struct {
 		GroupID int    `json:"groupId"`
 		Title   string `json:"title"`
 		Text    string `json:"text"`
 	}
-	if !decodeJSON(w, r, &payload) {
+	if err := json.Unmarshal([]byte(jsonData), &payload); err != nil {
+		http.Error(w, fmt.Sprintf("invalid JSON data: %v", err), http.StatusBadRequest)
 		return
 	}
 
@@ -610,7 +626,24 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := dbConn.CreateGroupPost(payload.GroupID, authorID, title, text)
+	// Handle optional image
+	var imageID *int = nil
+	file, handler, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+		imgID, err := dbConn.SaveImage(file, handler.Filename, authorID)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "Image upload failed", http.StatusInternalServerError)
+			return
+		}
+		imageID = &imgID
+	} else if err != http.ErrMissingFile {
+		http.Error(w, "Failed to read image", http.StatusBadRequest)
+		return
+	}
+
+	post, err := dbConn.CreateGroupPost(payload.GroupID, authorID, title, text, imageID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -623,6 +656,7 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 		Title:        post.Title,
 		Text:         post.Text,
 		AuthorID:     post.AuthorID,
+		ImageID:      post.ImageID,
 		CreationTime: post.CreationTime.Format(time.RFC3339),
 		Comments:     []groupCommentResponse{},
 	}
@@ -683,6 +717,7 @@ func GetGroupPostsHandler(w http.ResponseWriter, r *http.Request) {
 			Text:           post.Text,
 			AuthorID:       post.AuthorID,
 			AuthorUsername: user.User_Name,
+			ImageID:        post.ImageID,
 			CreationTime:   post.CreationTime.Format(time.RFC3339),
 		}
 		for _, comment := range post.Comments {

@@ -57,8 +57,36 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || 'Failed to create event');
+                // Try to extract error message from response
+                let errorMessage = 'Failed to create event';
+                
+                try {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType?.includes('application/json')) {
+                        const errorData = await response.json();
+                        // Handle different error response formats
+                        if (errorData.message) {
+                            errorMessage = errorData.message;
+                        } else if (errorData.error) {
+                            errorMessage = errorData.error;
+                            // If there are field-specific errors, append them
+                            if (errorData.fields) {
+                                const fieldErrors = Object.entries(errorData.fields)
+                                    .map(([field, msg]) => `${field}: ${msg}`)
+                                    .join(', ');
+                                errorMessage += ` - ${fieldErrors}`;
+                            }
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        errorMessage = errorText || errorMessage;
+                    }
+                } catch {
+                    // If parsing fails, use default message
+                }
+                
+                setError(errorMessage);
+                return;
             }
 
             onEventCreated();

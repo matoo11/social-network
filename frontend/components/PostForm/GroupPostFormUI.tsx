@@ -3,6 +3,7 @@
 import React from 'react';
 import Title from '../Title/Title';
 import InputField from '../InputField/InputField';
+import ImageInputField from '../ImageInputField/ImageInputField';
 
 type FormData = {
     title: string;
@@ -54,6 +55,13 @@ const GroupPostFormUI: React.FC<GroupPostFormUIProps> = ({
                         placeholder="Write something… (max 2000 chars)"
                         required
                     />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-white mb-1">
+                        Image (optional)
+                    </label>
+                    <ImageInputField showPreview={true} />
                 </div>
 
                 {error && <p className="text-red-500 text-sm">{error}</p>}

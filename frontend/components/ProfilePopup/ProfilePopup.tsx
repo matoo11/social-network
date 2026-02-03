@@ -203,12 +203,19 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
                                                 <span className="text-gray-400">Email: </span>
                                                 <span className="text-white">{profile.user.email}</span>
                                             </div>
+
                                             <div>
                                                 <span className="text-gray-400">Gender: </span>
                                                 <span className="text-white">{profile.user.gender}</span>
                                             </div>
+
+                                            <div>
+                                                <span className="text-gray-400">Nick Name: </span>
+                                                <span className="text-white">{profile.user.nickName}</span>
+                                            </div>
+                                            
                                             {profile.user.dateOfBirth && (
-                                                <div className="col-span-2">
+                                                <div>
                                                     <span className="text-gray-400">Birthday: </span>
                                                     <span className="text-white">
                                                         {new Date(profile.user.dateOfBirth).toLocaleDateString()}

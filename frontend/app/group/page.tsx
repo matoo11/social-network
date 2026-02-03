@@ -296,6 +296,7 @@ export default function SocialFeed() {
                 <CreateGroup
                     onSubmit={() => {
                         setIsGroupListPopupOpen(false);
+                        refreshGroups();
                     }} />
                     
             </Popup>

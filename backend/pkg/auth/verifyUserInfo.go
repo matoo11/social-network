@@ -3,8 +3,8 @@ package auth
 import (
 	"fmt"
 	"net"
-	"social/backend/pkg/db/dbHandler"
 	re "regexp"
+	"social/backend/pkg/db/dbHandler"
 	"strconv"
 	"strings"
 	"time"
@@ -42,7 +42,7 @@ const (
 // VerifyUserInfo - Verifies the provided user details, ensuring they meet validation criteria.
 func VerifyUserInfo(userInfo SignupRequest) error {
 	verifications := []func() error{
-		func() error { return VerifyNickname(userInfo.Username) },
+		// func() error { return VerifyNickname(userInfo.Username) },
 		func() error { return VerifyEmail(userInfo.Email) },
 		func() error { return VerifyPassword(userInfo.Password) },
 		func() error { return VerifyConfirmPassword(userInfo.ConfirmPassword, userInfo.Password) },
@@ -54,6 +54,14 @@ func VerifyUserInfo(userInfo SignupRequest) error {
 
 	for _, verify := range verifications {
 		if err := verify(); err != nil {
+			return err
+		}
+	}
+
+	// Validate nickname only if provided (optional field)
+	fmt.Println(userInfo.Nickname)
+	if userInfo.Nickname != "" {
+		if err := VerifyNickname(userInfo.Nickname); err != nil {
 			return err
 		}
 	}

@@ -18,6 +18,7 @@ type SignupRequest struct {
 	DateOfBirth     *time.Time `json:"dateOfBirth"`
 	Gender          string     `json:"gender"`
 	AvatarNumber    int        `json:"avatarNumber"`
+	AboutMe         string     `json:"aboutMe"`
 }
 
 // ============================================================
@@ -76,8 +77,15 @@ func GenerateNewValidUser(requestInfo SignupRequest) dbConn.User {
 		avatarNumber = 1
 	}
 
+	// If nickname is empty, use username
+	nickname := requestInfo.Nickname
+	if nickname == "" {
+		nickname = requestInfo.Username
+	}
+
 	user := dbConn.User{
 		User_Name:     requestInfo.Username,
+		Nick_Name:     nickname,
 		Password:      requestInfo.Password,
 		Email:         requestInfo.Email,
 		First_Name:    requestInfo.FirstName,
@@ -85,6 +93,7 @@ func GenerateNewValidUser(requestInfo SignupRequest) dbConn.User {
 		Date_Of_Birth: requestInfo.DateOfBirth,
 		Gender:        requestInfo.Gender,
 		Image_ID:      avatarNumber,
+		About_Me:      requestInfo.AboutMe,
 	}
 	return user
 }

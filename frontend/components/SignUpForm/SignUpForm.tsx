@@ -19,6 +19,7 @@ const SignUpForm: React.FC = () => {
         dateOfBirth: '',
         gender: '',
         avatarNumber: 1, // Default to avatar 1
+        aboutMe: '',
     });
     const [error, setError] = useState('');
 

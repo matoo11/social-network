@@ -37,6 +37,7 @@ export async function registerUser(signUpData: {
     lastName: string;
     gender: string;
     avatarNumber: number;
+    aboutMe: string;
 }) {
     try {
         console.log('Registering user with data:', signUpData);

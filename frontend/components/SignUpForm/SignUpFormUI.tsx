@@ -13,6 +13,7 @@ type FormData = {
     dateOfBirth: string;
     gender: string;
     avatarNumber: number;
+    aboutMe: string;
 };
 
 type SignUpFormUIProps = {
@@ -33,8 +34,8 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
     onAvatarSelect,
 }) => {
     return (
-        <div className="mx-auto w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
-            <form onSubmit={onSubmit} className="max-w-md mx-auto space-y-4 md:space-y-6">
+        <div className="mx-auto w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700 my-4 max-h-[95vh] overflow-y-auto">
+            <form onSubmit={onSubmit} className="max-w-md mx-auto space-y-3">
                 <AvatarSelector 
                     selectedAvatar={formData.avatarNumber} 
                     onAvatarSelect={onAvatarSelect}
@@ -109,14 +110,29 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                     />
                     <InputField
                         htmlFor="nickname"
-                        labelText="Nickname"
+                        labelText="Nickname (optional)"
                         inputType="text"
                         inputName="nickname"
                         inputID="nickname"
                         inputValue={formData.nickname}
                         onInputChange={onInputChange('nickname')}
                         placeholderText="Nickname"
-                        isRequired={true}
+                        isRequired={false}
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="aboutMe" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        About Me (optional)
+                    </label>
+                    <textarea
+                        id="aboutMe"
+                        name="aboutMe"
+                        value={formData.aboutMe}
+                        onChange={onInputChange('aboutMe') as any}
+                        placeholder="Tell us about yourself..."
+                        rows={3}
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 resize-none"
                     />
                 </div>
 

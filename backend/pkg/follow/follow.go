@@ -202,6 +202,7 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		follower.FollowerUsername = user.User_Name
+		follower.FollowerAvatarNumber = user.Image_ID
 		followers[i] = follower
 	}
 	if err := auth.JsonEncode(w, followers); err != nil {

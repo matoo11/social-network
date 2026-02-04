@@ -9,6 +9,7 @@ type FollowerCardProps = {
     username: string;
     description?: string;
     avatarUrl?: string;
+    avatarNumber?: number;
     checked?: boolean;
     onCheckChange?: (checked: boolean) => void;
 };
@@ -18,6 +19,7 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
     username,
     description,
     avatarUrl,
+    avatarNumber = 1,
     checked = false,
     onCheckChange,
 }) => {
@@ -49,7 +51,7 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
                 {/* Left: Avatar + Info */}
                 <div className="flex items-center space-x-3 rtl:space-x-reverse flex-1 min-w-0">
                     <div className="w-8 h-8 flex-shrink-0">
-                        <ProfileImage imageUrl={avatarUrl || ''} />
+                        <ProfileImage imageUrl={avatarUrl || ''} avatarNumber={avatarNumber} />
                     </div>
                     <div className="flex flex-col min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">

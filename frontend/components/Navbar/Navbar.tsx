@@ -160,7 +160,7 @@ const Navbar = () => {
                         onClick={() => setIsDropdownOpen((prev) => !prev)}
                     >
                         <div className="w-8 h-8">
-                            <ProfileImage imageUrl="" />
+                            <ProfileImage imageUrl="" avatarNumber={user?.profileImageID || 1} />
                         </div>
                     </button>
 

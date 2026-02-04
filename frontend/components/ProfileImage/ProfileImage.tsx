@@ -6,6 +6,7 @@ type ProfileImageProps = {
     altText?: string;
     link?: string;
     className?: string;
+    avatarNumber?: number;
 };
 
 const ProfileImage = ({
@@ -13,17 +14,21 @@ const ProfileImage = ({
     altText = 'profile Image',
     link = '',
     className,
+    avatarNumber,
 }: ProfileImageProps) => {
     const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
         if (!link) {
             event.preventDefault();
         }
     };
-    // imageUrl = imageUrl.trim();
 
-    // if (!imageUrl) {
-    //     imageUrl = 'http://localhost:3000/uploads/default-profile.jpg';
-    // }
+    // Determine the image source
+    let imageSrc = imageUrl || 'http://localhost:3000/uploads/default-profile.jpg';
+    
+    // If avatarNumber is provided (1-4), use the corresponding avatar SVG
+    if (avatarNumber && avatarNumber >= 1 && avatarNumber <= 4) {
+        imageSrc = `/avatars/avatar${avatarNumber}.svg`;
+    }
 
     return (
         <div
@@ -35,7 +40,7 @@ const ProfileImage = ({
                 className="relative w-full h-full flex items-center justify-center"
             >
                 <Image
-                    src={imageUrl || 'http://localhost:3000/uploads/default-profile.jpg'}
+                    src={imageSrc}
                     alt={altText}
                     fill
                     sizes="48px"

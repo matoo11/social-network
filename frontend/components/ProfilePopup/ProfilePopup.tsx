@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Popup from '../Popup/Popup';
 import FollowButton from '../FollowButton/FollowButton';
+import ProfileImage from '../ProfileImage/ProfileImage';
 import { useUser } from '@/app/context/UserContext';
 
 type ProfileUser = {
@@ -172,10 +173,12 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
                                 <div className="flex flex-col md:flex-row gap-4">
                                     {/* Avatar */}
                                     <div className="flex-shrink-0">
-                                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                                            <span className="text-white text-3xl font-bold">
-                                                {profile.user.firstName?.[0] || profile.user.userName[0]}
-                                            </span>
+                                        <div className="w-24 h-24">
+                                            <ProfileImage 
+                                                imageUrl="" 
+                                                avatarNumber={profile.user.imageID}
+                                                altText={`${profile.user.firstName}'s profile`}
+                                            />
                                         </div>
                                     </div>
 
@@ -334,16 +337,25 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
                                                     key={follower.userID}
                                                     className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                                 >
-                                                    <div
-                                                        className="cursor-pointer flex-1"
-                                                        onClick={() => handleUserClick(follower.userID)}
-                                                    >
-                                                        <h5 className="text-white font-medium text-sm hover:text-blue-500">
-                                                            {follower.firstName} {follower.lastName}
-                                                        </h5>
-                                                        <p className="text-gray-400 text-xs">
-                                                            @{follower.userName}
-                                                        </p>
+                                                    <div className="flex items-center gap-3 flex-1">
+                                                        <div className="w-10 h-10 flex-shrink-0">
+                                                            <ProfileImage 
+                                                                imageUrl="" 
+                                                                avatarNumber={follower.imageID}
+                                                                altText={`${follower.firstName}'s profile`}
+                                                            />
+                                                        </div>
+                                                        <div
+                                                            className="cursor-pointer"
+                                                            onClick={() => handleUserClick(follower.userID)}
+                                                        >
+                                                            <h5 className="text-white font-medium text-sm hover:text-blue-500">
+                                                                {follower.firstName} {follower.lastName}
+                                                            </h5>
+                                                            <p className="text-gray-400 text-xs">
+                                                                @{follower.userName}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                     {currentUser.userId !== follower.userID && (
                                                         <FollowButton userID={follower.userID} />
@@ -366,16 +378,25 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
                                                     key={following.userID}
                                                     className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                                 >
-                                                    <div
-                                                        className="cursor-pointer flex-1"
-                                                        onClick={() => handleUserClick(following.userID)}
-                                                    >
-                                                        <h5 className="text-white font-medium text-sm hover:text-blue-500">
-                                                            {following.firstName} {following.lastName}
-                                                        </h5>
-                                                        <p className="text-gray-400 text-xs">
-                                                            @{following.userName}
-                                                        </p>
+                                                    <div className="flex items-center gap-3 flex-1">
+                                                        <div className="w-10 h-10 flex-shrink-0">
+                                                            <ProfileImage 
+                                                                imageUrl="" 
+                                                                avatarNumber={following.imageID}
+                                                                altText={`${following.firstName}'s profile`}
+                                                            />
+                                                        </div>
+                                                        <div
+                                                            className="cursor-pointer"
+                                                            onClick={() => handleUserClick(following.userID)}
+                                                        >
+                                                            <h5 className="text-white font-medium text-sm hover:text-blue-500">
+                                                                {following.firstName} {following.lastName}
+                                                            </h5>
+                                                            <p className="text-gray-400 text-xs">
+                                                                @{following.userName}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                     {currentUser.userId !== following.userID && (
                                                         <FollowButton userID={following.userID} />

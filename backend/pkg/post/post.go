@@ -24,17 +24,18 @@ type displayedCommentDTO struct {
 }
 
 type displayedPostDTO struct {
-	PostID           int                   `json:"postId"`
-	PostTitle        string                `json:"postTitle"`
-	PostText         string                `json:"postText"`
-	PostType         string                `json:"postType"`
-	PosterNickname   string                `json:"posterNickname"`
-	PostImageID      int                   `json:"postImageId"`
-	PostTime         time.Time             `json:"postTime"`
-	NumberOfLikes    int                   `json:"numberOfLikes"`
-	NumberOfDislikes int                   `json:"numberOfDislikes"`
-	NumberOfComments int                   `json:"numberOfComments"`
-	Comments         []displayedCommentDTO `json:"comments"`
+	PostID             int                   `json:"postId"`
+	PostTitle          string                `json:"postTitle"`
+	PostText           string                `json:"postText"`
+	PostType           string                `json:"postType"`
+	PosterNickname     string                `json:"posterNickname"`
+	PosterAvatarNumber int                   `json:"posterAvatarNumber"`
+	PostImageID        int                   `json:"postImageId"`
+	PostTime           time.Time             `json:"postTime"`
+	NumberOfLikes      int                   `json:"numberOfLikes"`
+	NumberOfDislikes   int                   `json:"numberOfDislikes"`
+	NumberOfComments   int                   `json:"numberOfComments"`
+	Comments           []displayedCommentDTO `json:"comments"`
 }
 
 type PostPayload struct {

@@ -8,21 +8,21 @@ import (
 )
 
 type SignupRequest struct {
-	Username        string `json:"username"`
-	Nickname        string `json:"nickname"`
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirmPassword"`
-	FirstName       string `json:"firstName"`
-	LastName        string `json:"lastName"`
+	Username        string     `json:"username"`
+	Nickname        string     `json:"nickname"`
+	Email           string     `json:"email"`
+	Password        string     `json:"password"`
+	ConfirmPassword string     `json:"confirmPassword"`
+	FirstName       string     `json:"firstName"`
+	LastName        string     `json:"lastName"`
 	DateOfBirth     *time.Time `json:"dateOfBirth"`
-	Gender          string `json:"gender"`
+	Gender          string     `json:"gender"`
+	AvatarNumber    int        `json:"avatarNumber"`
 }
 
 // ============================================================
 //                   Main Functions
 // ============================================================
-
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var data SignupRequest
@@ -30,7 +30,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorPage(w, 400)
 		return
 	}
-	
+
 	if r.Method == http.MethodGet {
 		return
 	}
@@ -47,7 +47,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		userInfo := GenerateNewValidUser(requestBody)
-		
+
 		if err = dbConn.CreateUser(userInfo); err != nil {
 			fmt.Println("here?")
 			fmt.Println(err)
@@ -70,14 +70,21 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 // ============================================================
 
 func GenerateNewValidUser(requestInfo SignupRequest) dbConn.User {
+	// Default to avatar 1 if avatarNumber is 0 or invalid
+	avatarNumber := requestInfo.AvatarNumber
+	if avatarNumber < 1 || avatarNumber > 4 {
+		avatarNumber = 1
+	}
+
 	user := dbConn.User{
-		User_Name:    requestInfo.Username,
-		Password:    requestInfo.Password,
-		Email:       requestInfo.Email,
-		First_Name:   requestInfo.FirstName,
-		Last_Name:    requestInfo.LastName,
+		User_Name:     requestInfo.Username,
+		Password:      requestInfo.Password,
+		Email:         requestInfo.Email,
+		First_Name:    requestInfo.FirstName,
+		Last_Name:     requestInfo.LastName,
 		Date_Of_Birth: requestInfo.DateOfBirth,
-		Gender: requestInfo.Gender,
+		Gender:        requestInfo.Gender,
+		Image_ID:      avatarNumber,
 	}
 	return user
 }

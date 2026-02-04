@@ -1,0 +1,49 @@
+'use client';
+
+import React from 'react';
+import Image from 'next/image';
+
+type AvatarSelectorProps = {
+    selectedAvatar: number;
+    onAvatarSelect: (avatarNumber: number) => void;
+};
+
+const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onAvatarSelect }) => {
+    const avatars = [1, 2, 3, 4];
+
+    return (
+        <div className="space-y-3">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Choose Your Avatar
+            </label>
+            <div className="grid grid-cols-4 gap-4">
+                {avatars.map((num) => (
+                    <button
+                        key={num}
+                        type="button"
+                        onClick={() => onAvatarSelect(num)}
+                        className={`relative w-full aspect-square rounded-full overflow-hidden border-4 transition-all ${
+                            selectedAvatar === num
+                                ? 'border-blue-600 scale-110 shadow-lg'
+                                : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:scale-105'
+                        }`}
+                    >
+                        <Image
+                            src={`/avatars/avatar${num}.svg`}
+                            alt={`Avatar ${num}`}
+                            fill
+                            className="object-cover"
+                        />
+                    </button>
+                ))}
+            </div>
+            {selectedAvatar > 0 && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                    Avatar {selectedAvatar} selected
+                </p>
+            )}
+        </div>
+    );
+};
+
+export default AvatarSelector;

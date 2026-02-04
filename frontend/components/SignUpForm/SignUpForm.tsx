@@ -18,6 +18,7 @@ const SignUpForm: React.FC = () => {
         lastName: '',
         dateOfBirth: '',
         gender: '',
+        avatarNumber: 1, // Default to avatar 1
     });
     const [error, setError] = useState('');
 
@@ -28,6 +29,13 @@ const SignUpForm: React.FC = () => {
                 [field]: e.target.value,
             }));
         };
+
+    const handleAvatarSelect = (avatarNumber: number) => {
+        setFormData((prev) => ({
+            ...prev,
+            avatarNumber,
+        }));
+    };
 
     const validateForm = (): string | null => {
         if (!formData.username.trim()) return 'Username is required';
@@ -95,6 +103,7 @@ const SignUpForm: React.FC = () => {
             error={error}
             onInputChange={handleInputChange}
             onSubmit={handleSubmit}
+            onAvatarSelect={handleAvatarSelect}
         />
     );
 };

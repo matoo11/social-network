@@ -62,17 +62,18 @@ func buildDisplayedPost(p dbConn.PostDisplay) (displayedPostDTO, error) {
 	}
 
 	return displayedPostDTO{
-		PostID:           p.PostID,
-		PostTitle:        p.PostTitle,
-		PostText:         p.PostText,
-		PostType:         postTypeName,
-		PosterNickname:   poster.Nick_Name,
-		PostImageID:      postImageID,
-		PostTime:         p.CreationTime,
-		NumberOfLikes:    0,
-		NumberOfDislikes: 0,
-		NumberOfComments: len(comments),
-		Comments:         comments,
+		PostID:             p.PostID,
+		PostTitle:          p.PostTitle,
+		PostText:           p.PostText,
+		PostType:           postTypeName,
+		PosterNickname:     poster.Nick_Name,
+		PosterAvatarNumber: poster.Image_ID,
+		PostImageID:        postImageID,
+		PostTime:           p.CreationTime,
+		NumberOfLikes:      0,
+		NumberOfDislikes:   0,
+		NumberOfComments:   len(comments),
+		Comments:           comments,
 	}, nil
 }
 

@@ -10,6 +10,7 @@ export interface DisplayedPost {
     postText: string;
     postType: string;
     posterNickname: string;
+    posterAvatarNumber: number;
     postImageId: number;
     postTime: string; // ISO date string (Go's time.Time → string)
     numberOfLikes: number;
@@ -67,6 +68,7 @@ const PostList: React.FC<PostListProps> = ({ popupHandler, onRef, postContentPop
             content: p.postText,
             postType: p.postType,
             posterNickname: p.posterNickname,
+            posterAvatarNumber: p.posterAvatarNumber,
             posterProfileImageUrl: '',
             postImageUrl:
                 p.postImageId !== 0 ? `http://localhost:8080/api/image?id=${p.postImageId}` : null,

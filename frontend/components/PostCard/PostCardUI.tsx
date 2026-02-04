@@ -12,6 +12,7 @@ export type PostCardUIProps = {
     title: string;
     content: string;
     posterNickname?: string;
+    posterAvatarNumber?: number;
     posterProfileImageUrl?: string;
     postImageUrl?: string;
     createdAt?: string;
@@ -26,6 +27,7 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
     title,
     content,
     posterNickname = 'Unknown',
+    posterAvatarNumber = 1,
     posterProfileImageUrl = '',
     postImageUrl = '',
     createdAt,
@@ -61,6 +63,7 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
                 <div className="flex w-10 h-10 rounded-none items-center justify-center">
                     <ProfileImage
                         imageUrl={posterProfileImageUrl || ''}
+                        avatarNumber={posterAvatarNumber}
                         altText={`${posterNickname}'s profile`}
                     />
                 </div>

@@ -36,6 +36,7 @@ export async function registerUser(signUpData: {
     firstName: string;
     lastName: string;
     gender: string;
+    avatarNumber: number;
 }) {
     try {
         console.log('Registering user with data:', signUpData);
@@ -48,7 +49,16 @@ export async function registerUser(signUpData: {
 
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(errorText || 'Signup failed');
+            
+            // Try to parse as JSON to extract error message
+            try {
+                const errorData = JSON.parse(errorText);
+                const errorMessage = errorData.message || errorData.error || errorData.Feedback || 'Signup failed';
+                throw new Error(errorMessage);
+            } catch {
+                // If not JSON, use the text as is
+                throw new Error(errorText || 'Signup failed');
+            }
         }
 
         return res;

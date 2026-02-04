@@ -9,6 +9,7 @@ export type ChatCardProps = {
     username: string;
     lastMessage?: string;
     avatarUrl?: string;
+    avatarNumber?: number;
     selected?: boolean;
     actions?: React.ReactNode;
     onChatClick?: (username: string) => void;
@@ -18,6 +19,7 @@ const ChatCard: React.FC<ChatCardProps> = ({
     username,
     lastMessage,
     avatarUrl,
+    avatarNumber = 1,
     selected,
     actions,
     onChatClick,
@@ -33,7 +35,7 @@ const ChatCard: React.FC<ChatCardProps> = ({
         <div className={className} onClick={() => onChatClick?.(username)}>
             <div className="flex items-center space-x-3 rtl:space-x-reverse p-3">
                 <div className="w-8 h-8 flex-shrink-0">
-                    <ProfileImage imageUrl={avatarUrl || ''} />
+                    <ProfileImage imageUrl={avatarUrl || ''} avatarNumber={avatarNumber} />
                 </div>
                 <div className="flex-1 min-w-0">
                     <p className="text-md font-semibold  truncate text-white mb-0.5">

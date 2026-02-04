@@ -15,10 +15,11 @@ type Follow struct {
 }
 
 type FollowDisplay struct {
-	FollowerID        int
-	FollowerUsername  string
-	FollowerAvatarURL string
-	FollowedID        int
+	FollowerID           int
+	FollowerUsername     string
+	FollowerAvatarURL    string
+	FollowerAvatarNumber int
+	FollowedID           int
 }
 
 func CreateFollow(follow Follow) error {

@@ -47,6 +47,7 @@ const GroupPostList: React.FC<GroupPostListProps> = ({
             title: p.title,
             content: p.text,
             posterNickname: p.authorUsername, // until backend sends usernames
+            posterAvatarNumber: p.authorAvatarNumber || 1,
             posterProfileImageUrl: '',
             postImageUrl: p.imageId ? `http://localhost:8080/api/image?id=${p.imageId}` : '',
             createdAt: p.createdAt,

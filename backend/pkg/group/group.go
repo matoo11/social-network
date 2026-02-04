@@ -33,16 +33,17 @@ type groupInviteResponse struct {
 }
 
 type groupPostResponse struct {
-	GroupPostID    int                    `json:"groupPostId"`
-	GroupID        int                    `json:"groupId"`
-	PostID         int                    `json:"postId"`
-	Title          string                 `json:"title"`
-	Text           string                 `json:"text"`
-	AuthorID       int                    `json:"authorId"`
-	AuthorUsername string                 `json:"authorUsername"`
-	ImageID        *int                   `json:"imageId"`
-	CreationTime   string                 `json:"createdAt"`
-	Comments       []groupCommentResponse `json:"comments"`
+	GroupPostID        int                    `json:"groupPostId"`
+	GroupID            int                    `json:"groupId"`
+	PostID             int                    `json:"postId"`
+	Title              string                 `json:"title"`
+	Text               string                 `json:"text"`
+	AuthorID           int                    `json:"authorId"`
+	AuthorUsername     string                 `json:"authorUsername"`
+	AuthorAvatarNumber int                    `json:"authorAvatarNumber"`
+	ImageID            *int                   `json:"imageId"`
+	CreationTime       string                 `json:"createdAt"`
+	Comments           []groupCommentResponse `json:"comments"`
 }
 
 type groupCommentResponse struct {
@@ -649,16 +650,23 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	author, err := dbConn.GetUserByID(authorID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	response := groupPostResponse{
-		GroupPostID:  post.GroupPostID,
-		GroupID:      post.GroupID,
-		PostID:       post.PostID,
-		Title:        post.Title,
-		Text:         post.Text,
-		AuthorID:     post.AuthorID,
-		ImageID:      post.ImageID,
-		CreationTime: post.CreationTime.Format(time.RFC3339),
-		Comments:     []groupCommentResponse{},
+		GroupPostID:        post.GroupPostID,
+		GroupID:            post.GroupID,
+		PostID:             post.PostID,
+		Title:              post.Title,
+		Text:               post.Text,
+		AuthorID:           post.AuthorID,
+		AuthorAvatarNumber: author.Image_ID,
+		ImageID:            post.ImageID,
+		CreationTime:       post.CreationTime.Format(time.RFC3339),
+		Comments:           []groupCommentResponse{},
 	}
 
 	if err := auth.JsonEncode(w, response); err != nil {
@@ -710,15 +718,16 @@ func GetGroupPostsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		postResp := groupPostResponse{
-			GroupPostID:    post.GroupPostID,
-			GroupID:        post.GroupID,
-			PostID:         post.PostID,
-			Title:          post.Title,
-			Text:           post.Text,
-			AuthorID:       post.AuthorID,
-			AuthorUsername: user.User_Name,
-			ImageID:        post.ImageID,
-			CreationTime:   post.CreationTime.Format(time.RFC3339),
+			GroupPostID:        post.GroupPostID,
+			GroupID:            post.GroupID,
+			PostID:             post.PostID,
+			Title:              post.Title,
+			Text:               post.Text,
+			AuthorID:           post.AuthorID,
+			AuthorUsername:     user.User_Name,
+			AuthorAvatarNumber: user.Image_ID,
+			ImageID:            post.ImageID,
+			CreationTime:       post.CreationTime.Format(time.RFC3339),
 		}
 		for _, comment := range post.Comments {
 			postResp.Comments = append(postResp.Comments, groupCommentResponse{

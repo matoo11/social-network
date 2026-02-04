@@ -12,6 +12,7 @@ export type CommentCardUIProps = {
     commentID: number;
     commentText: string;
     commenterNickname?: string;
+    commenterAvatarNumber?: number;
     commenterProfileImageUrl?: string;
     commentImageUrl?: string;
     createdAt?: string;
@@ -24,6 +25,7 @@ const CommentCard: React.FC<CommentCardUIProps> = ({
     commentID,
     commentText,
     commenterNickname = 'Unknown',
+    commenterAvatarNumber = 1,
     commenterProfileImageUrl = '',
     commentImageUrl = '',
     createdAt,
@@ -50,6 +52,7 @@ const CommentCard: React.FC<CommentCardUIProps> = ({
                     <ProfileImage
                         imageUrl={commenterProfileImageUrl || ''}
                         altText={`${commenterNickname}'s profile`}
+                        avatarNumber={commenterAvatarNumber}
                     />
                 </div>
                 <Username text={commenterNickname} />

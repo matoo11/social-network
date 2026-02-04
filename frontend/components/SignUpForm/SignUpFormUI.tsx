@@ -1,5 +1,6 @@
 import React from 'react';
 import InputField from '../InputField/InputField';
+import AvatarSelector from '../AvatarSelector/AvatarSelector';
 
 type FormData = {
     username: string;
@@ -11,6 +12,7 @@ type FormData = {
     lastName: string;
     dateOfBirth: string;
     gender: string;
+    avatarNumber: number;
 };
 
 type SignUpFormUIProps = {
@@ -20,6 +22,7 @@ type SignUpFormUIProps = {
         field: string,
     ) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+    onAvatarSelect: (avatarNumber: number) => void;
 };
 
 const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
@@ -27,10 +30,15 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
     error,
     onInputChange,
     onSubmit,
+    onAvatarSelect,
 }) => {
     return (
         <div className="mx-auto w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
             <form onSubmit={onSubmit} className="max-w-md mx-auto space-y-4 md:space-y-6">
+                <AvatarSelector 
+                    selectedAvatar={formData.avatarNumber} 
+                    onAvatarSelect={onAvatarSelect}
+                />
                 <InputField
                     htmlFor="username"
                     labelText="Your username"
@@ -159,6 +167,11 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                         isRequired={true}
                     />
                 </div>
+                {error && (
+                    <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400">
+                        {error}
+                    </div>
+                )}
                 <button
                     type="submit"
                     className="cursor-pointer w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"

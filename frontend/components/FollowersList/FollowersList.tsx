@@ -31,6 +31,7 @@ interface Follower {
     FollowerID: number;
     FollowerUsername: string;
     FollowerAvatarURL: string;
+    FollowerAvatarNumber: number;
 }
 
 const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
@@ -101,6 +102,7 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
                             userID={follower.FollowerID}
                             username={follower.FollowerUsername}
                             avatarUrl={follower.FollowerAvatarURL}
+                            avatarNumber={follower.FollowerAvatarNumber || 1}
                             checked={checkedList.includes(follower.FollowerID)}
                             onCheckChange={(checked) =>
                                 handleCheckChange(follower.FollowerID, checked)

@@ -28,8 +28,16 @@ export function InitWebSocket() {
                 new CustomEvent("ws-chat", { detail: msg.data })
             );
         } else if (msg.type === "notification") {
+            const parsedNotification = typeof msg.data === 'string' ? JSON.parse(msg.data) : msg.data;
+            if (parsedNotification.Id !== undefined) {
+                parsedNotification.id = parsedNotification.Id;
+            }
             window.dispatchEvent(
-                new CustomEvent("ws-notification", { detail: msg.data })
+                new CustomEvent("ws-notification", { detail: parsedNotification })
+            );
+        } else if (msg.type === "notification_removed") {
+            window.dispatchEvent(
+                new CustomEvent("ws-notification-removed", { detail: msg.data })
             );
         } else if (msg.type === "event_response") {
             window.dispatchEvent(

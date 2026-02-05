@@ -213,3 +213,27 @@ func SendNotification(nId int, to int, nType int) {
 		}
 	}
 }
+
+// SendNotificationRemoval sends a message to remove a notification from the client's UI
+func SendNotificationRemoval(notificationID int, targetUserID int) {
+	conn := GetClientConn(targetUserID)
+	if conn == nil {
+		return
+	}
+
+	payload := struct {
+		NotificationID int `json:"notificationId"`
+	}{
+		NotificationID: notificationID,
+	}
+
+	data, _ := json.Marshal(payload)
+	res := Response{
+		Type: "notification_removed",
+		Data: data,
+	}
+
+	conn.Lock.Lock()
+	conn.Conn.WriteJSON(res)
+	conn.Lock.Unlock()
+}

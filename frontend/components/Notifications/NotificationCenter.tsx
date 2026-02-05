@@ -65,6 +65,18 @@ const NotificationCenter = ({ onGroupInviteHandled }: NotificationCenterProps) =
         return () => window.removeEventListener('ws-notification', handler);
     }, []);
 
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const data = (e as CustomEvent).detail;
+            const notificationId = data.notificationId;
+
+            setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+        };
+
+        window.addEventListener('ws-notification-removed', handler);
+        return () => window.removeEventListener('ws-notification-removed', handler);
+    }, []);
+
     const removeNotification = (id: number) => {
         setNotifications((prev) => prev.filter((n) => n.id !== id));
     };

@@ -1,6 +1,7 @@
 package dbConn
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -193,4 +194,45 @@ func DeactivateNotification(notificationID int) error {
 	}
 
 	return nil
+}
+
+// DeleteNotificationBySourceAndType deletes a notification based on source, target, and type
+func DeleteNotificationBySourceAndType(sourceID, targetID, notificationTypeID int) error {
+	statement := `
+	UPDATE Notifications
+	SET Is_Active = 0, Last_Updated_Time = ?
+	WHERE Source_ID = ? 
+	AND Target_ID = ? 
+	AND Notification_Type_ID = ?
+	AND Is_Active = 1`
+
+	now := time.Now().UTC().Format("2006-01-02 15:04:05")
+	_, err := dbHandler.DB.Exec(statement, now, sourceID, targetID, notificationTypeID)
+	if err != nil {
+		return fmt.Errorf("failed to delete notification: %v", err)
+	}
+
+	return nil
+}
+
+// GetNotificationIDBySourceAndType gets the notification ID by source, target, and type
+func GetNotificationIDBySourceAndType(sourceID, targetID, notificationTypeID int) (int, error) {
+	statement := `
+	SELECT Notification_ID 
+	FROM Notifications
+	WHERE Source_ID = ? 
+	AND Target_ID = ? 
+	AND Notification_Type_ID = ?
+	AND Is_Active = 1`
+
+	var notificationID int
+	err := dbHandler.DB.QueryRow(statement, sourceID, targetID, notificationTypeID).Scan(&notificationID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, fmt.Errorf("notification not found")
+		}
+		return 0, fmt.Errorf("failed to get notification ID: %v", err)
+	}
+
+	return notificationID, nil
 }

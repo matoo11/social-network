@@ -255,6 +255,11 @@ func AcceptFollowRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = dbConn.DeleteNotificationBySourceAndType(data.RequesterID, LoggedInUserID, 3)
+	if err != nil {
+		fmt.Println("Error deleting notification:", err)
+	}
+
 	wsManager.SendChatListRefresh(LoggedInUserID)
 	wsManager.SendChatListRefresh(data.RequesterID)
 
@@ -300,6 +305,11 @@ func RejectFollowRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = dbConn.DeleteNotificationBySourceAndType(data.RequesterID, LoggedInUserID, 3)
+	if err != nil {
+		fmt.Println("Error deleting notification:", err)
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 func CancelFollowRequest(w http.ResponseWriter, r *http.Request) {
@@ -339,6 +349,22 @@ func CancelFollowRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error canceling follow request:", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	// Get the notification ID before deleting it
+	notificationID, err := dbConn.GetNotificationIDBySourceAndType(LoggedInUserID, data.ReceiverID, 3)
+	if err != nil {
+		fmt.Println("Error getting notification ID:", err)
+	}
+
+	err = dbConn.DeleteNotificationBySourceAndType(LoggedInUserID, data.ReceiverID, 3)
+	if err != nil {
+		fmt.Println("Error deleting notification:", err)
+	}
+
+	// Send WebSocket message to remove notification from receiver's UI
+	if notificationID > 0 {
+		wsManager.SendNotificationRemoval(notificationID, data.ReceiverID)
 	}
 
 	w.WriteHeader(http.StatusOK)

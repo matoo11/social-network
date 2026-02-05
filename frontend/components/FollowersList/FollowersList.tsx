@@ -58,7 +58,7 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
         const fetchData = async () => {
             try {
                 const data = await fetchFollowers(); // wait for the async function
-                setFollowersListData(data);
+                setFollowersListData(data || []);
             } catch (error) {
                 console.error('Failed to fetch followers:', error);
             } finally {
@@ -73,6 +73,16 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
         return (
             <div className="flex items-center justify-center py-8">
                 <p className="text-sm text-gray-600 dark:text-gray-400">Loading followers...</p>
+            </div>
+        );
+    }
+
+    if (!followersListData || followersListData.length === 0) {
+        return (
+            <div className="flex items-center justify-center py-8">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                    You don't have any followers yet.
+                </p>
             </div>
         );
     }
@@ -111,7 +121,7 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
                     ))
                 ) : (
                     <p className="text-gray-500 dark:text-gray-400 text-sm italic py-2">
-                        No followers found.
+                        No followers match your search.
                     </p>
                 )}
             </div>

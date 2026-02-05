@@ -35,7 +35,7 @@ export default function SocialFeed() {
 
     const loadChats = async () => {
         try {
-            const res = await fetch("http://localhost:8080/api/chat/getChatList", {
+            const res = await fetch('http://localhost:8080/api/chat/getChatList', {
                 credentials: 'include',
             });
 
@@ -45,8 +45,22 @@ export default function SocialFeed() {
                 throw new Error(`HTTP ${res.status}: ${text}`);
             }
 
+            // Get response text first to check if it's empty
+            const text = await res.text();
+            if (!text) {
+                setChatsData([]);
+                return;
+            }
+
             // Parse JSON safely
-            const data: unknown = await res.json();
+            let data: unknown;
+            try {
+                data = JSON.parse(text);
+            } catch (parseErr) {
+                console.error('Failed to parse JSON:', parseErr);
+                setChatsData([]);
+                return;
+            }
 
             // Ensure data is an array before mapping
             const list = Array.isArray(data) ? data : [];
@@ -63,10 +77,10 @@ export default function SocialFeed() {
             if (mapped.length > 0 && !chatID) {
                 setchatID(mapped[0].id);
                 setChatWith(mapped[0].username);
-                setChatter("Me");
+                setChatter('Me');
             }
         } catch (err) {
-            console.error("Failed to load chats:", err);
+            console.error('Failed to load chats:', err);
             setChatsData([]); // fallback to empty array on error
         }
     };
@@ -79,25 +93,25 @@ export default function SocialFeed() {
         // Listen for WebSocket chat messages to refresh chat list
         const handleChatMessage = () => {
             loadChats();
-            console.log("Chat list refreshed due to WebSocket message");
+            console.log('Chat list refreshed due to WebSocket message');
         };
 
         // Listen for sent messages to refresh chat list
         const handleMessageSent = () => {
             loadChats();
-            console.log("Chat list refreshed due to sent message");
+            console.log('Chat list refreshed due to sent message');
         };
 
         // Listen for follow/unfollow actions to refresh chat list
         const handleFollowUpdated = () => {
             loadChats();
-            console.log("Chat list refreshed due to follow action");
+            console.log('Chat list refreshed due to follow action');
         };
 
         // Listen for WebSocket chatlist refresh
         const handleChatListRefresh = () => {
             loadChats();
-            console.log("Chat list refreshed via WebSocket");
+            console.log('Chat list refreshed via WebSocket');
         };
 
         window.addEventListener('ws-chat', handleChatMessage);
@@ -132,7 +146,7 @@ export default function SocialFeed() {
                     onSelectChat={(id, username) => {
                         setchatID(id);
                         setChatWith(username);
-                        setChatter("Me");
+                        setChatter('Me');
                     }}
                 />
             </div>

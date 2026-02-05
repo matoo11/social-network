@@ -16,6 +16,7 @@ type ChatItem = {
     id: string;
     username: string;
     lastMessage: string;
+    avatarNumber?: number;
 };
 
 export default function SocialFeed() {
@@ -54,6 +55,7 @@ export default function SocialFeed() {
                 id: String(item.UserID),
                 username: item.Username,
                 lastMessage: item.last_message || '',
+                avatarNumber: item.AvatarNumber || 1,
             }));
 
             setChatsData(mapped);
@@ -86,12 +88,28 @@ export default function SocialFeed() {
             console.log("Chat list refreshed due to sent message");
         };
 
+        // Listen for follow/unfollow actions to refresh chat list
+        const handleFollowUpdated = () => {
+            loadChats();
+            console.log("Chat list refreshed due to follow action");
+        };
+
+        // Listen for WebSocket chatlist refresh
+        const handleChatListRefresh = () => {
+            loadChats();
+            console.log("Chat list refreshed via WebSocket");
+        };
+
         window.addEventListener('ws-chat', handleChatMessage);
         window.addEventListener('message-sent', handleMessageSent);
+        window.addEventListener('follow-updated', handleFollowUpdated);
+        window.addEventListener('ws-chatlist-refresh', handleChatListRefresh);
 
         return () => {
             window.removeEventListener('ws-chat', handleChatMessage);
             window.removeEventListener('message-sent', handleMessageSent);
+            window.removeEventListener('follow-updated', handleFollowUpdated);
+            window.removeEventListener('ws-chatlist-refresh', handleChatListRefresh);
         };
     }, []);
 

@@ -25,6 +25,7 @@ interface BackendPost {
     postText: string;
     postType: string;
     posterNickname: string;
+    posterAvatarNumber?: number;
     postImageId?: number;
     postTime: string;
     numberOfLikes: number;
@@ -38,6 +39,7 @@ interface BackendDisplayedComment {
     commentId: number;
     commentText: string;
     commenterNickname: string;
+    commenterAvatarNumber?: number;
     commentProfileImageId: number;
     commentImageId: number;
     commentTime: string;
@@ -102,6 +104,7 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
                 commentID: c.commentId,
                 commentText: c.commentText,
                 commenterNickname: c.commenterNickname,
+                commenterAvatarNumber: c.commenterAvatarNumber,
                 commentProfileImageId: c.commentProfileImageId ?? undefined,
                 commentImageId: c.commentImageId ?? undefined,
                 commentTime: c.commentTime,
@@ -141,6 +144,7 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
                         <PostCard
                             postID={postID}
                             posterNickname={currentPostData.posterNickname}
+                            posterAvatarNumber={currentPostData.posterAvatarNumber}
                             createdAt={currentPostData.postTime}
                             postImageUrl={
                                 currentPostData.postImageId

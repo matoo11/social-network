@@ -8,9 +8,9 @@ import (
 )
 
 type Comment struct {
-	CommentID   int
-	CommentText string
-	PostID      int
+	CommentID       int
+	CommentText     string
+	PostID          int
 	CommentImageID  *int
 	CreatedByID     int
 	CreationTime    time.Time
@@ -20,11 +20,12 @@ type Comment struct {
 }
 
 type CommentDisplay struct {
-	CommentID    int
-	CommentText  string
-	PostID       int
-	CreatedByID  int
-	CreationTime time.Time
+	CommentID             int
+	CommentText           string
+	PostID                int
+	CreatedByID           int
+	CommenterAvatarNumber int
+	CreationTime          time.Time
 }
 
 func CreateComment(comment Comment) error {
@@ -121,14 +122,14 @@ func GetCommentsByPostID(postID int) ([]Comment, error) {
 	defer data.Close()
 	for data.Next() {
 		var comment Comment
-		err := data.Scan(&comment.CommentID, 
-			&comment.CommentText, 
+		err := data.Scan(&comment.CommentID,
+			&comment.CommentText,
 			&comment.PostID,
 			&comment.CommentImageID,
-			&comment.CreatedByID, 
-			&comment.CreationTime, 
+			&comment.CreatedByID,
+			&comment.CreationTime,
 			&comment.LastUpdatedByID,
-			&comment.LastUpdatedTime, 
+			&comment.LastUpdatedTime,
 			&comment.IsActive)
 		if err != nil {
 			return nil, err

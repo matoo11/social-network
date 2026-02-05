@@ -88,6 +88,8 @@ func AddFollow(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
+	wsManager.SendChatListRefresh(follow.FollowedID)
 }
 
 func FollowStatus(w http.ResponseWriter, r *http.Request) {
@@ -164,7 +166,10 @@ func UnFollow(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		auth.ErrorPage(w, 400)
+		return
 	}
+
+	wsManager.SendChatListRefresh(data.FollowedID)
 }
 
 func GetFollowers(w http.ResponseWriter, r *http.Request) {
@@ -236,6 +241,9 @@ func AcceptFollowRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	wsManager.SendChatListRefresh(LoggedInUserID)
+	wsManager.SendChatListRefresh(data.RequesterID)
 
 	w.WriteHeader(http.StatusOK)
 }

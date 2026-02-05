@@ -41,15 +41,16 @@ type PostData struct {
 }
 
 type PostDisplay struct {
-	PostID       int
-	PostTitle    string
-	PostText     string
-	PostTypeID   int
-	UserID       int
-	UserName     string
-	ImageID      *int
-	CreationTime time.Time
-	Comments     []CommentDisplay
+	PostID             int
+	PostTitle          string
+	PostText           string
+	PostTypeID         int
+	UserID             int
+	UserName           string
+	ImageID            *int
+	PosterAvatarNumber int
+	CreationTime       time.Time
+	Comments           []CommentDisplay
 }
 
 func boolToInt(value bool) int {
@@ -479,6 +480,7 @@ func GetPostByID(postID int) (PostDisplay, error) {
 		u.User_Name,
 		p.Post_Type_ID,
 		p.Image_ID,
+		u.Image_ID,
 		p.Creation_Time
 	FROM Posts p
 	JOIN Users u ON p.User_ID = u.User_ID
@@ -492,6 +494,7 @@ func GetPostByID(postID int) (PostDisplay, error) {
 		&post.UserName,
 		&post.PostTypeID,
 		&post.ImageID,
+		&post.PosterAvatarNumber,
 		&post.CreationTime,
 	)
 	if err != nil {
@@ -506,12 +509,17 @@ func GetPostByID(postID int) (PostDisplay, error) {
 	}
 
 	for _, c := range commments {
+		commenter, err := GetUserByID(c.CreatedByID)
+		if err != nil {
+			return PostDisplay{}, fmt.Errorf("failed to get commenter for comment %d: %w", c.CommentID, err)
+		}
 		comments = append(comments, CommentDisplay{
-			CommentID:    c.CommentID,
-			PostID:       c.PostID,
-			CommentText:  c.CommentText,
-			CreationTime: c.CreationTime,
-			CreatedByID:  c.CreatedByID,
+			CommentID:             c.CommentID,
+			PostID:                c.PostID,
+			CommentText:           c.CommentText,
+			CreationTime:          c.CreationTime,
+			CreatedByID:           c.CreatedByID,
+			CommenterAvatarNumber: commenter.Image_ID,
 		})
 	}
 

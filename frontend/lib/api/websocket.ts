@@ -35,6 +35,10 @@ export function InitWebSocket() {
             window.dispatchEvent(
                 new CustomEvent("ws-event-response", { detail: msg.data })
             );
+        } else if (msg.type === "chatlist_refresh") {
+            window.dispatchEvent(
+                new CustomEvent("ws-chatlist-refresh", { detail: msg.data })
+            );
         }
     };
 

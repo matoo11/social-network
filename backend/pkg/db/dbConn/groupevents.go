@@ -95,14 +95,13 @@ func GetGroupEvents(groupID int) ([]GroupEvent, error) {
 	var events []GroupEvent
 	for rows.Next() {
 		var evt GroupEvent
-		var eventTimeStr string
+		var eventTimeStr time.Time
 		err := rows.Scan(&evt.EventID, &evt.GroupID, &evt.Title, &evt.Description, &eventTimeStr, &evt.CreatorID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan group event: %w", err)
 		}
-		if parsed, parseErr := time.Parse("2006-01-02 15:04:05", eventTimeStr); parseErr == nil {
-			evt.EventTime = parsed
-		}
+		
+		evt.EventTime = eventTimeStr
 		counts, err := GetEventResponseCounts(evt.EventID)
 		if err != nil {
 			return nil, err

@@ -34,6 +34,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, onSelectChat, popupHandler, 
                             username={chat.username}
                             lastMessage={chat.lastMessage}
                             avatarUrl={chat.avatarUrl}
+                            avatarNumber={chat.avatarNumber}
                             selected={String(chat.id) === String(selectedChatId)}
                             onChatClick={() => {
                                 handleChatClick(String(chat.id), chat.username);

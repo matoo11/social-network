@@ -16,6 +16,7 @@ export type Comment = {
     commentID: number;
     commentText: string;
     commenterNickname: string;
+    commenterAvatarNumber?: number;
     commentProfileImageId?: number;
     commentImageId?: number ;
     commentTime: string;
@@ -106,7 +107,7 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
                             commentID={comment.commentID}
                             commentText={comment.commentText}
                             commenterNickname={comment.commenterNickname}
-                            commenterAvatarNumber={comment.commentProfileImageId || 1}
+                            commenterAvatarNumber={comment.commenterAvatarNumber || 1}
                             commenterProfileImageUrl={comment.commentProfileImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}` : undefined}
                             commentImageUrl={comment.commentImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentImageId}` : undefined}
                             createdAt={comment.commentTime}

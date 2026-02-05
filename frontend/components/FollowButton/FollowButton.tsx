@@ -85,6 +85,8 @@ export default function FollowButton({ userID }: FollowButtonProps) {
             else if (updated === 2) setText("following");
             else setText("follow");
 
+            window.dispatchEvent(new CustomEvent('follow-updated'));
+
         } catch (err) {
             console.error(err);
         }

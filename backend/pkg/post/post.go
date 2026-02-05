@@ -221,15 +221,53 @@ func GetImageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := strconv.Atoi(ids)
 	if err != nil {
-		fmt.Println("error 1")
+		http.Error(w, "Invalid image id", http.StatusBadRequest)
 		return
+	}
+
+	session, err := dbConn.GetSessionFromCookie(r)
+	if err != nil {
+		auth.ErrorPage(w, http.StatusUnauthorized)
+		return
+	}
+	loggedInUserID := session.UserID
+
+	postID, err := dbConn.GetPostIDByImageID(id)
+	if err == nil && postID > 0 {
+		groupID, err := dbConn.GetGroupIDByPostID(postID)
+		if err == nil && groupID > 0 {
+			isMember, err := dbConn.IsGroupMember(groupID, loggedInUserID)
+			if err != nil || !isMember {
+				http.Error(w, "Forbidden: You don't have access to this image", http.StatusForbidden)
+				return
+			}
+		} else {
+			post, err := dbConn.GetPostByID(postID)
+			if err == nil {
+				if post.UserID != loggedInUserID {
+					if post.PostTypeID == 2 {
+						isFollower, err := dbConn.IsFollowing(loggedInUserID, post.UserID)
+						if err != nil || !isFollower {
+							http.Error(w, "Forbidden: You don't have access to this image", http.StatusForbidden)
+							return
+						}
+					} else if post.PostTypeID == 3 {
+						hasAccess, err := dbConn.HasPrivatePostAccess(postID, loggedInUserID)
+						if err != nil || !hasAccess {
+							http.Error(w, "Forbidden: You don't have access to this image", http.StatusForbidden)
+							return
+						}
+					}
+				}
+			}
+		}
 	}
 
 	var data []byte
 	var mimeType string
 	data, mimeType, err = dbConn.GetPostImage(id)
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, "Image not found", http.StatusNotFound)
 		return
 	}
 
@@ -249,10 +287,17 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	session, err := dbConn.GetSessionFromCookie(r)
+	if err != nil {
+		auth.ErrorPage(w, http.StatusUnauthorized)
+		return
+	}
+	loggedInUserID := session.UserID
+
 	var req PostIDRequest
 
 	// Decode JSON body
-	err := json.NewDecoder(r.Body).Decode(&req)
+	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -264,11 +309,45 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+
+	groupID, err := dbConn.GetGroupIDByPostID(req.ID)
+	if err == nil && groupID > 0 {
+
+		isMember, err := dbConn.IsGroupMember(groupID, loggedInUserID)
+		if err != nil || !isMember {
+			http.Error(w, "Forbidden: You are not a member of this group", http.StatusForbidden)
+			return
+		}
+	}
+
 	// Fetch post
 	postData, err := dbConn.GetPostByID(req.ID)
 	if err != nil {
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
+	}
+
+
+	if groupID == 0 {
+
+		if postData.UserID != loggedInUserID {
+
+			if postData.PostTypeID == 2 {
+
+				isFollower, err := dbConn.IsFollowing(loggedInUserID, postData.UserID)
+				if err != nil || !isFollower {
+					http.Error(w, "Forbidden: This post is only visible to followers", http.StatusForbidden)
+					return
+				}
+			} else if postData.PostTypeID == 3 {
+
+				hasAccess, err := dbConn.HasPrivatePostAccess(req.ID, loggedInUserID)
+				if err != nil || !hasAccess {
+					http.Error(w, "Forbidden: You don't have access to this private post", http.StatusForbidden)
+					return
+				}
+			}
+		}
 	}
 
 	// Return JSON
@@ -299,11 +378,13 @@ func FetchPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, authenticated := auth.Authenticator(w, r)
+	user, authenticated := auth.Authenticator(w, r)
 	if !authenticated {
 		util.Respond(w, r, http.StatusUnauthorized, nil, http.StatusText(http.StatusUnauthorized))
 		return
 	}
+
+	loggedInUserID := user.User_ID
 
 	var req PostIDRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -315,10 +396,41 @@ func FetchPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	groupID, err := dbConn.GetGroupIDByPostID(req.ID)
+	if err == nil && groupID > 0 {
+		isMember, err := dbConn.IsGroupMember(groupID, loggedInUserID)
+		if err != nil || !isMember {
+			http.Error(w, "Forbidden: You are not a member of this group", http.StatusForbidden)
+			return
+		}
+	}
+
 	postData, err := dbConn.GetPostByID(req.ID)
 	if err != nil {
 		util.Respond(w, r, http.StatusNotFound, nil, "Post not found")
 		return
+	}
+
+	if groupID == 0 {
+
+		if postData.UserID != loggedInUserID {
+
+			if postData.PostTypeID == 2 {
+
+				isFollower, err := dbConn.IsFollowing(loggedInUserID, postData.UserID)
+				if err != nil || !isFollower {
+					http.Error(w, "Forbidden: This post is only visible to followers", http.StatusForbidden)
+					return
+				}
+			} else if postData.PostTypeID == 3 {
+
+				hasAccess, err := dbConn.HasPrivatePostAccess(req.ID, loggedInUserID)
+				if err != nil || !hasAccess {
+					http.Error(w, "Forbidden: You don't have access to this private post", http.StatusForbidden)
+					return
+				}
+			}
+		}
 	}
 
 	dto, err := buildDisplayedPost(postData)

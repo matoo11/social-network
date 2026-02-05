@@ -2,6 +2,7 @@ package dbConn
 
 import (
 	"bytes"
+	"database/sql"
 	"fmt"
 	"image"
 	"io"
@@ -536,4 +537,49 @@ func GetPostTypeNameByID(postTypeID int) (string, error) {
 		return "", err
 	}
 	return postTypeName, nil
+}
+
+func GetGroupIDByPostID(postID int) (int, error) {
+	var groupID int
+	err := dbHandler.DB.QueryRow(`
+		SELECT Group_ID 
+		FROM Group_Posts 
+		WHERE Post_ID = ? AND Is_Active = 1
+	`, postID).Scan(&groupID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, nil // Post is not in a group
+		}
+		return 0, err
+	}
+	return groupID, nil
+}
+
+func HasPrivatePostAccess(postID int, userID int) (bool, error) {
+	var count int
+	err := dbHandler.DB.QueryRow(`
+		SELECT COUNT(*) 
+		FROM Private_Posts_Users 
+		WHERE Post_ID = ? AND User_ID = ? AND Is_Active = 1
+	`, postID, userID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func GetPostIDByImageID(imageID int) (int, error) {
+	var postID int
+	err := dbHandler.DB.QueryRow(`
+		SELECT Post_ID 
+		FROM Posts 
+		WHERE Image_ID = ? AND Is_Active = 1
+	`, imageID).Scan(&postID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, nil // Image doesn't belong to a post
+		}
+		return 0, err
+	}
+	return postID, nil
 }

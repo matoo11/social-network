@@ -235,6 +235,19 @@ func AcceptFollowRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Verify the follow request exists and logged in user is the receiver
+	status, err := dbConn.RequestStatus(data.RequesterID, LoggedInUserID)
+	if err != nil {
+		http.Error(w, "Follow request not found", http.StatusNotFound)
+		return
+	}
+
+	// Status 1 = pending request
+	if status != 1 {
+		http.Error(w, "Invalid follow request status", http.StatusBadRequest)
+		return
+	}
+
 	err = dbConn.AcceptFollowRequest(data.RequesterID, LoggedInUserID)
 	if err != nil {
 		fmt.Println("Error accepting follow request:", err)
@@ -267,6 +280,19 @@ func RejectFollowRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Verify the follow request exists and logged in user is the receiver
+	status, err := dbConn.RequestStatus(data.RequesterID, LoggedInUserID)
+	if err != nil {
+		http.Error(w, "Follow request not found", http.StatusNotFound)
+		return
+	}
+
+	// Status 1 = pending request
+	if status != 1 {
+		http.Error(w, "Invalid follow request status", http.StatusBadRequest)
+		return
+	}
+
 	err = dbConn.RejectFollowRequest(data.RequesterID, LoggedInUserID)
 	if err != nil {
 		fmt.Println("Error rejecting follow request:", err)
@@ -292,6 +318,19 @@ func CancelFollowRequest(w http.ResponseWriter, r *http.Request) {
 
 	if err := auth.JsonDecode(w, r, &data); err != nil {
 		auth.ErrorPage(w, http.StatusBadRequest)
+		return
+	}
+
+	// Verify the follow request exists and logged in user is the requester
+	status, err := dbConn.RequestStatus(LoggedInUserID, data.ReceiverID)
+	if err != nil {
+		http.Error(w, "Follow request not found", http.StatusNotFound)
+		return
+	}
+
+	// Status 1 = pending request
+	if status != 1 {
+		http.Error(w, "Invalid follow request status", http.StatusBadRequest)
 		return
 	}
 

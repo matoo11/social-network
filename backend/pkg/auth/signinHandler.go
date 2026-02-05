@@ -42,6 +42,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, data Login) {
 
 		if username == "" || password == "" {
 			feedBack := "username or password cannot be empty"
+			w.WriteHeader(http.StatusBadRequest)
 			RenderSigninFeedback(w, feedBack)
 			return
 		}
@@ -51,7 +52,8 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, data Login) {
 			fmt.Println(err)
 			feedBack := "wrong username or password"
 			fmt.Println((feedBack))
-			ErrorPage(w, http.StatusUnauthorized)
+			// ErrorPage(w, http.StatusUnauthorized)
+			w.WriteHeader(http.StatusUnauthorized)
 			RenderSigninFeedback(w, feedBack)
 			return
 		}

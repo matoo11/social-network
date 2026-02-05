@@ -9,8 +9,9 @@ export async function loginUser(username: string, password: string) {
         });
 
         if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(errorText || 'Login failed');
+            const errorText = await res.json();
+            console.log('Error response body:', errorText.Feedback);
+            throw new Error(errorText.Feedback || 'Login failed');
         }
 
         const responseData = await res.json();

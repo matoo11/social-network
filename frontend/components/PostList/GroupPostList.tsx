@@ -10,12 +10,21 @@ const fetchGroupPosts = async (groupId: number) => {
         credentials: 'include',
     });
 
+    const text = await res.text();
+
     if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(msg || 'Failed to fetch group posts');
+        throw new Error(text || 'Failed to fetch group posts');
     }
 
-    return res.json();
+    if (!text) {
+        return [];
+    }
+
+    try {
+        return JSON.parse(text);
+    } catch (err) {
+        throw new Error('Failed to parse response');
+    }
 };
 
 type GroupPostListProps = {
@@ -32,31 +41,39 @@ const GroupPostList: React.FC<GroupPostListProps> = ({
     postContentPopupHandler,
 }) => {
     const [posts, setPosts] = useState<PostListUIProps['posts']>([]);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchPostsFromAPI = async () => {
-
         if (groupId === 0) {
             setPosts([]);
+            setError(null);
             return;
         }
 
-        const data = await fetchGroupPosts(groupId);
-
-        const mappedPosts: PostListUIProps['posts'] = data.map((p: any) => ({
-            postID: p.groupPostId, // IMPORTANT
-            title: p.title,
-            content: p.text,
-            posterNickname: p.authorUsername, // until backend sends usernames
-            posterAvatarNumber: p.authorAvatarNumber || 1,
-            posterProfileImageUrl: '',
-            postImageUrl: p.imageId ? `http://localhost:8080/api/image?id=${p.imageId}` : '',
-            createdAt: p.createdAt,
-            likesCount: 0,
-            dislikesCount: 0,
-            commentsCount: p.comments?.length ?? 0,
-            postContentPopup: postContentPopupHandler,
-        }));
-        setPosts(mappedPosts);
+        try {
+            const data = await fetchGroupPosts(groupId);
+            setError(null);
+            console.log('Fetched Group Posts:', data);
+            const mappedPosts: PostListUIProps['posts'] = data.map((p: any) => ({
+                postID: p.postId, // IMPORTANT
+                title: p.title,
+                content: p.text,
+                posterNickname: p.authorUsername, // until backend sends usernames
+                posterAvatarNumber: p.authorAvatarNumber || 1,
+                posterProfileImageUrl: '',
+                postImageUrl: p.imageId ? `http://localhost:8080/api/image?id=${p.imageId}` : '',
+                createdAt: p.createdAt,
+                likesCount: 0,
+                dislikesCount: 0,
+                commentsCount: p.comments?.length ?? 0,
+                postContentPopup: postContentPopupHandler,
+            }));
+            setPosts(mappedPosts);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to fetch posts';
+            setError(errorMessage);
+            setPosts([]);
+        }
     };
 
     useEffect(() => {
@@ -66,7 +83,13 @@ const GroupPostList: React.FC<GroupPostListProps> = ({
 
     return (
         <div className="flex flex-col h-full w-full rounded-lg shadow-sm overflow-hidden bg-gray-900">
-            <PostListUI posts={posts} popupHandler={popupHandler} />
+            {error ? (
+                <div className="flex items-center justify-center h-full p-4">
+                    <p className="text-red-400 text-center">{error}</p>
+                </div>
+            ) : (
+                <PostListUI posts={posts} popupHandler={popupHandler} />
+            )}
         </div>
     );
 };

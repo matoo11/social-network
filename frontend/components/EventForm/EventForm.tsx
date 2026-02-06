@@ -35,6 +35,14 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
             return;
         }
 
+        // Add this validation
+        const selectedDate = new Date(eventTime);
+        const now = new Date();
+        if (selectedDate < now) {
+            setError('Event date and time must be in the future');
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -59,7 +67,7 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
             if (!response.ok) {
                 // Try to extract error message from response
                 let errorMessage = 'Failed to create event';
-                
+
                 try {
                     const contentType = response.headers.get('content-type');
                     if (contentType?.includes('application/json')) {
@@ -84,7 +92,7 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
                 } catch {
                     // If parsing fails, use default message
                 }
-                
+
                 setError(errorMessage);
                 return;
             }
@@ -105,11 +113,7 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
         <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-gray-800 rounded-lg">
             <h2 className="text-xl font-semibold text-white mb-4">Create Event</h2>
 
-            {error && (
-                <div className="bg-red-900 text-red-200 p-3 rounded-md text-sm">
-                    {error}
-                </div>
-            )}
+            {error && <div className="bg-red-900 text-red-200 p-3 rounded-md text-sm">{error}</div>}
 
             <div>
                 <InputField
@@ -119,7 +123,9 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
                     inputName="title"
                     inputID="title"
                     inputValue={title}
-                    onInputChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+                    onInputChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setTitle(e.target.value)
+                    }
                     placeholderText="Event title (max 100 characters)"
                     isRequired={true}
                 />
@@ -127,9 +133,7 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Description
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
                 <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -150,6 +154,7 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
                     type="datetime-local"
                     value={eventTime}
                     onChange={(e) => setEventTime(e.target.value)}
+                    min={new Date().toISOString().slice(0, 16)} // Add this line
                     required
                     className="w-full px-3 py-2 bg-gray-700 text-white rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />

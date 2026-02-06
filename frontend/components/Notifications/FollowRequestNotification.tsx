@@ -50,10 +50,10 @@ const FollowRequestNotification = ({ notificationId, requesterId, requesterName,
             });
 
             if (response.ok) {
-                await fetch(`http://localhost:8080/api/notifications/delete/${notificationId}`, {
-                    method: 'DELETE',
-                    credentials: 'include',
-                });
+                // await fetch(`http://localhost:8080/api/notifications/delete/${notificationId}`, {
+                //     method: 'DELETE',
+                //     credentials: 'include',
+                // });
                 onHandled();
             } else {
                 console.error('Failed to reject follow request');

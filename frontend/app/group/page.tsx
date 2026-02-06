@@ -18,6 +18,7 @@ import GroupChat from '@/components/ChatArea/GroupChatArea';
 import FollowersList from '@/components/FollowersList/FollowersList';
 import { ChatCardProps } from '@/components/ChatCard/ChatCard';
 import Title from '@/components/Title/Title';
+import AllUsersList from '@/components/AllUsersList/AllUsersList';
 
 type GroupListItem = ChatCardProps & { joined?: boolean };
 
@@ -314,7 +315,7 @@ export default function SocialFeed() {
                     
                     <Title text={actionGroupTitle ? `Invite members to ${actionGroupTitle}` : 'Invite members'} />
                     <div className="flex-1 min-h-0">
-                        <FollowersList onSelectionChange={(ids) => setSelectedInviteeIds(ids)} />
+                        <AllUsersList onSelectionChange={(ids) => setSelectedInviteeIds(ids)} />
                     </div>
                     <button
                         type="button"

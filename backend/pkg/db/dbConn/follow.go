@@ -206,7 +206,8 @@ func AcceptFollowRequest(requesterID int, receiverID int) error {
 	statement := `UPDATE Follow_Requests
 		SET Status_ID = 2,
 			Last_Updated_By_ID = ?,
-			Last_Updated_Time = ?
+			Last_Updated_Time = ?,
+			Is_Active = 0
 		WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1`
 
 	_, err = dbHandler.DB.Exec(statement, receiverID, formattedCurrentTime, requesterID, receiverID)

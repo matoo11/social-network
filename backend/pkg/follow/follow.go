@@ -111,29 +111,35 @@ func FollowStatus(w http.ResponseWriter, r *http.Request) {
 		auth.ErrorPage(w, http.StatusBadRequest)
 		return
 	}
-	status := 0
+	status := 3
 	isFollowing, err := dbConn.IsFollowing(LoggedInUserID, data.FollowedID)
 	if err != nil {
 		auth.ErrorPage(w, 500)
 		return
 	}
-
+	fmt.Println(isFollowing)
 	if !isFollowing {
 		checkRequest, err := dbConn.RequestStatus(LoggedInUserID, data.FollowedID)
+		fmt.Println("here000")
+		fmt.Println(checkRequest)
 		if err != nil {
+			fmt.Println("here555")
 			if err != sql.ErrNoRows {
 				auth.ErrorPage(w, 500)
-				fmt.Println("here")
+				fmt.Println("here999")
 				return
 			}
+			fmt.Println("here444")
 			status = 3
-		} else {
+		} else if checkRequest != 2 {
+			fmt.Println("here111")
 			status = checkRequest
 		}
 	} else {
+		fmt.Println("222")
 		status = 2
 	}
-
+	fmt.Println("here333")
 	if err := auth.JsonEncode(w, status); err != nil {
 		fmt.Println("encode")
 		auth.ErrorPage(w, 500)

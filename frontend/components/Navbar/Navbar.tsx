@@ -37,12 +37,50 @@ const Navbar = () => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
     const [profileUserId, setProfileUserId] = useState<number | null>(null);
+    const [notificationCount, setNotificationCount] = useState(0);
     const dropdownRef = useRef(null);
 
     const { user, setUser } = useUser();
 
     useEffect(() => {
         handleUserData();
+    }, []);
+
+    // Fetch initial notification count
+    useEffect(() => {
+        const fetchNotificationCount = async () => {
+            try {
+                const res = await fetch('http://localhost:8080/api/notifications/get', {
+                    credentials: 'include',
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!data) return;
+                const notifs = Array.isArray(data) ? data : (data.data || []);
+                setNotificationCount(Array.isArray(notifs) ? notifs.length : 0);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchNotificationCount();
+    }, []);
+
+    // Listen for new notifications via WebSocket
+    useEffect(() => {
+        const handler = () => {
+            setNotificationCount((prev) => prev + 1);
+        };
+        window.addEventListener('ws-notification', handler);
+        return () => window.removeEventListener('ws-notification', handler);
+    }, []);
+
+    // Listen for notification removals via WebSocket
+    useEffect(() => {
+        const handler = () => {
+            setNotificationCount((prev) => Math.max(0, prev - 1));
+        };
+        window.addEventListener('ws-notification-removed', handler);
+        return () => window.removeEventListener('ws-notification-removed', handler);
     }, []);
 
     const handleUserData = async () => {
@@ -147,11 +185,16 @@ const Navbar = () => {
                     {/* Notifications button */}
                     <button
                         type="button"
-                        className="cursor-pointer flex items-center justify-center bg-gray-800 text-white rounded-full w-10 h-10 hover:bg-gray-700"
+                        className="cursor-pointer flex items-center justify-center bg-gray-800 text-white rounded-full w-10 h-10 hover:bg-gray-700 relative"
                         aria-label="Notifications"
                         onClick={() => setIsNotificationCenterOpen(true)}
                     >
                         <FaBell size={20} />
+                        {notificationCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                {notificationCount > 9 ? '9+' : notificationCount}
+                            </span>
+                        )}
                     </button>
 
                     <button
@@ -240,7 +283,11 @@ const Navbar = () => {
                 onClose={() => setIsNotificationCenterOpen(false)}
                 className="max-w-lg"
             >
-                <NotificationCenter />
+                <NotificationCenter 
+                    onNotificationHandled={() => {
+                        setNotificationCount((prev) => Math.max(0, prev - 1));
+                    }}
+                />
             </Popup>
         </nav>
     );

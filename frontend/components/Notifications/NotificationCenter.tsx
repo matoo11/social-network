@@ -20,9 +20,10 @@ export type Notification = {
 
 type NotificationCenterProps = {
     onGroupInviteHandled?: () => void;
+    onNotificationHandled?: () => void;
 };
 
-const NotificationCenter = ({ onGroupInviteHandled }: NotificationCenterProps) => {
+const NotificationCenter = ({ onGroupInviteHandled, onNotificationHandled }: NotificationCenterProps) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
     useEffect(() => {
@@ -99,6 +100,9 @@ const NotificationCenter = ({ onGroupInviteHandled }: NotificationCenterProps) =
                         notification={n}
                         onHandled={() => {
                             removeNotification(n.id);
+                            if (onNotificationHandled) {
+                                onNotificationHandled();
+                            }
                             if (n.type === 'GROUP_INVITE' && onGroupInviteHandled) {
                                 onGroupInviteHandled();
                             }

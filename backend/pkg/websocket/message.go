@@ -200,10 +200,10 @@ func GroupChat(groupID int, message string, conn *Conn, LoggedInUserID int, Logg
 	}
 
 	// Broadcast to all online members of this group
-	BroadCastGroup(groupID, chat)
+	BroadCastGroup(groupID, chat, LoggedInUserID)
 }
 
-func BroadCastGroup(groupID int, chat ChatData) {
+func BroadCastGroup(groupID int, chat ChatData, senderID int) {
 	groupMembers, err := dbConn.GetGroupMembers(groupID)
 	if err != nil {
 		fmt.Println("failed to fetch group members:", err)
@@ -218,7 +218,7 @@ func BroadCastGroup(groupID int, chat ChatData) {
 
 	for _, member := range groupMembers {
 		memberConn := GetClientConn(member.UserID)
-		if memberConn != nil {
+		if memberConn != nil && member.UserID != senderID {
 			memberConn.Lock.Lock()
 			memberConn.Conn.WriteJSON(response)
 			memberConn.Lock.Unlock()

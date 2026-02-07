@@ -110,16 +110,16 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
                             commenterAvatarNumber={comment.commenterAvatarNumber || 1}
                             commenterProfileImageUrl={comment.commentProfileImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}` : undefined}
                             commentImageUrl={comment.commentImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentImageId}` : undefined}
-                            commenterProfileImageUrl={
-                                comment.commentProfileImageId !== 0
-                                    ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}`
-                                    : undefined
-                            }
-                            commentImageUrl={
-                                comment.commentImageId !== 0
-                                    ? `http://localhost:8080/api/image?id=${comment.commentImageId}`
-                                    : undefined
-                            }
+                            // commenterProfileImageUrl={
+                            //     comment.commentProfileImageId !== 0
+                            //         ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}`
+                            //         : undefined
+                            // }
+                            // commentImageUrl={
+                            //     comment.commentImageId !== 0
+                            //         ? `http://localhost:8080/api/image?id=${comment.commentImageId}`
+                            //         : undefined
+                            // }
                             createdAt={comment.commentTime}
                             likesCount={comment.likesCount}
                             dislikesCount={comment.dislikesCount}

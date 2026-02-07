@@ -121,18 +121,21 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         //     message: input,
         // });
 
+        const newMessage: Message = {
+            id: Date.now(),
+            username: 'Me',
+            text: input,
+            type: 'sent',
+            time: new Date().toISOString(),
+        };
+
+        setMessages([...messages, newMessage]);
+
         // Trigger chat list refresh after sending message
         window.dispatchEvent(new CustomEvent('message-sent'));
 
         setInput('');
 
-        // Simulate a response
-        // setTimeout(() => {
-        //     setMessages((prev) => [
-        //         ...prev,
-        //         { id: Date.now() + 1, text: 'Got it!', type: 'received' , username: chatWith},
-        //     ]);
-        // }, 1000);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

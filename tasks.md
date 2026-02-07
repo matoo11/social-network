@@ -15,3 +15,13 @@
 ## Not Important
 
 1. when unfollowing a user and no follow is between them, the chat disappears.
+
+
+## New Tasks
+
+1. private chat can send message when not selecting anyone and sometimes that happens in groups for the first time creating a group
+2. group post doesn't have scroll
+3. creating a group when selecting members its randomly selecting the member 2 times and then sends the same notification 2 times
+4. when being unautherized next.js gives multiple issues
+5. if you want to add group posts in the posts list in the profile but thats a lot of work
+6. fix the responsiveness

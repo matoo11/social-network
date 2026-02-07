@@ -5,6 +5,9 @@ import Navbar from '@/components/Navbar/Navbar';
 import WebSocketInit from './WebSocketInit';
 import { UserProvider } from './context/UserContext';
 import AuthGuard from '@/components/AuthGuard/AuthGuard';
+import { ToastProvider } from '@/context/ToastContext';
+import ToastContainer from '@/components/Toast/ToastContainer';
+import ToastNotificationListener from '@/components/Toast/ToastNotificationListener';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -38,13 +41,17 @@ export default function RootLayout({
                 />
             </head>
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                <UserProvider>
-                    <AuthGuard>
-                        <WebSocketInit />
-                        {children}
-                        {/* <Navbar /> */}
-                    </AuthGuard>
-                </UserProvider>
+                <ToastProvider>
+                    <UserProvider>
+                        <AuthGuard>
+                            <WebSocketInit />
+                            <ToastContainer />
+                            <ToastNotificationListener />
+                            {children}
+                            {/* <Navbar /> */}
+                        </AuthGuard>
+                    </UserProvider>
+                </ToastProvider>
             </body>
         </html>
     );

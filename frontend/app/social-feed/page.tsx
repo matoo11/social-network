@@ -75,7 +75,7 @@ export default function SocialFeed() {
             setChatsData(mapped);
 
             if (mapped.length > 0 && !chatID) {
-                setchatID(mapped[0].id);
+                // setchatID(mapped[0].id);
                 setChatWith(mapped[0].username);
                 setChatter('Me');
             }

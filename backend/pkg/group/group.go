@@ -394,6 +394,71 @@ func RequestToJoinGroupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CheckGroupRequestStatusHandler checks if the logged-in user has requested to join a group
+func CheckGroupRequestStatusHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		auth.ErrorPage(w, http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, ok := getLoggedInUserID(w, r)
+	if !ok {
+		return
+	}
+
+	var payload struct {
+		GroupID int `json:"groupId"`
+	}
+	if !decodeJSON(w, r, &payload) {
+		return
+	}
+
+	if payload.GroupID <= 0 {
+		http.Error(w, "groupId must be a positive integer", http.StatusBadRequest)
+		return
+	}
+
+	// Check if user is already a member
+	isMember, err := dbConn.IsGroupMember(payload.GroupID, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if isMember {
+		// Status 2 = joined
+		if err := auth.JsonEncode(w, 2); err != nil {
+			http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Check if user has a pending request
+	ownerID, err := dbConn.GetGroupOwnerID(payload.GroupID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	hasPending, err := dbConn.HasPendingGroupInvite(payload.GroupID, userID, ownerID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if hasPending {
+		// Status 1 = requested
+		if err := auth.JsonEncode(w, 1); err != nil {
+			http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Status 0 = not requested
+	if err := auth.JsonEncode(w, 0); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
+}
+
 func GetPendingInvitesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		auth.ErrorPage(w, http.StatusMethodNotAllowed)

@@ -85,6 +85,8 @@ func Router(w http.ResponseWriter, r *http.Request) {
 		group.RespondToInviteHandler(w, r)
 	case "/api/groups/request":
 		group.RequestToJoinGroupHandler(w, r)
+	case "/api/groups/request/status":
+		group.CheckGroupRequestStatusHandler(w, r)
 	case "/api/groups/request/pending":
 		group.GetPendingRequestsHandler(w, r)
 	// group posts routes

@@ -6,6 +6,7 @@ import ChatCard from '../ChatCard/ChatCard';
 import Title from '../Title/Title';
 import PopupBtn from '../PopupBtn/PopupBtn';
 import { ChatCardProps } from '../ChatCard/ChatCard';
+import GroupJoinButton from '../GroupJoinButton/GroupJoinButton';
 
 type GroupListItem = ChatCardProps & { joined?: boolean };
 
@@ -151,16 +152,7 @@ const GroupList: React.FC<ChatListProps> = ({
                                     </div>
                                 ) : (
                                     <div onClick={(e) => e.stopPropagation()}>
-                                        <button
-                                            type="button"
-                                            className="bg-gray-700 text-white px-3 py-1 rounded-md hover:bg-gray-600 disabled:opacity-50 text-sm"
-                                            disabled={Boolean(chat.joined)}
-                                            onClick={() =>
-                                                onRequestToJoin?.(String(chat.id), chat.username)
-                                            }
-                                        >
-                                            {chat.joined ? 'Joined' : 'Join'}
-                                        </button>
+                                        <GroupJoinButton groupId={Number(chat.id)} />
                                     </div>
                                 )
                             }

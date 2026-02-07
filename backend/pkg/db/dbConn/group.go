@@ -393,6 +393,39 @@ func GetPendingInvitesForUser(userID int) ([]GroupInviteDisplay, error) {
 	return invites, nil
 }
 
+// GetPendingInvitesForGroup returns all pending invites for a specific group
+func GetPendingInvitesForGroup(groupID int) ([]GroupInviteDisplay, error) {
+	statement := `
+		SELECT gir.Invite_Request_ID,
+		       gir.Group_ID,
+		       ug.Group_Title,
+		       gir.Inviter_ID,
+		       gir.Invitee_ID,
+		       gir.Status_ID,
+		       gir.Creation_Time
+		FROM Group_Invite_Requests gir
+		JOIN User_Groups ug ON gir.Group_ID = ug.Group_ID
+		WHERE gir.Group_ID = ? AND gir.Status_ID = ? AND gir.Is_Active = 1
+		ORDER BY gir.Creation_Time DESC`
+
+	rows, err := dbHandler.DB.Query(statement, groupID, StatusPending)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch pending group invites: %w", err)
+	}
+	defer rows.Close()
+
+	var invites []GroupInviteDisplay
+	for rows.Next() {
+		var invite GroupInviteDisplay
+		err := rows.Scan(&invite.InviteID, &invite.GroupID, &invite.GroupTitle, &invite.InviterID, &invite.InviteeID, &invite.StatusID, &invite.CreationTime)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan group invite: %w", err)
+		}
+		invites = append(invites, invite)
+	}
+	return invites, nil
+}
+
 func GetPendingRequestsForOwner(ownerID int) ([]GroupInviteDisplay, error) {
 	statement := `
 		SELECT gir.Invite_Request_ID,

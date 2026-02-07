@@ -43,6 +43,7 @@ export default function SocialFeed() {
     const [actionGroupTitle, setActionGroupTitle] = useState<string>('');
     const [selectedInviteeIds, setSelectedInviteeIds] = useState<number[]>([]);
     const [groupMembers, setGroupMembers] = useState<{ userId: number; username: string }[]>([]);
+    const [pendingInviteeIds, setPendingInviteeIds] = useState<number[]>([]);
 
     const fetchGroups = async (mode: 'mine' | 'all', isInitial = false) => {
         try {
@@ -157,10 +158,47 @@ export default function SocialFeed() {
         }
     };
 
-    const openInviteMembers = (groupId: string, groupTitle: string) => {
+    const openInviteMembers = async (groupId: string, groupTitle: string) => {
         setActionGroupId(groupId);
         setActionGroupTitle(groupTitle);
         setSelectedInviteeIds([]);
+
+        // Fetch group members and pending invites to exclude them from the invite list
+        try {
+            const [membersRes, pendingRes] = await Promise.all([
+                fetch('http://localhost:8080/api/groups/members', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ groupId: Number(groupId) }),
+                }),
+                fetch('http://localhost:8080/api/groups/pendingInvites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ groupId: Number(groupId) }),
+                }),
+            ]);
+
+            if (!membersRes.ok) {
+                const txt = await membersRes.text();
+                throw new Error(txt || 'Failed to fetch group members');
+            }
+            const membersData = await membersRes.json();
+            setGroupMembers(Array.isArray(membersData) ? membersData : []);
+
+            if (!pendingRes.ok) {
+                const txt = await pendingRes.text();
+                throw new Error(txt || 'Failed to fetch pending invites');
+            }
+            const pendingData = await pendingRes.json();
+            setPendingInviteeIds(Array.isArray(pendingData) ? pendingData : []);
+        } catch (err) {
+            console.error(err);
+            setGroupMembers([]);
+            setPendingInviteeIds([]);
+        }
+
         setIsInviteMembersOpen(true);
     };
 
@@ -330,7 +368,10 @@ export default function SocialFeed() {
                         }
                     />
                     <div className="flex-1 min-h-0">
-                        <AllUsersList onSelectionChange={(ids) => setSelectedInviteeIds(ids)} />
+                        <AllUsersList 
+                            onSelectionChange={(ids) => setSelectedInviteeIds(ids)}
+                            excludeUserIds={[...groupMembers.map(m => m.userId), ...pendingInviteeIds]}
+                        />
                     </div>
                     <button
                         type="button"

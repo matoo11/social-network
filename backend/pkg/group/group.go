@@ -338,6 +338,58 @@ func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetGroupPendingInvitesHandler returns all pending invites for a specific group
+func GetGroupPendingInvitesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		auth.ErrorPage(w, http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, ok := getLoggedInUserID(w, r)
+	if !ok {
+		return
+	}
+
+	var payload struct {
+		GroupID int `json:"groupId"`
+	}
+	if !decodeJSON(w, r, &payload) {
+		return
+	}
+
+	if payload.GroupID <= 0 {
+		http.Error(w, "groupId must be a positive integer", http.StatusBadRequest)
+		return
+	}
+
+	// Verify user is a member of the group
+	isMember, err := dbConn.IsGroupMember(payload.GroupID, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !isMember {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
+	invites, err := dbConn.GetPendingInvitesForGroup(payload.GroupID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Extract just the invitee IDs
+	inviteeIDs := make([]int, 0, len(invites))
+	for _, invite := range invites {
+		inviteeIDs = append(inviteeIDs, invite.InviteeID)
+	}
+
+	if err := auth.JsonEncode(w, inviteeIDs); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
+}
+
 func RequestToJoinGroupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		auth.ErrorPage(w, http.StatusMethodNotAllowed)

@@ -9,6 +9,7 @@ import { useUser } from '@/app/context/UserContext';
 
 type AllUsersListProps = {
     onSelectionChange?: (selectedUserIDs: number[]) => void;
+    excludeUserIds?: number[];
 };
 
 interface User {
@@ -17,7 +18,7 @@ interface User {
     Avatar: string;
 }
 
-const AllUsersList: React.FC<AllUsersListProps> = ({ onSelectionChange }) => {
+const AllUsersList: React.FC<AllUsersListProps> = ({ onSelectionChange, excludeUserIds = [] }) => {
     const { user } = useUser();
     const [usersListData, setUsersListData] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
@@ -46,8 +47,10 @@ const AllUsersList: React.FC<AllUsersListProps> = ({ onSelectionChange }) => {
         const handler = (e: any) => {
             const users = e.detail;
             if (Array.isArray(users)) {
-                // Filter out the current user
-                const filteredUsers = users.filter((u: User) => u.User_ID !== user.userId);
+                // Filter out the current user and excluded users
+                const filteredUsers = users.filter(
+                    (u: User) => u.User_ID !== user.userId && !excludeUserIds.includes(u.User_ID)
+                );
                 setUsersListData(filteredUsers);
                 setLoading(false);
             }
@@ -55,7 +58,7 @@ const AllUsersList: React.FC<AllUsersListProps> = ({ onSelectionChange }) => {
 
         window.addEventListener('ws-userlist', handler);
         return () => window.removeEventListener('ws-userlist', handler);
-    }, [user.userId]);
+    }, [user.userId, excludeUserIds]);
 
     if (loading) {
         return (

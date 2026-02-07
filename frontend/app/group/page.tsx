@@ -208,11 +208,11 @@ export default function SocialFeed() {
 
 
     return (
-        <div className="flex w-full h-full mt-[10vh]">
+        <div className="flex w-full h-full mt-[7vh]">
             {/* Header with Navbar and Notifications button */}
             <Navbar />
             {/* Left column - 17.5% */}
-            <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[90%]">
+            <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[93%]">
                 <GroupList
                     chats={chatsData}
                     mode={groupListMode}
@@ -235,7 +235,7 @@ export default function SocialFeed() {
             </div>
 
             {/* Middle column - 52.5% */}
-            <div className="w-[52.5%] bg-gray-900 ml-[17.5%] fixed h-[90%]">
+            <div className="w-[52.5%] bg-gray-900 ml-[17.5%] fixed h-[93%]">
                 <GroupPostList
                     groupId={Number(chatID)}
                     popupHandler={() => setIsPostFormPopupOpen(true)}
@@ -249,7 +249,7 @@ export default function SocialFeed() {
             </div>
 
             {/* Right column - 30% */}
-            <div className="w-[30%] bg-gray-900 fixed h-[90%] right-0">
+            <div className="w-[30%] bg-gray-900 fixed h-[93%] right-0">
                 {/* <EventsList popupHandler={() => setIsEventsListPopupOpen(false)} /> */}
                 {/* <GroupChatArea chatID='1' chatWith='hrar' chatter='2'/> */}
                 <GroupChat chatID={chatID} chatWith={chatWith} chatter={chatter} />

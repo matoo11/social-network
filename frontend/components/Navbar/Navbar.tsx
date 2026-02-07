@@ -56,7 +56,7 @@ const Navbar = () => {
                 if (!res.ok) return;
                 const data = await res.json();
                 if (!data) return;
-                const notifs = Array.isArray(data) ? data : (data.data || []);
+                const notifs = Array.isArray(data) ? data : data.data || [];
                 setNotificationCount(Array.isArray(notifs) ? notifs.length : 0);
             } catch (err) {
                 console.error(err);
@@ -139,125 +139,131 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="bg-white border-gray-200 dark:bg-gray-900 items-center fixed top-0 left-0 w-full z-50 h-[10vh]">
-            <div className="max-w-full h-full flex items-center justify-between p-4">
-                {/* Left: Logo */}
-                <a
-                    href="/"
-                    className="flex items-center space-x-3 rtl:space-x-reverse flex-shrink-0"
-                >
-                    <Image
-                        src="http://localhost:3000/uploads/reboot01-logo.jpeg"
-                        className="h-10 w-10 rounded-full"
-                        alt="Flowbite Logo"
-                        width={32}
-                        height={32}
-                    />
-                    <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-                        Social Network
-                    </span>
-                </a>
+        <nav className="bg-gray-900 fixed top-0 left-0 w-full z-50 h-[7vh]">
+            <div className="flex items-center h-full w-full">
+                {/* Left section - Logo (matches left sidebar width) */}
+                <div className="w-[17.5%] flex items-center px-5 flex-shrink-0">
+                    <a href="/" className="flex items-center gap-3">
+                        <Image
+                            src="http://localhost:3000/uploads/reboot01-logo.jpeg"
+                            className="rounded-full"
+                            alt="Logo"
+                            width={36}
+                            height={36}
+                        />
+                        <span className="text-lg font-semibold text-white tracking-tight">
+                            Social Network
+                        </span>
+                    </a>
+                </div>
 
-                {/* Center: Navigation Links */}
-                <div className="flex-1 flex justify-center">
-                    <ul className="flex font-medium space-x-8 rtl:space-x-reverse">
+                {/* Middle section - Navigation links (matches post feed width) */}
+                <div className="w-[52.5%] flex items-center justify-center">
+                    <ul className="flex items-center gap-1">
                         <NavLink href="/social-feed">Social Feed</NavLink>
-                        <NavLink href="/group">Group</NavLink>
+                        <NavLink href="/group">Groups</NavLink>
                     </ul>
                 </div>
 
-                {/* Right: User Menu */}
+                {/* Right section - User actions (matches chat area width) */}
                 <div
-                    className="flex items-center space-x-3 rtl:space-x-reverse relative flex-shrink-0"
+                    className="w-[30%] flex items-center justify-end px-5 gap-2 relative"
                     ref={dropdownRef}
                 >
                     {/* User list button */}
                     <button
                         type="button"
                         id="dropdownUsersButton"
-                        className="cursor-pointer flex items-center justify-center bg-gray-800 text-white rounded-full w-10 h-10 hover:bg-gray-700"
+                        className="cursor-pointer flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg w-9 h-9 transition-colors"
                         aria-label="User list"
                         onClick={() => setIsUserListOpen(true)}
                     >
-                        <FaUsers size={20} />
+                        <FaUsers size={18} />
                     </button>
 
                     {/* Notifications button */}
                     <button
                         type="button"
-                        className="cursor-pointer flex items-center justify-center bg-gray-800 text-white rounded-full w-10 h-10 hover:bg-gray-700 relative"
+                        className="cursor-pointer flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg w-9 h-9 transition-colors relative"
                         aria-label="Notifications"
                         onClick={() => setIsNotificationCenterOpen(true)}
                     >
-                        <FaBell size={20} />
+                        <FaBell size={16} />
                         {notificationCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                                 {notificationCount > 9 ? '9+' : notificationCount}
                             </span>
                         )}
                     </button>
 
+                    {/* Separator */}
+                    <div className="w-px h-6 bg-gray-700 mx-1"></div>
+
                     <button
                         type="button"
-                        className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                        className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-800 transition-colors"
                         onClick={() => setIsDropdownOpen((prev) => !prev)}
                     >
-                        <div className="w-8 h-8">
+                        <div className="w-7 h-7">
                             <ProfileImage imageUrl="" avatarNumber={user?.profileImageID || 1} />
                         </div>
+                        <span className="text-sm text-gray-300 font-medium hidden xl:block">
+                            {user?.userName ?? 'Guest'}
+                        </span>
                     </button>
 
                     {isDropdownOpen && (
-                        <div className="absolute top-12 right-0 z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 w-44">
-                            <div className="px-4 py-3">
-                                <span className="block text-sm text-gray-900 dark:text-white">
+                        <div className="absolute top-14 right-5 z-50 text-sm list-none bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden w-48">
+                            <div className="px-4 py-3 border-b border-gray-700">
+                                <p className="text-sm font-medium text-white">
                                     {user?.userName ?? 'Guest'}
-                                </span>
-                                <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+                                </p>
+                                <p className="text-xs text-gray-400 truncate mt-0.5">
                                     {user?.email ?? 'Not logged in'}
-                                </span>
+                                </p>
                             </div>
-                            <ul className="py-2">
+                            <ul className="py-1">
                                 {user.userId === 0 && (
                                     <li
                                         onClick={() => {
                                             setIsDropdownOpen(false);
                                             router.push('/login');
                                         }}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                        className="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer transition-colors"
                                     >
                                         Login
                                     </li>
                                 )}
 
                                 {user.userId !== 0 && (
-                                    <div>
+                                    <>
                                         <li
                                             onClick={() => {
                                                 setIsDropdownOpen(false);
                                                 setProfileUserId(user.userId);
                                                 setIsProfileOpen(true);
                                             }}
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
+                                            className="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer transition-colors"
                                         >
                                             Profile
                                         </li>
                                         <li>
-                                            {/* TODO: Need to create a settings component/page */}
                                             <Link
                                                 href="/settings"
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                                                className="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
                                             >
                                                 Settings
                                             </Link>
                                         </li>
-                                        <li
-                                            onClick={handleLogout}
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
-                                        >
-                                            Sign out
+                                        <li className="border-t border-gray-700">
+                                            <span
+                                                onClick={handleLogout}
+                                                className="block px-4 py-2 text-red-400 hover:bg-gray-700 hover:text-red-300 cursor-pointer transition-colors"
+                                            >
+                                                Sign out
+                                            </span>
                                         </li>
-                                    </div>
+                                    </>
                                 )}
                             </ul>
                         </div>
@@ -283,7 +289,7 @@ const Navbar = () => {
                 onClose={() => setIsNotificationCenterOpen(false)}
                 className="max-w-lg"
             >
-                <NotificationCenter 
+                <NotificationCenter
                     onNotificationHandled={() => {
                         setNotificationCount((prev) => Math.max(0, prev - 1));
                     }}

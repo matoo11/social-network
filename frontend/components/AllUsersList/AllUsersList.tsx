@@ -70,7 +70,7 @@ const AllUsersList: React.FC<AllUsersListProps> = ({ onSelectionChange }) => {
     );
 
     return (
-        <div className="flex flex-col w-full gap-2">
+        <div className="flex flex-col w-full gap-2 h-full">
             {/* Search Section - Fixed at top */}
             <div className="flex-shrink-0">
                 <SearchInput
@@ -81,8 +81,8 @@ const AllUsersList: React.FC<AllUsersListProps> = ({ onSelectionChange }) => {
                 />
             </div>
 
-            {/* Users List - Scrollable, shows 3 cards then scrolls */}
-            <div className="max-h-[156px] overflow-y-auto overflow-x-hidden space-y-2 pr-1 hide-scrollbar">
+            {/* Users List - Scrollable, fills remaining space */}
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-2 pr-1 hide-scrollbar">
                 {filteredUsers.length > 0 ? (
                     filteredUsers.map((user) => (
                         <FollowerCard

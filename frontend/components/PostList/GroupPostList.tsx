@@ -88,7 +88,13 @@ const GroupPostList: React.FC<GroupPostListProps> = ({
                     <p className="text-red-400 text-center">{error}</p>
                 </div>
             ) : (
-                <PostListUI posts={posts} popupHandler={popupHandler} />
+                <PostListUI
+                    posts={posts}
+                    popupHandler={popupHandler}
+                    title="Group Posts"
+                    accentColor="bg-emerald-500"
+                    btnColor="emerald"
+                />
             )}
         </div>
     );

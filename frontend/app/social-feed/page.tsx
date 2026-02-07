@@ -134,11 +134,11 @@ export default function SocialFeed() {
     };
 
     return (
-        <div className="flex w-full h-full mt-[10vh]">
+        <div className="flex w-full h-full mt-[7vh]">
             <Navbar />
 
-            {/* Left column - Fixed width */}
-            <div className="w-[280px] bg-gray-900 flex flex-col gap-2 fixed h-[90%] left-0">
+            {/* Left column - 17.5% */}
+            <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[93%] left-0">
                 <ChatList
                     chats={chatsData}
                     popupHandler={() => setIsChatListPopupOpen(true)}
@@ -151,8 +151,8 @@ export default function SocialFeed() {
                 />
             </div>
 
-            {/* Middle column - Flexible width */}
-            <div className="absolute left-[280px] right-[380px] bg-gray-900 h-[90%]">
+            {/* Middle column - 52.5% */}
+            <div className="w-[52.5%] bg-gray-900 ml-[17.5%] fixed h-[93%]">
                 <PostList
                     popupHandler={() => {
                         if (user.userId !== 0) {
@@ -169,8 +169,8 @@ export default function SocialFeed() {
                 />
             </div>
 
-            {/* Right column - Fixed width */}
-            <div className="w-[380px] bg-gray-900 fixed h-[90%] right-0">
+            {/* Right column - 30% */}
+            <div className="w-[30%] bg-gray-900 fixed h-[93%] right-0">
                 <PrivateChatArea chatWith={chatWith} chatter={chatter} chatID={chatID} />
             </div>
 

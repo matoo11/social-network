@@ -183,10 +183,11 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 
 const GroupChat: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     return (
-        <div className="flex flex-col h-full w-full border-2 border-gray-600 rounded-lg shadow-sm overflow-hidden dark:bg-gray-900">
+        <div className="flex flex-col h-full w-full border-2 border-gray-600 rounded-lg shadow-sm overflow-hidden bg-gray-900">
             {/* Header */}
-            <div className="flex-shrink-0 flex justify-center items-center gap-5 px-4 py-3 border-b-2 border-gray-600 dark:bg-gray-900">
-                <Title text="Chat" />
+            <div className="flex-shrink-0 flex justify-center items-center gap-3 px-4 py-3 border-b-2 border-gray-600 bg-gray-900">
+                <div className="w-1 h-5 bg-emerald-500 rounded-full"></div>
+                <Title text="Group Chat" />
             </div>
 
             {/* Chat Area */}

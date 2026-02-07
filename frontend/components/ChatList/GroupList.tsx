@@ -37,8 +37,8 @@ const GroupList: React.FC<ChatListProps> = ({
     onOpenEvents,
     popupHandler,
 }) => {
-    const handleChatClick = (id: string, username: string) => {
-        if (mode === 'mine') {
+    const handleChatClick = (id: string, username: string, joined?: boolean) => {
+        if (mode === 'mine' || joined) {
             onSelectChat?.(id, username);
         }
     };
@@ -80,7 +80,11 @@ const GroupList: React.FC<ChatListProps> = ({
                             selected={String(chat.id) === String(selectedChatId)}
                             onChatClick={() => {
                                 setOpenMenuId(null);
-                                handleChatClick(String(chat.id), chat.username);
+                                handleChatClick(
+                                    String(chat.id),
+                                    chat.username,
+                                    Boolean(chat.joined),
+                                );
                             }}
                             actions={
                                 mode === 'mine' ? (

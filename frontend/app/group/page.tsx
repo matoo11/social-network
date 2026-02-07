@@ -44,7 +44,7 @@ export default function SocialFeed() {
     const [selectedInviteeIds, setSelectedInviteeIds] = useState<number[]>([]);
     const [groupMembers, setGroupMembers] = useState<{ userId: number; username: string }[]>([]);
 
-    const fetchGroups = async (mode: 'mine' | 'all') => {
+    const fetchGroups = async (mode: 'mine' | 'all', isInitial = false) => {
         try {
             const endpoint = mode === 'mine' ? '/api/groups/mine' : '/api/groups/all';
 
@@ -75,23 +75,38 @@ export default function SocialFeed() {
             }));
             setChatsData(mapped);
 
-            if (mapped.length > 0 && !chatID) {
-                setchatID(mapped[0].id);
-                setChatWith(mapped[0].username);
-                setChatter('Me');
+            // Only auto-select on initial load (not on refresh via events)
+            if (isInitial && mapped.length > 0 && chatID === '') {
+                if (mode === 'mine') {
+                    setchatID(mapped[0].id);
+                    setChatWith(mapped[0].username);
+                    setChatter('Me');
+                } else {
+                    const firstJoined = mapped.find((m) => m.joined);
+                    if (firstJoined) {
+                        setchatID(firstJoined.id);
+                        setChatWith(firstJoined.username);
+                        setChatter('Me');
+                    } else {
+                        // no auto-select for non-members
+                        setchatID('');
+                        setChatWith('');
+                        setChatter('');
+                    }
+                }
             }
         } catch (err) {
             console.error(err);
         }
     };
 
-    // GroupList refresh function
+    // GroupList refresh function (doesn't reset selection)
     const refreshGroups = async () => {
-        await fetchGroups(groupListMode);
+        await fetchGroups(groupListMode, false);
     };
 
     useEffect(() => {
-        refreshGroups();
+        fetchGroups(groupListMode, true);
     }, [groupListMode]);
 
     useEffect(() => {
@@ -141,7 +156,6 @@ export default function SocialFeed() {
             console.error(err);
         }
     };
-
 
     const openInviteMembers = (groupId: string, groupTitle: string) => {
         setActionGroupId(groupId);
@@ -198,14 +212,11 @@ export default function SocialFeed() {
         }
     };
 
-
     const handleNewPostCreated = () => {
         if (postListRefreshFn) {
             postListRefreshFn(); // refresh PostList
         }
     };
-
-
 
     return (
         <div className="flex w-full h-full mt-[7vh]">
@@ -222,7 +233,7 @@ export default function SocialFeed() {
                     onSelectChat={(id, username) => {
                         setchatID(id);
                         setChatWith(username);
-                        setChatter("Me");
+                        setChatter('Me');
                     }}
                     onInviteMembers={openInviteMembers}
                     onSeeMembers={openSeeMembers}
@@ -277,7 +288,6 @@ export default function SocialFeed() {
                 className="max-w-3xl"
             >
                 <ChatArea chatWith={chatWith} chatter={chatter} chatID={chatID} />
-
             </Popup>
 
             <Popup
@@ -302,8 +312,8 @@ export default function SocialFeed() {
                     onSubmit={() => {
                         setIsGroupListPopupOpen(false);
                         refreshGroups();
-                    }} />
-                    
+                    }}
+                />
             </Popup>
 
             <Popup
@@ -312,8 +322,13 @@ export default function SocialFeed() {
                 className="max-w-3xl"
             >
                 <div className="border-2 border-gray-600 rounded-lg shadow-sm bg-gray-900 dark:bg-gray-900 p-4 h-full flex flex-col gap-4">
-                    
-                    <Title text={actionGroupTitle ? `Invite members to ${actionGroupTitle}` : 'Invite members'} />
+                    <Title
+                        text={
+                            actionGroupTitle
+                                ? `Invite members to ${actionGroupTitle}`
+                                : 'Invite members'
+                        }
+                    />
                     <div className="flex-1 min-h-0">
                         <AllUsersList onSelectionChange={(ids) => setSelectedInviteeIds(ids)} />
                     </div>
@@ -334,7 +349,9 @@ export default function SocialFeed() {
                 className="max-w-lg"
             >
                 <div className="border-2 border-gray-600 rounded-lg shadow-sm bg-gray-900 dark:bg-gray-900 p-4 h-full flex flex-col gap-4">
-                    <Title text={actionGroupTitle ? `Members of ${actionGroupTitle}` : 'Group members'} />
+                    <Title
+                        text={actionGroupTitle ? `Members of ${actionGroupTitle}` : 'Group members'}
+                    />
                     <div className="flex-1 min-h-0 overflow-y-auto hide-scrollbar flex flex-col gap-2">
                         {groupMembers.length === 0 ? (
                             <p className="text-sm text-gray-400">No members found.</p>
@@ -359,7 +376,6 @@ export default function SocialFeed() {
             >
                 {chatID && <EventsList groupId={Number(chatID)} />}
             </Popup>
-
         </div>
     );
 }

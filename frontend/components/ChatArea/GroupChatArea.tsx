@@ -31,14 +31,13 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
+    const messageIdRef = useRef<number>(0);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
-    console.log(chatWith);
     useEffect(() => {
         const loadMessages = async () => {
-
             if (!chatID || Number(chatID) === 0) {
                 setMessages([]);
                 return;
@@ -61,11 +60,15 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 
                 const mapped: Message[] = list.map((m: any) => ({
                     id: m.MessageID,
-                    username: m.IsSender ? 'Me' : (m.SenderUsername || `User ${m.SenderID}`),
+                    username: m.IsSender ? 'Me' : m.SenderUsername || `User ${m.SenderID}`,
                     text: m.Content,
                     type: (m.IsSender ? 'sent' : 'received') as 'sent' | 'received',
                     time: m.CreationTime,
                 }));
+
+                // Set messageIdRef to max existing ID so new messages don't have duplicate keys
+                const maxId = mapped.length > 0 ? Math.max(...mapped.map((m) => m.id)) : 0;
+                messageIdRef.current = maxId;
 
                 setMessages(mapped);
             } catch (err) {
@@ -91,7 +94,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
             if (data?.groupID && String(data.groupID) !== chatID) return;
 
             const incoming: Message = {
-                id: Date.now(),
+                id: ++messageIdRef.current,
                 username: data.senderUsername,
                 text: data.message,
                 type: 'received',

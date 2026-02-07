@@ -3,6 +3,7 @@ import ChatMessage from '../ChatMessage/ChatMessage';
 import { sendMessage } from '@/lib/api/websocket';
 import Title from '../Title/Title';
 import PopupBtn from '../PopupBtn/PopupBtn';
+import EmojiPicker from '../EmojiPicker/EmojiPicker';
 
 interface Message {
     id: number;
@@ -30,6 +31,7 @@ function SendChatMessage(chatID: number, text: string, type: number) {
 const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     const scrollToBottom = () => {
@@ -140,6 +142,11 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
         if (e.key === 'Enter') handleSend();
     };
 
+    const handleEmojiSelect = (emoji: string) => {
+        setInput(input + emoji);
+        setShowEmojiPicker(false);
+    };
+
     return (
         <div className="flex flex-col h-full w-full bg-gray-900">
             {/* Messages Container */}
@@ -165,21 +172,35 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
             </div>
 
             {/* Input Area */}
-            <div className="flex-shrink-0 flex items-center gap-2 border-t border-gray-400 p-3">
-                <input
-                    type="text"
-                    className="flex-1 min-w-0 rounded-lg border border-gray-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-blue-500 bg-gray-100 bg-gray-700 text-gray-900 text-white text-sm sm:text-base"
-                    placeholder="Type a message..."
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                />
-                <button
-                    onClick={handleSend}
-                    className="flex-shrink-0 cursor-pointer px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg font-semibold text-sm sm:text-base transition-colors"
-                >
-                    Send
-                </button>
+            <div className="flex-shrink-0 flex flex-col gap-2 border-t border-gray-400 p-3">
+                {showEmojiPicker && (
+                    <div className="flex justify-center">
+                        <EmojiPicker onSelectEmoji={handleEmojiSelect} />
+                    </div>
+                )}
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        className="flex-shrink-0 text-xl cursor-pointer px-2 py-2 hover:bg-gray-600 rounded-lg transition-colors"
+                        title="Add emoji"
+                    >
+                        😊
+                    </button>
+                    <input
+                        type="text"
+                        className="flex-1 min-w-0 rounded-lg border border-gray-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-blue-500 bg-gray-100 bg-gray-700 text-gray-900 text-white text-sm sm:text-base"
+                        placeholder="Type a message..."
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                    />
+                    <button
+                        onClick={handleSend}
+                        className="flex-shrink-0 cursor-pointer px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg font-semibold text-sm sm:text-base transition-colors"
+                    >
+                        Send
+                    </button>
+                </div>
             </div>
         </div>
     );

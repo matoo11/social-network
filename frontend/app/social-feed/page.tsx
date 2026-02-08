@@ -11,6 +11,7 @@ import { useUser } from '../context/UserContext';
 import SignInForm from '@/components/SignInForm/SignInForm';
 import Navbar from '@/components/Navbar/Navbar';
 import PrivateChatArea from '@/components/ChatArea/PrivateChatArea';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type ChatItem = {
     id: string;
@@ -36,7 +37,7 @@ export default function SocialFeed() {
 
     const loadChats = async () => {
         try {
-            const res = await fetch('http://localhost:8080/api/chat/getChatList', {
+            const res = await fetchWithAuth('http://localhost:8080/api/chat/getChatList', {
                 credentials: 'include',
             });
 

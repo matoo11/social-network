@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 import Title from '../Title/Title';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 import PostCard from '../PostCard/PostCard';
 import CommentList from '../CommentList/CommentList';
 import { Comment } from '../CommentList/CommentList';
@@ -56,7 +57,7 @@ const selectInputOptions = [
 export async function getPostByID(id: number): Promise<APIResponse<BackendPost>> {
     console.log('Response received for getPostByID');
     try {
-        const res = await fetch('http://localhost:8080/api/getPostByID', {
+        const res = await fetchWithAuth('http://localhost:8080/api/getPostByID', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: id }),

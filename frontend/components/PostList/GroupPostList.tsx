@@ -3,9 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import PostListUI from './PostListUI';
 import { PostListUIProps } from './PostListUI';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 const fetchGroupPosts = async (groupId: number) => {
-    const res = await fetch(`http://localhost:8080/api/groups/posts?groupId=${groupId}`, {
+    const res = await fetchWithAuth(`http://localhost:8080/api/groups/posts?groupId=${groupId}`, {
         method: 'GET',
         credentials: 'include',
     });

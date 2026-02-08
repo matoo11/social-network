@@ -16,6 +16,7 @@ type displayedCommentDTO struct {
 	CommentID             int       `json:"commentId"`
 	CommentText           string    `json:"commentText"`
 	CommenterNickname     string    `json:"commenterNickname"`
+	CommenterAvatarNumber int       `json:"commenterAvatarNumber"`
 	CommentProfileImageID int       `json:"commentProfileImageId"`
 	CommentImageID        int       `json:"commentImageId"`
 	CommentTime           time.Time `json:"commentTime"`
@@ -48,7 +49,7 @@ type PostPayload struct {
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := dbConn.GetSessionFromCookie(r)
 	if err != nil {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
 	LoggedInUserID := session.UserID
@@ -309,7 +310,6 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	groupID, err := dbConn.GetGroupIDByPostID(req.ID)
 	if err == nil && groupID > 0 {
 
@@ -326,7 +326,6 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
 	}
-
 
 	if groupID == 0 {
 

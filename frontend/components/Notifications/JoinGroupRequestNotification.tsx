@@ -1,4 +1,5 @@
 import NotificationCard from './NotificationCard';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 const JoinGroupRequestNotification = ({
     notificationId,
@@ -14,7 +15,7 @@ const JoinGroupRequestNotification = ({
     onHandled: () => void;
 }) => {
     const respond = async (accept: boolean) => {
-        const res = await fetch('http://localhost:8080/api/groups/invite/respond', {
+        const res = await fetchWithAuth('http://localhost:8080/api/groups/invite/respond', {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },

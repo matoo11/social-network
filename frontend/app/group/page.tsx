@@ -19,6 +19,7 @@ import FollowersList from '@/components/FollowersList/FollowersList';
 import { ChatCardProps } from '@/components/ChatCard/ChatCard';
 import Title from '@/components/Title/Title';
 import AllUsersList from '@/components/AllUsersList/AllUsersList';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type GroupListItem = ChatCardProps & { joined?: boolean };
 
@@ -50,9 +51,9 @@ export default function SocialFeed() {
             const endpoint = mode === 'mine' ? '/api/groups/mine' : '/api/groups/all';
 
             const [res, myRes] = await Promise.all([
-                fetch(`http://localhost:8080${endpoint}`, { credentials: 'include' }),
+                fetchWithAuth(`http://localhost:8080${endpoint}`, { credentials: 'include' }),
                 mode === 'all'
-                    ? fetch('http://localhost:8080/api/groups/mine', { credentials: 'include' })
+                    ? fetchWithAuth('http://localhost:8080/api/groups/mine', { credentials: 'include' })
                     : Promise.resolve(null),
             ]);
 
@@ -148,7 +149,7 @@ export default function SocialFeed() {
 
     const requestToJoin = async (groupId: string) => {
         try {
-            const res = await fetch('http://localhost:8080/api/groups/request', {
+            const res = await fetchWithAuth('http://localhost:8080/api/groups/request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -171,13 +172,13 @@ export default function SocialFeed() {
         // Fetch group members and pending invites to exclude them from the invite list
         try {
             const [membersRes, pendingRes] = await Promise.all([
-                fetch('http://localhost:8080/api/groups/members', {
+                fetchWithAuth('http://localhost:8080/api/groups/members', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify({ groupId: Number(groupId) }),
                 }),
-                fetch('http://localhost:8080/api/groups/pendingInvites', {
+                fetchWithAuth('http://localhost:8080/api/groups/pendingInvites', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -213,7 +214,7 @@ export default function SocialFeed() {
         setIsSeeMembersOpen(true);
 
         try {
-            const res = await fetch('http://localhost:8080/api/groups/members', {
+            const res = await fetchWithAuth('http://localhost:8080/api/groups/members', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -235,7 +236,7 @@ export default function SocialFeed() {
         try {
             await Promise.all(
                 selectedInviteeIds.map(async (inviteeId) => {
-                    const res = await fetch('http://localhost:8080/api/groups/invite', {
+                    const res = await fetchWithAuth('http://localhost:8080/api/groups/invite', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',

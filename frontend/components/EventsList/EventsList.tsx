@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import EventCard, { EventData } from '../EventCard/EventCard';
 import EventForm from '../EventForm/EventForm';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type EventsListProps = {
     groupId: number;
@@ -16,7 +17,7 @@ const EventsList: React.FC<EventsListProps> = ({ groupId }) => {
     const fetchEvents = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(
+            const response = await fetchWithAuth(
                 `http://localhost:8080/api/groups/events?groupId=${groupId}`,
                 {
                     method: 'GET',

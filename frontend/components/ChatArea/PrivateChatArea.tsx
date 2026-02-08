@@ -4,6 +4,7 @@ import { sendMessage } from '@/lib/api/websocket';
 import Title from '../Title/Title';
 import PopupBtn from '../PopupBtn/PopupBtn';
 import EmojiPicker from '../EmojiPicker/EmojiPicker';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 interface Message {
     id: number;
@@ -46,7 +47,7 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
             }
 
             try {
-                const res = await fetch('http://localhost:8080/api/message/getPrivateMessages', {
+                const res = await fetchWithAuth('http://localhost:8080/api/message/getPrivateMessages', {
                     method: 'POST',
                     credentials: 'include',
                     headers: {

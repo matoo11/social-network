@@ -68,7 +68,7 @@ const GroupPostForm: React.FC<GroupPostFormProps> = ({ groupId, onSubmit }) => {
         }
 
         try {
-            const res = await fetch('http://localhost:8080/api/groups/posts/create', {
+            const res = await fetchWithAuth('http://localhost:8080/api/groups/posts/create', {
                 method: 'POST',
                 credentials: 'include',
                 body: formDataPayload,

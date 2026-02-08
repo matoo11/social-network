@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Popup from '../Popup/Popup';
 import FollowButton from '../FollowButton/FollowButton';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 import ProfileImage from '../ProfileImage/ProfileImage';
 import { useUser } from '@/app/context/UserContext';
 
@@ -78,7 +79,7 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
         setActiveTab('posts');
         
         try {
-            const res = await fetch('http://localhost:8080/api/profile/get', {
+            const res = await fetchWithAuth('http://localhost:8080/api/profile/get', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -113,7 +114,7 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
         const newVisibility = profile.profileTypeName === 'Public' ? 'Private' : 'Public';
 
         try {
-            const res = await fetch('http://localhost:8080/api/profile/toggle', {
+            const res = await fetchWithAuth('http://localhost:8080/api/profile/toggle', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',

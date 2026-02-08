@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import NotificationCard from './NotificationCard';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type Props = {
     notificationId: number;
@@ -16,7 +17,7 @@ const FollowRequestNotification = ({ notificationId, requesterId, requesterName,
     const handleAccept = async () => {
         setIsProcessing(true);
         try {
-            const response = await fetch('http://localhost:8080/api/follow/acceptRequest', {
+            const response = await fetchWithAuth('http://localhost:8080/api/follow/acceptRequest', {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -42,7 +43,7 @@ const FollowRequestNotification = ({ notificationId, requesterId, requesterName,
     const handleReject = async () => {
         setIsProcessing(true);
         try {
-            const response = await fetch('http://localhost:8080/api/follow/rejectRequest', {
+            const response = await fetchWithAuth('http://localhost:8080/api/follow/rejectRequest', {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },

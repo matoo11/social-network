@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import PostListUI from './PostListUI';
 import { PostListUIProps } from './PostListUI';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 export interface DisplayedPost {
     postId: number;
@@ -30,7 +31,7 @@ export interface DisplayedComment {
 }
 
 const fetchposts = async () => {
-    const res = await fetch('http://localhost:8080/api/fetchPostsByUserID', {
+    const res = await fetchWithAuth('http://localhost:8080/api/fetchPostsByUserID', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

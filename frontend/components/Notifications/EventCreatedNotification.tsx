@@ -1,4 +1,5 @@
 import NotificationCard from './NotificationCard';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type Props = {
     notificationId: number;
@@ -19,7 +20,7 @@ const EventCreatedNotification = ({
 }: Props) => {
     const dismiss = async () => {
         try {
-            const res = await fetch('http://localhost:8080/api/notifications/dismiss', {
+            const res = await fetchWithAuth('http://localhost:8080/api/notifications/dismiss', {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },

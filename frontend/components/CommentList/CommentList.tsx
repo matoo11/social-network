@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 import { useState } from 'react';
 import Title from '../Title/Title';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 import InputField from '../InputField/InputField';
 import ImageInputField from '../ImageInputField/ImageInputField';
 import SelectInput from '../SelectInput/SelectInput';
@@ -39,7 +40,7 @@ type CommentData = {
 
 async function handleCreateComment(formData: FormData) {
     try {
-        const res = await fetch('http://localhost:8080/api/createComment', {
+        const res = await fetchWithAuth('http://localhost:8080/api/createComment', {
             method: 'POST',
             credentials: 'include',
             body: formData,
@@ -107,9 +108,9 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
                             commentID={comment.commentID}
                             commentText={comment.commentText}
                             commenterNickname={comment.commenterNickname}
-                            commenterAvatarNumber={comment.commenterAvatarNumber || 1}
-                            commenterProfileImageUrl={comment.commentProfileImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}` : undefined}
-                            commentImageUrl={comment.commentImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentImageId}` : undefined}
+                            commenterAvatarNumber={comment.commenterAvatarNumber}
+                            commenterProfileImageUrl={comment.commentProfileImageId && comment.commentProfileImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}` : undefined}
+                            commentImageUrl={comment.commentImageId && comment.commentImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentImageId}` : undefined}
                             // commenterProfileImageUrl={
                             //     comment.commentProfileImageId !== 0
                             //         ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}`

@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 const checkfollow = async (userID: number): Promise<any> => {
-    const res = await fetch('http://localhost:8080/api/checkFollowStatus', {
+    const res = await fetchWithAuth('http://localhost:8080/api/checkFollowStatus', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -14,7 +15,7 @@ const checkfollow = async (userID: number): Promise<any> => {
 };
 
 const follow = async (userID: number) => {
-    const res = await fetch('http://localhost:8080/api/addFollow', {
+    const res = await fetchWithAuth('http://localhost:8080/api/addFollow', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -25,7 +26,7 @@ const follow = async (userID: number) => {
 };
 
 const unfollow = async (userID: number) => {
-    const res = await fetch('http://localhost:8080/api/unFollow', {
+    const res = await fetchWithAuth('http://localhost:8080/api/unFollow', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -37,7 +38,7 @@ const unfollow = async (userID: number) => {
 };
 
 const cancelRequest = async (userID: number) => {
-    const res = await fetch('http://localhost:8080/api/follow/cancelRequest', {
+    const res = await fetchWithAuth('http://localhost:8080/api/follow/cancelRequest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

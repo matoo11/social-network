@@ -5,13 +5,14 @@ import { useState, useEffect } from 'react';
 import FollowerCard from '../FollowerCard/FollowerCard';
 import SearchInput from '../SearchInput/SearchInput';
 import Title from '../Title/Title';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type FollowersListProps = {
     onSelectionChange?: (selectedFollowerIDs: number[]) => void;
 };
 
 async function fetchFollowers() {
-    const res = await fetch('http://localhost:8080/api/getFollowers', {
+    const res = await fetchWithAuth('http://localhost:8080/api/getFollowers', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

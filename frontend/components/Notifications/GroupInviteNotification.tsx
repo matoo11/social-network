@@ -1,4 +1,5 @@
 import NotificationCard from './NotificationCard';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type Props = {
     notificationId: number;
@@ -16,7 +17,7 @@ const GroupInviteNotification = ({
     onHandled,
 }: Props) => {
     const respond = async (accept: boolean) => {
-        const res = await fetch(
+        const res = await fetchWithAuth(
             'http://localhost:8080/api/groups/invite/respond',
             {
                 method: 'POST',

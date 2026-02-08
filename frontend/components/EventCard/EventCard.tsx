@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 export type EventData = {
     eventId: number;
@@ -30,7 +31,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onResponseUpdated }) => {
 
         setIsSubmitting(true);
         try {
-            const response = await fetch('http://localhost:8080/api/groups/events/respond', {
+            const response = await fetchWithAuth('http://localhost:8080/api/groups/events/respond', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

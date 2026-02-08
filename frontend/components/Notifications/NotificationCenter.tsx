@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Title from '../Title/Title';
 import NotificationRenderer from './NotificationRenderer';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 export type NotificationType =
     | 'GROUP_INVITE'
@@ -30,7 +31,7 @@ const NotificationCenter = ({ onGroupInviteHandled, onNotificationHandled }: Not
 
         const fetchNotifications = async () => {
             try {
-                const res = await fetch('http://localhost:8080/api/notifications/get',{
+                const res = await fetchWithAuth('http://localhost:8080/api/notifications/get',{
                     credentials: "include",
                 });
                 if (!res.ok) {

@@ -8,6 +8,7 @@ import NavLink from '../NavLink/NavLink';
 import { fetchUserData, logoutUser } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/context/UserContext';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 import { FaBell, FaUsers } from 'react-icons/fa';
 import UserListPopup from '../UserList/UserListPopup';
 import ProfilePopup from '../ProfilePopup/ProfilePopup';
@@ -50,7 +51,7 @@ const Navbar = () => {
     useEffect(() => {
         const fetchNotificationCount = async () => {
             try {
-                const res = await fetch('http://localhost:8080/api/notifications/get', {
+                const res = await fetchWithAuth('http://localhost:8080/api/notifications/get', {
                     credentials: 'include',
                 });
                 if (!res.ok) return;

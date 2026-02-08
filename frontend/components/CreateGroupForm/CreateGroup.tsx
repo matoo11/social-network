@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import CreateGroupUI from './CreateGroupUI';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type CreateGroupProps = {
     onSubmit?: () => void;
@@ -65,7 +66,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onSubmit }) => {
 
         try {
             // 1️⃣ Create group
-            const res = await fetch('http://localhost:8080/api/groups/create', {
+            const res = await fetchWithAuth('http://localhost:8080/api/groups/create', {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -113,7 +114,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({ onSubmit }) => {
             // 2️⃣ Send invites (fire & forget or await all)
             const inviteResults = await Promise.allSettled(
                 formData.invitees.map((userId) =>
-                    fetch('http://localhost:8080/api/groups/invite', {
+                    fetchWithAuth('http://localhost:8080/api/groups/invite', {
                         method: 'POST',
                         credentials: 'include',
                         headers: { 'Content-Type': 'application/json' },

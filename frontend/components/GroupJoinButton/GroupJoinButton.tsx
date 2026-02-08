@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 const checkGroupStatus = async (groupId: number): Promise<any> => {
-    const res = await fetch('http://localhost:8080/api/groups/request/status', {
+    const res = await fetchWithAuth('http://localhost:8080/api/groups/request/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -14,7 +15,7 @@ const checkGroupStatus = async (groupId: number): Promise<any> => {
 };
 
 const requestToJoin = async (groupId: number) => {
-    const res = await fetch('http://localhost:8080/api/groups/request', {
+    const res = await fetchWithAuth('http://localhost:8080/api/groups/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

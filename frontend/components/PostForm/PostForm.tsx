@@ -3,6 +3,7 @@
 import React from 'react';
 import { useState } from 'react';
 import PostFormUI from './PostFormUI';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type PostFormProps = {
     onSubmit?: () => void;
@@ -98,7 +99,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:8080/api/createPost', {
+            const res = await fetchWithAuth('http://localhost:8080/api/createPost', {
                 method: 'POST',
                 credentials: 'include',
                 body: formData,

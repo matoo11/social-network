@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ChatMessage from '../ChatMessage/ChatMessage';
 import { sendMessage } from '@/lib/api/websocket';
 import { FaComments } from 'react-icons/fa';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 interface Message {
     id: number;
@@ -44,7 +45,7 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
             }
 
             try {
-                const res = await fetch('http://localhost:8080/api/message/getPrivateMessages', {
+                const res = await fetchWithAuth('http://localhost:8080/api/message/getPrivateMessages', {
                     method: 'POST',
                     credentials: 'include',
                     headers: {

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import InputField from '../InputField/InputField';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type EventFormProps = {
     groupId: number;
@@ -50,7 +51,7 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
             const localDate = new Date(eventTime);
             const eventTimeRFC3339 = localDate.toISOString();
 
-            const response = await fetch('http://localhost:8080/api/groups/events/create', {
+            const response = await fetchWithAuth('http://localhost:8080/api/groups/events/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

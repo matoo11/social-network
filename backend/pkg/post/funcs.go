@@ -29,6 +29,7 @@ func buildDisplayedComments(postID int) ([]displayedCommentDTO, error) {
 			CommentID:             c.CommentID,
 			CommentText:           c.CommentText,
 			CommenterNickname:     commenter.Nick_Name,
+			CommenterAvatarNumber: commenter.Image_ID,
 			CommentProfileImageID: commenter.Image_ID,
 			CommentImageID:        commentImageID,
 			CommentTime:           c.CreationTime,

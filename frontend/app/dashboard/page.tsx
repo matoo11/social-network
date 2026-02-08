@@ -8,6 +8,7 @@ import FollowButton from '@/components/FollowButton/FollowButton';
 import PostImage from '@/components/PostImage/PostImage';
 import ProfileImage from '@/components/ProfileImage/ProfileImage';
 import ChatPopup from '@/components/ChatPopup/ChatPopup';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 import { title } from 'process';
 import Navbar from '@/components/Navbar/Navbar';
 
@@ -20,7 +21,7 @@ const Dashboard = () => {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:8080/api/signout', {
+            const res = await fetchWithAuth('http://localhost:8080/api/signout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -61,7 +62,7 @@ const Dashboard = () => {
             formData.append("image", fileInput.files[0])
         }
         try {
-            const res = await fetch('http://localhost:8080/api/createPost', {
+            const res = await fetchWithAuth('http://localhost:8080/api/createPost', {
                 method: 'POST',
                 credentials: 'include',
                 body: formData
@@ -86,7 +87,7 @@ const Dashboard = () => {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:8080/api/createComment', {
+            const res = await fetchWithAuth('http://localhost:8080/api/createComment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -111,7 +112,7 @@ const Dashboard = () => {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:8080/api/addFollow', {
+            const res = await fetchWithAuth('http://localhost:8080/api/addFollow', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -137,7 +138,7 @@ const Dashboard = () => {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:8080/api/unFollow', {
+            const res = await fetchWithAuth('http://localhost:8080/api/unFollow', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -163,7 +164,7 @@ const Dashboard = () => {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:8080/api/checkFollowStatus', {
+            const res = await fetchWithAuth('http://localhost:8080/api/checkFollowStatus', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -190,7 +191,7 @@ const Dashboard = () => {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:8080/api/groups/create', {
+            const res = await fetchWithAuth('http://localhost:8080/api/groups/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',

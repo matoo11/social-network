@@ -70,6 +70,7 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
                     type="checkbox"
                     checked={isChecked}
                     onChange={handleCheckboxChange}
+                    onClick={(e) => e.stopPropagation()}
                     className="ml-2 flex-shrink-0 w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 dark:ring-offset-slate-700 dark:bg-slate-600 dark:border-slate-500 cursor-pointer"
                 />
             </div>

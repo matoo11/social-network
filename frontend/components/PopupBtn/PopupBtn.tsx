@@ -6,6 +6,7 @@ type PopupBtnProps = {
     onClick?: () => void;
     className?: string;
     color?: 'blue' | 'emerald' | 'default';
+    disabled?: boolean;
 };
 
 const colorMap = {
@@ -20,12 +21,13 @@ const strokeMap = {
     default: 'white',
 };
 
-const PopupBtn: React.FC<PopupBtnProps> = ({ onClick, className = '', color = 'default' }) => {
+const PopupBtn: React.FC<PopupBtnProps> = ({ onClick, className = '', color = 'default', disabled = false }) => {
     return (
         <button
             type="button"
             onClick={onClick}
-            className={`aspect-square h-[80%] rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200 ${colorMap[color]} ${className}`}
+            disabled={disabled}
+            className={`aspect-square h-[80%] rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200 ${colorMap[color]} ${className} disabled:opacity-50 disabled:cursor-not-allowed`}
         >
             <svg
                 width="18"

@@ -106,7 +106,7 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
     }, [chatWith, chatter, chatID]);
 
     const handleSend = () => {
-        if (!input.trim()) return;
+        if (!input.trim() || !chatID || Number(chatID) === 0) return;
 
         const newMessage: Message = {
             id: Date.now(),
@@ -181,22 +181,25 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                        className="flex-shrink-0 text-xl cursor-pointer px-2 py-2 hover:bg-gray-600 rounded-lg transition-colors"
+                        disabled={!chatID || Number(chatID) === 0}
+                        className="flex-shrink-0 text-xl cursor-pointer px-2 py-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Add emoji"
                     >
                         😊
                     </button>
                     <input
                         type="text"
-                        className="flex-1 min-w-0 rounded-lg border border-gray-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-blue-500 bg-gray-100 bg-gray-700 text-gray-900 text-white text-sm sm:text-base"
-                        placeholder="Type a message..."
+                        disabled={!chatID || Number(chatID) === 0}
+                        className="flex-1 min-w-0 rounded-lg border border-gray-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-blue-500 bg-gray-100 bg-gray-700 text-gray-900 text-white text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                        placeholder={!chatID || Number(chatID) === 0 ? "Select a chat to message..." : "Type a message..."}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
                     />
                     <button
                         onClick={handleSend}
-                        className="flex-shrink-0 cursor-pointer px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg font-semibold text-sm sm:text-base transition-colors"
+                        disabled={!chatID || Number(chatID) === 0}
+                        className="flex-shrink-0 cursor-pointer px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg font-semibold text-sm sm:text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Send
                     </button>

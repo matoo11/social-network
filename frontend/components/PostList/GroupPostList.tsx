@@ -94,6 +94,7 @@ const GroupPostList: React.FC<GroupPostListProps> = ({
                     title="Group Posts"
                     accentColor="bg-emerald-500"
                     btnColor="emerald"
+                    disableBtn={groupId === 0}
                 />
             )}
         </div>

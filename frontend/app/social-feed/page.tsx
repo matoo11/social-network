@@ -32,6 +32,7 @@ export default function SocialFeed() {
     const [selectedPostID, setSelectedPostID] = useState<number>(0);
     const [chatsData, setChatsData] = useState<ChatItem[]>([]);
     const [isSignInPopupOpen, setIsSignInPopupOpen] = useState(false);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     const loadChats = async () => {
         try {
@@ -74,10 +75,16 @@ export default function SocialFeed() {
 
             setChatsData(mapped);
 
-            if (mapped.length > 0 && !chatID) {
-                // setchatID(mapped[0].id);
+            if (mapped.length === 0) {
+                setchatID('');
+                setChatWith('');
+                setChatter('');
+            }
+            else if (isInitialLoad && mapped.length > 0 && !chatID) {
+                setchatID(mapped[0].id);
                 setChatWith(mapped[0].username);
                 setChatter('Me');
+                setIsInitialLoad(false);
             }
         } catch (err) {
             console.error('Failed to load chats:', err);

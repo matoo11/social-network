@@ -76,8 +76,13 @@ export default function SocialFeed() {
             }));
             setChatsData(mapped);
 
+            if (mapped.length === 0) {
+                setchatID('');
+                setChatWith('');
+                setChatter('');
+            }
             // Only auto-select on initial load (not on refresh via events)
-            if (isInitial && mapped.length > 0 && chatID === '') {
+            else if (isInitial && mapped.length > 0 && chatID === '') {
                 if (mode === 'mine') {
                     setchatID(mapped[0].id);
                     setChatWith(mapped[0].username);

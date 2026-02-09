@@ -33,18 +33,16 @@ const ChatCard: React.FC<ChatCardProps> = ({
 
     return (
         <div className={className} onClick={() => onChatClick?.(username)}>
-            <div className="flex items-center space-x-3 rtl:space-x-reverse p-3">
-                <div className="w-8 h-8 flex-shrink-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse p-2 sm:p-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0">
                     <ProfileImage imageUrl={avatarUrl || ''} avatarNumber={avatarNumber} />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="text-md font-semibold  truncate text-white mb-0.5">
+                    <p className="text-sm sm:text-md font-semibold truncate text-white mb-0.5">
                         {username}
                     </p>
                     {!lastMessage ? (
-                        <p className="text-xs truncate text-gray-400">
-                            {lastMessage}
-                        </p>
+                        <p className="text-xs truncate text-gray-400">{lastMessage}</p>
                     ) : null}
                 </div>
                 {actions ? <div className="flex items-center flex-shrink-0">{actions}</div> : null}

@@ -27,13 +27,13 @@ const ChatList: React.FC<ChatListProps> = ({
 
     return (
         <div className="flex flex-col h-full w-full border-2 border-gray-600 rounded-lg shadow-sm overflow-hidden bg-gray-900">
-            <div className="flex flex-shrink-0 justify-center gap-5 items-center pt-3 pb-3 px-4 border-b-2 border-gray-600 shadow-sm overflow-hidden bg-gray-900">
-                <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
-                <Title text="Direct Messages" />
+            <div className="flex flex-shrink-0 justify-center gap-2 sm:gap-5 items-center py-2 sm:py-3 px-2 sm:px-4 border-b-2 border-gray-600 shadow-sm overflow-hidden bg-gray-900">
+                <div className="w-1 h-4 sm:h-5 bg-blue-500 rounded-full"></div>
+                <Title text="Direct Messages" className="whitespace-nowrap" />
                 <PopupBtn className="" onClick={popupHandler} color="blue" />
             </div>
             <div className="flex-1 overflow-y-auto hide-scrollbar">
-                <div className="flex flex-col gap-2 p-4">
+                <div className="flex flex-col gap-1.5 sm:gap-2 p-2 sm:p-4">
                     {chats.map((chat) => (
                         <ChatCard
                             key={chat.id}

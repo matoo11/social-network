@@ -1,7 +1,6 @@
 'use client';
 
 import GroupList from '@/components/ChatList/GroupList';
-import PostList from '@/components/PostList/PostList';
 import Popup from '@/components/Popup/Popup';
 import { useState } from 'react';
 import PostForm from '@/components/PostForm/PostForm';
@@ -9,21 +8,26 @@ import EventsList from '@/components/EventsList/EventsList';
 import ChatArea from '@/components/ChatArea/ChatArea';
 import PostContent from '@/components/PostContent/PostContent';
 import { useEffect } from 'react';
-import Testing from '@/components/ChatArea/GroupChatArea';
 import CreateGroup from '@/components/CreateGroupForm/CreateGroup';
 import GroupPostForm from '@/components/PostForm/GroupPostForm';
 import GroupPostList from '@/components/PostList/GroupPostList';
 import Navbar from '@/components/Navbar/Navbar';
 import GroupChat from '@/components/ChatArea/GroupChatArea';
-import FollowersList from '@/components/FollowersList/FollowersList';
 import { ChatCardProps } from '@/components/ChatCard/ChatCard';
 import Title from '@/components/Title/Title';
 import AllUsersList from '@/components/AllUsersList/AllUsersList';
 import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
+import { FaUsers, FaHome, FaComments, FaUser, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
+import ProfilePopup from '@/components/ProfilePopup/ProfilePopup';
+import { useUser } from '../context/UserContext';
+import SignInForm from '@/components/SignInForm/SignInForm';
 
 type GroupListItem = ChatCardProps & { joined?: boolean };
 
 export default function SocialFeed() {
+    const router = useRouter();
+    const { user } = useUser();
     const [chatWith, setChatWith] = useState<string>('');
     const [chatter, setChatter] = useState<string>('');
     const [chatID, setchatID] = useState<string>('');
@@ -45,6 +49,12 @@ export default function SocialFeed() {
     const [selectedInviteeIds, setSelectedInviteeIds] = useState<number[]>([]);
     const [groupMembers, setGroupMembers] = useState<{ userId: number; username: string }[]>([]);
     const [pendingInviteeIds, setPendingInviteeIds] = useState<number[]>([]);
+    const [isMobileGroupListOpen, setIsMobileGroupListOpen] = useState(false);
+    const [isMobileGroupChatOpen, setIsMobileGroupChatOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isSignInPopupOpen, setIsSignInPopupOpen] = useState(false);
+    const [isGroupListCollapsed, setIsGroupListCollapsed] = useState(false);
+    const [isGroupChatCollapsed, setIsGroupChatCollapsed] = useState(false);
 
     const fetchGroups = async (mode: 'mine' | 'all', isInitial = false) => {
         try {
@@ -53,7 +63,9 @@ export default function SocialFeed() {
             const [res, myRes] = await Promise.all([
                 fetchWithAuth(`http://localhost:8080${endpoint}`, { credentials: 'include' }),
                 mode === 'all'
-                    ? fetchWithAuth('http://localhost:8080/api/groups/mine', { credentials: 'include' })
+                    ? fetchWithAuth('http://localhost:8080/api/groups/mine', {
+                          credentials: 'include',
+                      })
                     : Promise.resolve(null),
             ]);
 
@@ -263,51 +275,271 @@ export default function SocialFeed() {
     };
 
     return (
-        <div className="flex w-full h-full mt-[7vh]">
-            {/* Header with Navbar and Notifications button */}
+        <div className="flex flex-col w-full h-dvh">
+            {/* Header with Navbar */}
             <Navbar />
-            {/* Left column - 17.5% */}
-            <div className="w-[17.5%] bg-gray-900 flex flex-col gap-2 fixed h-[93%]">
-                <GroupList
-                    chats={chatsData}
-                    mode={groupListMode}
-                    onToggleMode={toggleGroupListMode}
-                    popupHandler={() => setIsGroupListPopupOpen(true)}
-                    selectedChatId={chatID}
-                    onSelectChat={(id, username) => {
-                        setchatID(id);
-                        setChatWith(username);
-                        setChatter('Me');
-                    }}
-                    onInviteMembers={openInviteMembers}
-                    onSeeMembers={openSeeMembers}
-                    onRequestToJoin={(groupId) => requestToJoin(groupId)}
-                    onOpenEvents={(groupId) => {
-                        setchatID(groupId);
-                        setIsEventsListPopupOpen(true);
-                    }}
-                />
+
+            {/* Mobile Bottom Navigation Bar */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-gray-900 border-t border-gray-700 px-2 h-14 safe-area-bottom">
+                <div className="flex justify-around items-center h-full">
+                    <button
+                        onClick={() => router.push('/social-feed')}
+                        className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-white transition-colors"
+                    >
+                        <FaHome className="text-xl" />
+                    </button>
+                    <button
+                        onClick={() => setIsMobileGroupListOpen(true)}
+                        className="flex flex-col items-center gap-1 p-2 text-emerald-500"
+                    >
+                        <FaUsers className="text-xl" />
+                    </button>
+                    <button
+                        onClick={() => setIsMobileGroupListOpen(true)}
+                        className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-white transition-colors"
+                    >
+                        <FaComments className="text-xl" />
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (user.userId !== 0) {
+                                setIsProfileOpen(true);
+                            } else {
+                                setIsSignInPopupOpen(true);
+                            }
+                        }}
+                        className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-white transition-colors"
+                    >
+                        <FaUser className="text-xl" />
+                    </button>
+                </div>
             </div>
 
-            {/* Middle column - 52.5% */}
-            <div className="w-[52.5%] bg-gray-900 ml-[17.5%] fixed h-[93%]">
-                <GroupPostList
-                    groupId={Number(chatID)}
-                    popupHandler={() => setIsPostFormPopupOpen(true)}
-                    onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
-                    postContentPopupHandler={(postID: number) => {
-                        console.log('Open post content popup for post ID:', postID);
-                        setSelectedPostID(postID);
-                        setPostContentPopup(true);
-                    }}
-                />
+            {/* Mobile Group List Overlay - Full Screen */}
+            <div
+                className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${
+                    isMobileGroupListOpen
+                        ? 'opacity-100 pointer-events-auto'
+                        : 'opacity-0 pointer-events-none'
+                }`}
+            >
+                <div
+                    className={`absolute inset-0 bg-gray-900 flex flex-col transform transition-transform duration-300 ${
+                        isMobileGroupListOpen ? 'translate-x-0' : '-translate-x-full'
+                    }`}
+                >
+                    <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-gray-700">
+                        <span className="text-white font-semibold">Groups</span>
+                        <button
+                            onClick={() => setIsMobileGroupListOpen(false)}
+                            className="text-gray-400 hover:text-white p-2"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <div className="flex-1 min-h-0 overflow-hidden">
+                        <GroupList
+                            chats={chatsData}
+                            mode={groupListMode}
+                            onToggleMode={toggleGroupListMode}
+                            popupHandler={() => setIsGroupListPopupOpen(true)}
+                            selectedChatId={chatID}
+                            onSelectChat={(id, username) => {
+                                setchatID(id);
+                                setChatWith(username);
+                                setChatter('Me');
+                                setIsMobileGroupListOpen(false);
+                                setIsMobileGroupChatOpen(true);
+                            }}
+                            onInviteMembers={openInviteMembers}
+                            onSeeMembers={openSeeMembers}
+                            onRequestToJoin={(groupId) => requestToJoin(groupId)}
+                            onOpenEvents={(groupId) => {
+                                setchatID(groupId);
+                                setIsEventsListPopupOpen(true);
+                            }}
+                            onOpenChat={(groupId, groupTitle) => {
+                                setchatID(groupId);
+                                setChatWith(groupTitle);
+                                setChatter('Me');
+                                setIsMobileGroupListOpen(false);
+                                setIsMobileGroupChatOpen(true);
+                            }}
+                        />
+                    </div>
+                </div>
             </div>
 
-            {/* Right column - 30% */}
-            <div className="w-[30%] bg-gray-900 fixed h-[93%] right-0">
-                {/* <EventsList popupHandler={() => setIsEventsListPopupOpen(false)} /> */}
-                {/* <GroupChatArea chatID='1' chatWith='hrar' chatter='2'/> */}
-                <GroupChat chatID={chatID} chatWith={chatWith} chatter={chatter} />
+            {/* Mobile Group Chat Overlay - Full Screen */}
+            <div
+                className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${
+                    isMobileGroupChatOpen
+                        ? 'opacity-100 pointer-events-auto'
+                        : 'opacity-0 pointer-events-none'
+                }`}
+            >
+                <div
+                    className={`absolute inset-0 bg-gray-900 flex flex-col transform transition-transform duration-300 ${
+                        isMobileGroupChatOpen ? 'translate-x-0' : 'translate-x-full'
+                    }`}
+                >
+                    <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-gray-700">
+                        <button
+                            onClick={() => {
+                                setIsMobileGroupChatOpen(false);
+                                setIsMobileGroupListOpen(true);
+                            }}
+                            className="text-gray-400 hover:text-white p-2"
+                        >
+                            ← Back
+                        </button>
+                        <span className="text-white font-semibold">{chatWith || 'Group Chat'}</span>
+                        <button
+                            onClick={() => setIsMobileGroupChatOpen(false)}
+                            className="text-gray-400 hover:text-white p-2"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <div className="flex-1 min-h-0 overflow-hidden">
+                        <GroupChat chatID={chatID} chatWith={chatWith} chatter={chatter} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop 3-column layout using flexbox */}
+            <div className="hidden lg:flex flex-1 min-h-0 mt-[7vh] relative">
+                {/* Left sidebar - Group List */}
+                <div
+                    className={`flex-shrink-0 bg-gray-900 overflow-hidden transition-[width] duration-300 ease-in-out ${
+                        isGroupListCollapsed ? 'w-0' : 'w-[300px]'
+                    }`}
+                >
+                    <div className="w-[300px] h-full">
+                        <GroupList
+                            chats={chatsData}
+                            mode={groupListMode}
+                            onToggleMode={toggleGroupListMode}
+                            popupHandler={() => setIsGroupListPopupOpen(true)}
+                            selectedChatId={chatID}
+                            onSelectChat={(id, username) => {
+                                setchatID(id);
+                                setChatWith(username);
+                                setChatter('Me');
+                            }}
+                            onInviteMembers={openInviteMembers}
+                            onSeeMembers={openSeeMembers}
+                            onRequestToJoin={(groupId) => requestToJoin(groupId)}
+                            onOpenEvents={(groupId) => {
+                                setchatID(groupId);
+                                setIsEventsListPopupOpen(true);
+                            }}
+                            onOpenChat={(groupId, groupTitle) => {
+                                setchatID(groupId);
+                                setChatWith(groupTitle);
+                                setChatter('Me');
+                                setIsGroupChatCollapsed(false);
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {/* Left toggle */}
+                <button
+                    onClick={() => setIsGroupListCollapsed(!isGroupListCollapsed)}
+                    className="absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-5 h-14 rounded-r-lg bg-gray-800 hover:bg-emerald-600 border border-l-0 border-gray-700 shadow-md transition-all duration-300 cursor-pointer group"
+                    style={{ left: isGroupListCollapsed ? 0 : 300 }}
+                    title={isGroupListCollapsed ? 'Show Groups' : 'Hide Groups'}
+                >
+                    {isGroupListCollapsed ? (
+                        <FaChevronRight className="text-gray-400 group-hover:text-white text-[10px] transition-colors" />
+                    ) : (
+                        <FaChevronLeft className="text-gray-400 group-hover:text-white text-[10px] transition-colors" />
+                    )}
+                </button>
+
+                {/* Middle - Group Post Feed (fills remaining space) */}
+                <div className="flex-1 min-w-0 bg-gray-900 flex flex-col">
+                    <div className="flex-shrink-0 flex justify-center items-center py-3">
+                        <div className="flex items-center gap-1 bg-gray-800/60 rounded-xl p-1">
+                            <button
+                                onClick={() => router.push('/social-feed')}
+                                className="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors cursor-pointer"
+                            >
+                                Social Feed
+                            </button>
+                            <button className="px-4 py-1.5 rounded-lg text-sm font-medium bg-emerald-600 text-white cursor-default">
+                                Groups
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex-1 min-h-0">
+                        <GroupPostList
+                            groupId={Number(chatID)}
+                            popupHandler={() => setIsPostFormPopupOpen(true)}
+                            onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
+                            postContentPopupHandler={(postID: number) => {
+                                console.log('Open post content popup for post ID:', postID);
+                                setSelectedPostID(postID);
+                                setPostContentPopup(true);
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {/* Right toggle */}
+                <button
+                    onClick={() => setIsGroupChatCollapsed(!isGroupChatCollapsed)}
+                    className="absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-5 h-14 rounded-l-lg bg-gray-800 hover:bg-emerald-600 border border-r-0 border-gray-700 shadow-md transition-all duration-300 cursor-pointer group"
+                    style={{ right: isGroupChatCollapsed ? 0 : 450 }}
+                    title={isGroupChatCollapsed ? 'Show Chat' : 'Hide Chat'}
+                >
+                    {isGroupChatCollapsed ? (
+                        <FaChevronLeft className="text-gray-400 group-hover:text-white text-[10px] transition-colors" />
+                    ) : (
+                        <FaChevronRight className="text-gray-400 group-hover:text-white text-[10px] transition-colors" />
+                    )}
+                </button>
+
+                {/* Right sidebar - Group Chat */}
+                <div
+                    className={`flex-shrink-0 bg-gray-900 overflow-hidden transition-[width] duration-300 ease-in-out ${
+                        isGroupChatCollapsed ? 'w-0' : 'w-[450px]'
+                    }`}
+                >
+                    <div className="w-[450px] h-full">
+                        <GroupChat chatID={chatID} chatWith={chatWith} chatter={chatter} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile - Group Post Feed only */}
+            <div className="lg:hidden mt-[7vh] h-[calc(100dvh_-_7vh_-_3.5rem)] bg-gray-900 overflow-hidden flex flex-col">
+                <div className="flex-shrink-0 flex justify-center items-center py-1.5">
+                    <div className="flex items-center gap-1 bg-gray-800/60 rounded-xl p-1">
+                        <button
+                            onClick={() => router.push('/social-feed')}
+                            className="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors cursor-pointer"
+                        >
+                            Social Feed
+                        </button>
+                        <button className="px-4 py-1.5 rounded-lg text-sm font-medium bg-emerald-600 text-white cursor-default">
+                            Groups
+                        </button>
+                    </div>
+                </div>
+                <div className="flex-1 min-h-0">
+                    <GroupPostList
+                        groupId={Number(chatID)}
+                        popupHandler={() => setIsPostFormPopupOpen(true)}
+                        onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
+                        postContentPopupHandler={(postID: number) => {
+                            console.log('Open post content popup for post ID:', postID);
+                            setSelectedPostID(postID);
+                            setPostContentPopup(true);
+                        }}
+                    />
+                </div>
             </div>
 
             {/* Popups */}
@@ -374,9 +606,12 @@ export default function SocialFeed() {
                         }
                     />
                     <div className="flex-1 min-h-0">
-                        <AllUsersList 
+                        <AllUsersList
                             onSelectionChange={(ids) => setSelectedInviteeIds(ids)}
-                            excludeUserIds={[...groupMembers.map(m => m.userId), ...pendingInviteeIds]}
+                            excludeUserIds={[
+                                ...groupMembers.map((m) => m.userId),
+                                ...pendingInviteeIds,
+                            ]}
                         />
                     </div>
                     <button
@@ -423,6 +658,21 @@ export default function SocialFeed() {
             >
                 {chatID && <EventsList groupId={Number(chatID)} />}
             </Popup>
+
+            <Popup
+                isOpen={isSignInPopupOpen}
+                onClose={() => setIsSignInPopupOpen(false)}
+                className="max-w-sm"
+            >
+                <SignInForm onSuccess={() => setIsSignInPopupOpen(false)} />
+            </Popup>
+
+            <ProfilePopup
+                isOpen={isProfileOpen}
+                onClose={() => setIsProfileOpen(false)}
+                userId={user.userId}
+                onUserClick={() => {}}
+            />
         </div>
     );
 }

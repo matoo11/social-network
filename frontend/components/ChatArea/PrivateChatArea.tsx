@@ -47,14 +47,17 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
             }
 
             try {
-                const res = await fetchWithAuth('http://localhost:8080/api/message/getPrivateMessages', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
+                const res = await fetchWithAuth(
+                    'http://localhost:8080/api/message/getPrivateMessages',
+                    {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ userID: Number(chatID) }),
                     },
-                    body: JSON.stringify({ userID: Number(chatID) }),
-                });
+                );
 
                 const data = await res.json();
 
@@ -191,8 +194,12 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
                     <input
                         type="text"
                         disabled={!chatID || Number(chatID) === 0}
-                        className="flex-1 min-w-0 rounded-lg border border-gray-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-blue-500 bg-gray-100 bg-gray-700 text-gray-900 text-white text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                        placeholder={!chatID || Number(chatID) === 0 ? "Select a chat to message..." : "Type a message..."}
+                        className="flex-1 min-w-0 rounded-lg border border-gray-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                        placeholder={
+                            !chatID || Number(chatID) === 0
+                                ? 'Select a chat to message...'
+                                : 'Type a message...'
+                        }
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -212,9 +219,9 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
 
 const PrivateChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     return (
-        <div className="flex flex-col h-full w-full border-2 border-gray-600 rounded-lg shadow-sm overflow-hidden bg-gray-900">
-            {/* Header */}
-            <div className="flex-shrink-0 flex justify-center items-center gap-3 px-4 py-3 border-b-2 border-gray-600 bg-gray-900">
+        <div className="flex flex-col h-full w-full border-0 lg:border-2 border-gray-600 rounded-none lg:rounded-lg shadow-sm overflow-hidden bg-gray-900">
+            {/* Header - Hidden on mobile overlay since parent has header */}
+            <div className="hidden lg:flex flex-shrink-0 justify-center items-center gap-3 px-4 py-3 border-b-2 border-gray-600 bg-gray-900">
                 <div className="w-1 h-5 bg-blue-500 rounded-full"></div>
                 <Title text="Private Chat" />
             </div>

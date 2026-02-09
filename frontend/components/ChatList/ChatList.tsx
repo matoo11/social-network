@@ -26,8 +26,8 @@ const ChatList: React.FC<ChatListProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full w-full border-2 border-gray-600 rounded-lg shadow-sm overflow-hidden bg-gray-900">
-            <div className="flex flex-shrink-0 justify-center gap-2 sm:gap-5 items-center py-2 sm:py-3 px-2 sm:px-4 border-b-2 border-gray-600 shadow-sm overflow-hidden bg-gray-900">
+        <div className="flex flex-col h-full w-full border-0 lg:border-2 border-gray-600 rounded-none lg:rounded-lg shadow-sm overflow-hidden bg-gray-900">
+            <div className="hidden lg:flex flex-shrink-0 justify-center gap-2 sm:gap-5 items-center py-2 sm:py-3 px-2 sm:px-4 border-b-2 border-gray-600 shadow-sm overflow-hidden bg-gray-900">
                 <div className="w-1 h-4 sm:h-5 bg-blue-500 rounded-full"></div>
                 <Title text="Direct Messages" className="whitespace-nowrap" />
                 <PopupBtn className="" onClick={popupHandler} color="blue" />

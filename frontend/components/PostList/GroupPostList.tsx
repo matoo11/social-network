@@ -83,7 +83,7 @@ const GroupPostList: React.FC<GroupPostListProps> = ({
     }, [groupId]);
 
     return (
-        <div className="flex flex-col h-full w-full rounded-lg shadow-sm overflow-hidden bg-gray-900">
+        <div className="flex flex-col h-full w-full rounded-none lg:rounded-lg shadow-none lg:shadow-sm overflow-hidden bg-gray-900">
             {error ? (
                 <div className="flex items-center justify-center h-full p-4">
                     <p className="text-red-400 text-center">{error}</p>

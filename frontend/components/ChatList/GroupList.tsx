@@ -22,6 +22,7 @@ type ChatListProps = {
     onSeeMembers?: (groupId: string, groupTitle: string) => void;
     onRequestToJoin?: (groupId: string, groupTitle: string) => void;
     onOpenEvents?: (groupId: string) => void;
+    onOpenChat?: (groupId: string, groupTitle: string) => void;
 
     popupHandler: () => void;
 };
@@ -36,6 +37,7 @@ const GroupList: React.FC<ChatListProps> = ({
     onSeeMembers,
     onRequestToJoin,
     onOpenEvents,
+    onOpenChat,
     popupHandler,
 }) => {
     const handleChatClick = (id: string, username: string, joined?: boolean) => {
@@ -51,8 +53,8 @@ const GroupList: React.FC<ChatListProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full w-full border-2 border-gray-600 rounded-lg shadow-sm overflow-hidden bg-gray-900">
-            <div className="flex flex-nowrap flex-shrink-0 justify-center gap-2 items-center py-3 px-3 border-b-2 border-gray-600 shadow-sm bg-gray-900">
+        <div className="flex flex-col h-full w-full border-0 lg:border-2 border-gray-600 rounded-none lg:rounded-lg shadow-sm overflow-hidden bg-gray-900">
+            <div className="hidden lg:flex flex-nowrap flex-shrink-0 justify-center gap-2 items-center py-3 px-3 border-b-2 border-gray-600 shadow-sm bg-gray-900">
                 <div className="w-1 h-5 bg-emerald-500 rounded-full flex-shrink-0"></div>
                 <span className="truncate min-w-0">
                     <Title text="Groups" />
@@ -70,8 +72,23 @@ const GroupList: React.FC<ChatListProps> = ({
                     color="emerald"
                 />
             </div>
+            {/* Mobile header with toggle and create buttons */}
+            <div className="flex lg:hidden flex-nowrap flex-shrink-0 justify-between gap-2 items-center py-2 px-3 border-b border-gray-700 bg-gray-900">
+                <button
+                    type="button"
+                    className="bg-emerald-700 text-white px-3 py-1.5 rounded-md hover:bg-emerald-600 text-xs whitespace-nowrap"
+                    onClick={onToggleMode}
+                >
+                    {mode === 'mine' ? 'All Groups' : 'My Groups'}
+                </button>
+                <PopupBtn
+                    className="h-8 w-8 !aspect-auto flex-shrink-0"
+                    onClick={popupHandler}
+                    color="emerald"
+                />
+            </div>
             <div className="flex-1 overflow-y-auto hide-scrollbar">
-                <div className="flex flex-col gap-2 p-4">
+                <div className="flex flex-col gap-1.5 sm:gap-2 p-2 sm:p-4">
                     {chats.map((chat) => (
                         <ChatCard
                             key={chat.id}
@@ -111,6 +128,19 @@ const GroupList: React.FC<ChatListProps> = ({
 
                                         {openMenuId === String(chat.id) ? (
                                             <div className="absolute right-0 mt-1 w-44 rounded-md bg-gray-800 border border-gray-600 shadow-lg z-50 overflow-hidden">
+                                                <button
+                                                    type="button"
+                                                    className="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700"
+                                                    onClick={() => {
+                                                        setOpenMenuId(null);
+                                                        onOpenChat?.(
+                                                            String(chat.id),
+                                                            chat.username,
+                                                        );
+                                                    }}
+                                                >
+                                                    Open Chat
+                                                </button>
                                                 <button
                                                     type="button"
                                                     className="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700"

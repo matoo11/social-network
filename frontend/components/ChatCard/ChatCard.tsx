@@ -41,7 +41,7 @@ const ChatCard: React.FC<ChatCardProps> = ({
                     <p className="text-sm sm:text-md font-semibold truncate text-white mb-0.5">
                         {username}
                     </p>
-                    {!lastMessage ? (
+                    {lastMessage ? (
                         <p className="text-xs truncate text-gray-400">{lastMessage}</p>
                     ) : null}
                 </div>

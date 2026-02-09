@@ -19,7 +19,7 @@ const SignInFormUI: React.FC<SignInFormUIProps> = ({
     onSubmit,
 }) => {
     return (
-        <div className="mx-auto w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
+        <div className="mx-auto w-full max-w-sm p-5 sm:p-6 md:p-8 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
             <form className="space-y-6" onSubmit={onSubmit}>
                 <h5 className="font-serif text-xl font-medium text-gray-900 text-white text-center">
                     Sign in to our platform

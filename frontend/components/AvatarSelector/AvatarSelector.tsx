@@ -16,7 +16,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onAvata
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Choose Your Avatar
             </label>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-2 sm:gap-4">
                 {avatars.map((num) => (
                     <button
                         key={num}

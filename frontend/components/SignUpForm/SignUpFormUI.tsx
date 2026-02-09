@@ -34,10 +34,13 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
     onAvatarSelect,
 }) => {
     return (
-        <div className="mx-auto w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700 my-4 max-h-[95vh] overflow-y-auto">
-            <form onSubmit={onSubmit} className="max-w-md mx-auto space-y-3">
-                <AvatarSelector 
-                    selectedAvatar={formData.avatarNumber} 
+        <div className="mx-auto w-full max-w-md p-4 sm:p-6 md:p-8 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 my-2 sm:my-4 max-h-[90dvh] overflow-y-auto overflow-x-hidden">
+            <form onSubmit={onSubmit} className="max-w-md mx-auto space-y-3 text-sm sm:text-base">
+                <h5 className="font-serif text-xl font-medium text-white text-center">
+                    Create your account
+                </h5>
+                <AvatarSelector
+                    selectedAvatar={formData.avatarNumber}
                     onAvatarSelect={onAvatarSelect}
                 />
                 <InputField
@@ -85,7 +88,7 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                     placeholderText="••••••••"
                     isRequired={true}
                 />
-                <div className="grid md:grid-cols-3 md:gap-6">
+                <div className="grid grid-cols-2 gap-3">
                     <InputField
                         htmlFor="firstName"
                         labelText="First name"
@@ -108,21 +111,24 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                         placeholderText="Last name"
                         isRequired={true}
                     />
-                    <InputField
-                        htmlFor="nickname"
-                        labelText="Nickname (optional)"
-                        inputType="text"
-                        inputName="nickname"
-                        inputID="nickname"
-                        inputValue={formData.nickname}
-                        onInputChange={onInputChange('nickname')}
-                        placeholderText="Nickname"
-                        isRequired={false}
-                    />
                 </div>
+                <InputField
+                    htmlFor="nickname"
+                    labelText="Nickname (optional)"
+                    inputType="text"
+                    inputName="nickname"
+                    inputID="nickname"
+                    inputValue={formData.nickname}
+                    onInputChange={onInputChange('nickname')}
+                    placeholderText="Nickname"
+                    isRequired={false}
+                />
 
                 <div>
-                    <label htmlFor="aboutMe" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <label
+                        htmlFor="aboutMe"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
                         About Me (optional)
                     </label>
                     <textarea
@@ -136,7 +142,7 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                     />
                 </div>
 
-                <div className="grid md:grid-cols-2 md:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
                     <div className="mb-4">
                         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                             Gender

@@ -90,8 +90,8 @@ export default function SocialFeed() {
                 setChatWith('');
                 setChatter('');
             } else if (isInitialLoad && mapped.length > 0 && !chatID) {
-                setchatID(mapped[0].id);
-                setChatWith(mapped[0].username);
+                // setchatID(mapped[0].id);
+                // setChatWith(mapped[0].username);
                 setChatter('Me');
                 setIsInitialLoad(false);
             }

@@ -288,14 +288,6 @@ const Navbar = () => {
                                         >
                                             Profile
                                         </li>
-                                        <li>
-                                            <Link
-                                                href="/settings"
-                                                className="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-                                            >
-                                                Settings
-                                            </Link>
-                                        </li>
                                         <li className="border-t border-gray-700">
                                             <span
                                                 onClick={handleLogout}

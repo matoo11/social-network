@@ -38,7 +38,34 @@ type CommentData = {
     postID: number;
 };
 
-async function handleCreateComment(formData: FormData) {
+const MAX_COMMENT_LENGTH = 500;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
+function validateComment(commentText: string, file: File | null): string | null {
+    const trimmed = commentText.trim();
+
+    if (!trimmed && !file) {
+        return 'Comment cannot be empty. Write something or attach an image.';
+    }
+
+    if (trimmed.length > MAX_COMMENT_LENGTH) {
+        return `Comment is too long. Maximum ${MAX_COMMENT_LENGTH} characters allowed (currently ${trimmed.length}).`;
+    }
+
+    if (file) {
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            return 'Invalid image format. Only JPEG, PNG, GIF, and WebP are allowed.';
+        }
+        if (file.size > MAX_IMAGE_SIZE) {
+            return `Image is too large. Maximum size is ${MAX_IMAGE_SIZE / (1024 * 1024)}MB.`;
+        }
+    }
+
+    return null;
+}
+
+async function handleCreateComment(formData: FormData): Promise<string | null> {
     try {
         const res = await fetchWithAuth('http://localhost:8080/api/createComment', {
             method: 'POST',
@@ -47,17 +74,13 @@ async function handleCreateComment(formData: FormData) {
         });
 
         if (!res.ok) {
-            throw new Error('Failed to create comment');
+            const errorData = await res.json().catch(() => null);
+            return errorData?.message || 'Failed to create comment';
         }
 
-        //   router.push('/login');
-    } catch (err: unknown) {
-        console.error('Error creating comment:', err);
-        if (err instanceof Error) {
-            console.error(err.message);
-        } else {
-            console.error('Unexpected error occurred');
-        }
+        return null;
+    } catch (err) {
+        return err instanceof Error ? err.message : 'Failed to create comment';
     }
 }
 
@@ -65,6 +88,7 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
     const commentRef = useRef<HTMLTextAreaElement | null>(null);
     const [file, setFile] = useState<File | null>(null);
     const [comment, setComment] = useState('');
+    const [formError, setFormError] = useState<string | null>(null);
 
     async function handleCommentSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -79,18 +103,25 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
         console.log('Submitting comment:', comment);
         console.log('With file:', file);
 
-        try {
-            await handleCreateComment(formData);
-        } catch (err) {
-            //TODO: show error to user
-            console.error('Error submitting comment:', err);
+        setFormError(null);
+
+        // Frontend validation
+        const validationError = validateComment(comment, file);
+        if (validationError) {
+            setFormError(validationError);
+            return;
         }
 
-        // Clear inputs
-        setComment('');
-        setFile(null);
+        const errorMsg = await handleCreateComment(formData);
 
-        if (onCommentAdded) onCommentAdded();
+        if (errorMsg) {
+            setFormError(errorMsg);
+        } else {
+            // Clear inputs on success
+            setComment('');
+            setFile(null);
+            if (onCommentAdded) onCommentAdded();
+        }
     }
 
     return (
@@ -109,8 +140,16 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
                             commentText={comment.commentText}
                             commenterNickname={comment.commenterNickname}
                             commenterAvatarNumber={comment.commenterAvatarNumber}
-                            commenterProfileImageUrl={comment.commentProfileImageId && comment.commentProfileImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}` : undefined}
-                            commentImageUrl={comment.commentImageId && comment.commentImageId !== 0 ? `http://localhost:8080/api/image?id=${comment.commentImageId}` : undefined}
+                            commenterProfileImageUrl={
+                                comment.commentProfileImageId && comment.commentProfileImageId !== 0
+                                    ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}`
+                                    : undefined
+                            }
+                            commentImageUrl={
+                                comment.commentImageId && comment.commentImageId !== 0
+                                    ? `http://localhost:8080/api/image?id=${comment.commentImageId}`
+                                    : undefined
+                            }
                             // commenterProfileImageUrl={
                             //     comment.commentProfileImageId !== 0
                             //         ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}`
@@ -131,6 +170,9 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
                     onSubmit={(e) => handleCommentSubmit(e)}
                     className="flex-shrink-0 px-4 py-3 border-t-2 border-gray-600 bg-gray-900"
                 >
+                    {(error || formError) && (
+                        <p className="text-red-500 text-sm mb-2">{formError || error}</p>
+                    )}
                     <textarea
                         id="message"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white resize-none"
@@ -140,7 +182,6 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
                         onChange={(e) => setComment(e.target.value)}
                     ></textarea>
                     <div className="flex items-center gap-3 mt-2">
-                        {error && <p className="text-red-500 text-sm">{error}</p>}
                         <button
                             type="submit"
                             className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"

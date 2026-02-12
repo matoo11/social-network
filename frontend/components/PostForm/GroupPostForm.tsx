@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import GroupPostFormUI from './GroupPostFormUI';
+import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type GroupPostFormProps = {
     groupId: number;
@@ -77,7 +78,7 @@ const GroupPostForm: React.FC<GroupPostFormProps> = ({ groupId, onSubmit }) => {
             if (!res.ok) {
                 // Try to extract error message from response
                 let errorMessage = 'Failed to create group post';
-                
+
                 try {
                     const contentType = res.headers.get('content-type');
                     if (contentType?.includes('application/json')) {
@@ -102,14 +103,14 @@ const GroupPostForm: React.FC<GroupPostFormProps> = ({ groupId, onSubmit }) => {
                 } catch {
                     // If parsing fails, use default message
                 }
-                
+
                 setError(errorMessage);
                 return;
             }
 
             onSubmit?.();
             setFormData({ title: '', text: '' });
-            
+
             // Clear the file input
             if (fileInput) {
                 fileInput.value = '';

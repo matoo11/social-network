@@ -35,7 +35,8 @@ export default function SocialFeed() {
     const [isChatGroupPopupOpen, setIsGroupListPopupOpen] = useState(false);
     const [isChatAreaPopupOpen, setIsChatAreaPopupOpen] = useState(false);
     const [isEventsListPopupOpen, setIsEventsListPopupOpen] = useState(false);
-    const [postListRefreshFn, setPostListRefreshFn] = useState<() => void>();
+    const [desktopPostListRefreshFn, setDesktopPostListRefreshFn] = useState<() => void>();
+    const [mobilePostListRefreshFn, setMobilePostListRefreshFn] = useState<() => void>();
     const [isPostContentPopupOpen, setPostContentPopup] = useState(false);
     const [selectedPostID, setSelectedPostID] = useState<number>(0);
     const [chatsData, setChatsData] = useState<GroupListItem[]>([]);
@@ -269,9 +270,8 @@ export default function SocialFeed() {
     };
 
     const handleNewPostCreated = () => {
-        if (postListRefreshFn) {
-            postListRefreshFn(); // refresh PostList
-        }
+        desktopPostListRefreshFn?.();
+        mobilePostListRefreshFn?.();
     };
 
     return (
@@ -477,7 +477,7 @@ export default function SocialFeed() {
                         <GroupPostList
                             groupId={Number(chatID)}
                             popupHandler={() => setIsPostFormPopupOpen(true)}
-                            onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
+                            onRef={(refreshFn) => setDesktopPostListRefreshFn(() => refreshFn)}
                             postContentPopupHandler={(postID: number) => {
                                 console.log('Open post content popup for post ID:', postID);
                                 setSelectedPostID(postID);
@@ -532,7 +532,7 @@ export default function SocialFeed() {
                     <GroupPostList
                         groupId={Number(chatID)}
                         popupHandler={() => setIsPostFormPopupOpen(true)}
-                        onRef={(refreshFn) => setPostListRefreshFn(() => refreshFn)}
+                        onRef={(refreshFn) => setMobilePostListRefreshFn(() => refreshFn)}
                         postContentPopupHandler={(postID: number) => {
                             console.log('Open post content popup for post ID:', postID);
                             setSelectedPostID(postID);

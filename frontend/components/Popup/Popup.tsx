@@ -28,7 +28,7 @@ const Popup: React.FC<PopupProps> = ({
 
             {/* Popup container */}
             <div
-                className={`relative h-[80%] w-[80%] max-h-xl bg-transparent rounded-md p-4 flex flex-col ${className}`}
+                className={`relative h-[90%] w-[80%] max-h-[90vh] bg-transparent rounded-md p-4 flex flex-col ${className}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Optional close button */}
@@ -46,7 +46,7 @@ const Popup: React.FC<PopupProps> = ({
                 {title && <h3 className="text-lg font-semibold mb-3">{title}</h3>}
 
                 {/* Content (scrollable) */}
-                <div className="flex-1 max-h-[80vh] mt-5">{children}</div>
+                <div className="flex-1 max-h-[90vh] mt-5">{children}</div>
             </div>
         </div>
     );

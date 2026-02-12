@@ -7,6 +7,7 @@ type PopupBtnProps = {
     className?: string;
     color?: 'blue' | 'emerald' | 'default';
     disabled?: boolean;
+    icon?: 'plus' | 'minus';
 };
 
 const colorMap = {
@@ -21,7 +22,13 @@ const strokeMap = {
     default: 'white',
 };
 
-const PopupBtn: React.FC<PopupBtnProps> = ({ onClick, className = '', color = 'default', disabled = false }) => {
+const PopupBtn: React.FC<PopupBtnProps> = ({
+    onClick,
+    className = '',
+    color = 'default',
+    disabled = false,
+    icon = 'plus',
+}) => {
     return (
         <button
             type="button"
@@ -36,13 +43,23 @@ const PopupBtn: React.FC<PopupBtnProps> = ({ onClick, className = '', color = 'd
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
             >
-                <path
-                    d="M1.22229 5.00019H8.77785M5.00007 8.77797V1.22241"
-                    stroke={strokeMap[color]}
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
+                {icon === 'plus' ? (
+                    <path
+                        d="M1.22229 5.00019H8.77785M5.00007 8.77797V1.22241"
+                        stroke={strokeMap[color]}
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                ) : (
+                    <path
+                        d="M1.22229 5.00019H8.77785"
+                        stroke={strokeMap[color]}
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                )}
             </svg>
         </button>
     );

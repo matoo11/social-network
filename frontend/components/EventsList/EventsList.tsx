@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import EventCard, { EventData } from '../EventCard/EventCard';
 import EventForm from '../EventForm/EventForm';
+import PopupBtn from '../PopupBtn/PopupBtn';
 import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 
 type EventsListProps = {
@@ -22,7 +23,7 @@ const EventsList: React.FC<EventsListProps> = ({ groupId }) => {
                 {
                     method: 'GET',
                     credentials: 'include',
-                }
+                },
             );
 
             if (!response.ok) {
@@ -69,44 +70,51 @@ const EventsList: React.FC<EventsListProps> = ({ groupId }) => {
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-gray-900 p-4">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-white">Group Events</h2>
-                <button
-                    type="button"
-                    onClick={() => setIsCreating(!isCreating)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
-                >
-                    {isCreating ? 'Cancel' : 'Create Event'}
-                </button>
-            </div>
-
-            {isCreating && (
-                <div className="mb-4">
-                    <EventForm
-                        groupId={groupId}
-                        onEventCreated={handleEventCreated}
-                        onCancel={() => setIsCreating(false)}
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md border border-gray-200 dark:border-slate-700 overflow-hidden h-full w-full flex flex-col">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 px-6 py-2 border-b border-gray-200 dark:border-slate-700 flex justify-center">
+                <div className="flex items-center gap-3">
+                    <div className="w-1 h-4 sm:h-5 bg-emerald-500 rounded-full"></div>
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100">
+                        Group Events
+                    </h2>
+                    <PopupBtn
+                        onClick={() => setIsCreating(!isCreating)}
+                        color="emerald"
+                        className="h-8"
+                        disabled={isLoading}
+                        icon={isCreating ? 'minus' : 'plus'}
                     />
                 </div>
-            )}
+            </div>
 
-            <div className="flex-1 overflow-y-auto space-y-3">
-                {isLoading ? (
-                    <div className="text-center text-gray-400 py-8">Loading events...</div>
-                ) : events.length === 0 ? (
-                    <div className="text-center text-gray-400 py-8">
-                        No events yet. Create one to get started!
-                    </div>
-                ) : (
-                    events.map((event) => (
-                        <EventCard
-                            key={event.eventId}
-                            event={event}
-                            onResponseUpdated={fetchEvents}
+            <div className="p-6 flex-1 min-h-0 flex flex-col">
+                {isCreating && (
+                    <div className="mb-4 shrink-0">
+                        <EventForm
+                            groupId={groupId}
+                            onEventCreated={handleEventCreated}
+                            onCancel={() => setIsCreating(false)}
                         />
-                    ))
+                    </div>
                 )}
+
+                <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1 hide-scrollbar">
+                    {isLoading ? (
+                        <div className="text-center text-gray-400 py-8">Loading events...</div>
+                    ) : events.length === 0 ? (
+                        <div className="text-center text-gray-400 py-8">
+                            No events yet. Create one to get started!
+                        </div>
+                    ) : (
+                        events.map((event) => (
+                            <EventCard
+                                key={event.eventId}
+                                event={event}
+                                onResponseUpdated={fetchEvents}
+                            />
+                        ))
+                    )}
+                </div>
             </div>
         </div>
     );

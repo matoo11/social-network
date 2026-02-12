@@ -287,7 +287,7 @@ CREATE TABLE Group_Invite_Requests
 CREATE TABLE Events
 (
   Event_ID   INTEGER NOT NULL,
-  Event_Title VARCHAR(100) NOT NULL UNIQUE CHECK (length(Event_Title) <= 100),
+  Event_Title VARCHAR(100) NOT NULL CHECK (length(Event_Title) <= 100),
   Event_Description TEXT CHECK (length(Event_Description) <= 500),
   Event_Time DATETIME NOT NULL,
   User_ID     INTEGER NOT NULL,

@@ -15,6 +15,7 @@ import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 import { FaComments, FaHome, FaUsers, FaUser, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import ProfilePopup from '@/components/ProfilePopup/ProfilePopup';
+import UserListPopup from '@/components/UserList/UserListPopup';
 
 type ChatItem = {
     id: string;
@@ -443,6 +444,8 @@ export default function SocialFeed() {
                 userId={user.userId}
                 onUserClick={() => {}}
             />
+
+            <UserListPopup isOpen={isChatListPopupOpen} onClose={() => setIsChatListPopupOpen(false)} />
         </div>
     );
 }

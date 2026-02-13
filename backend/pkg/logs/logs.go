@@ -10,8 +10,8 @@ var (
 	logFile       *os.File
 	termLogger    *log.Logger
 	fileLogger    *log.Logger
-	logToTerminal bool = true
-	logToFile     bool = true
+	logToTerminal bool = false
+	logToFile     bool = false
 )
 
 func InitializeLogger(logFilePath string) error {

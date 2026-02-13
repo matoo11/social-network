@@ -40,6 +40,15 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
     useEffect(() => {
+        const active =
+            chatID && Number(chatID) !== 0 ? { type: 'group', id: Number(chatID) } : null;
+        window.dispatchEvent(new CustomEvent('active-chat', { detail: active }));
+        return () => {
+            window.dispatchEvent(new CustomEvent('active-chat', { detail: null }));
+        };
+    }, [chatID]);
+
+    useEffect(() => {
         const loadMessages = async () => {
             if (!chatID || Number(chatID) === 0) {
                 setMessages([]);

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Title from '../Title/Title';
 import NotificationRenderer from './NotificationRenderer';
 import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
@@ -24,15 +24,35 @@ type NotificationCenterProps = {
     onNotificationHandled?: () => void;
 };
 
-const NotificationCenter = ({ onGroupInviteHandled, onNotificationHandled }: NotificationCenterProps) => {
+type ActiveChat = { type: 'private' | 'group'; id: number } | null;
+
+const NotificationCenter = ({
+    onGroupInviteHandled,
+    onNotificationHandled,
+}: NotificationCenterProps) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const activeChatRef = useRef<ActiveChat>(null);
+
+    const shouldIgnore = (notification: Notification) => {
+        if (notification.type !== 'MESSAGE') return false;
+
+        const data = notification.data ?? {};
+        const senderId = Number(data.senderId ?? data.senderID ?? data.sender_id);
+        const groupId = Number(data.groupId ?? data.groupID ?? data.group_id);
+        const active = activeChatRef.current;
+
+        if (!active) return false;
+        if (active.type === 'private' && senderId && senderId === active.id) return true;
+        if (active.type === 'group' && groupId && groupId === active.id) return true;
+
+        return false;
+    };
 
     useEffect(() => {
-
         const fetchNotifications = async () => {
             try {
-                const res = await fetchWithAuth('http://localhost:8080/api/notifications/get',{
-                    credentials: "include",
+                const res = await fetchWithAuth('http://localhost:8080/api/notifications/get', {
+                    credentials: 'include',
                 });
                 if (!res.ok) {
                     console.error('Failed to fetch notifications');
@@ -40,14 +60,15 @@ const NotificationCenter = ({ onGroupInviteHandled, onNotificationHandled }: Not
                     return;
                 }
                 const data = await res.json();
-                
+
                 if (!data) {
                     setNotifications([]);
                     return;
                 }
-                
-                const notifs = Array.isArray(data) ? data : (data.data || []);
-                setNotifications(Array.isArray(notifs) ? notifs : []);
+
+                const notifs = Array.isArray(data) ? data : data.data || [];
+                const safeList = Array.isArray(notifs) ? notifs : [];
+                setNotifications(safeList.filter((n) => !shouldIgnore(n)));
             } catch (err) {
                 console.error(err);
                 setNotifications([]);
@@ -58,7 +79,18 @@ const NotificationCenter = ({ onGroupInviteHandled, onNotificationHandled }: Not
 
     useEffect(() => {
         const handler = (e: Event) => {
+            activeChatRef.current = (e as CustomEvent).detail as ActiveChat;
+        };
+
+        window.addEventListener('active-chat', handler);
+        return () => window.removeEventListener('active-chat', handler);
+    }, []);
+
+    useEffect(() => {
+        const handler = (e: Event) => {
             const incoming = (e as CustomEvent).detail as Notification;
+
+            if (shouldIgnore(incoming)) return;
 
             setNotifications((prev) => [incoming, ...prev]);
         };

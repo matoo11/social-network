@@ -30,6 +30,8 @@ export interface User {
     isActive: boolean;
 }
 
+type ActiveChat = { type: 'private' | 'group'; id: number } | null;
+
 const Navbar = () => {
     const router = useRouter();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -40,12 +42,28 @@ const Navbar = () => {
     const [notificationCount, setNotificationCount] = useState(0);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const activeChatRef = useRef<ActiveChat>(null);
 
     const { user, setUser } = useUser();
 
     useEffect(() => {
         handleUserData();
     }, []);
+
+    const shouldIgnoreNotification = (notification: any) => {
+        if (notification?.type !== 'MESSAGE') return false;
+
+        const data = notification?.data ?? {};
+        const senderId = Number(data.senderId ?? data.senderID ?? data.sender_id);
+        const groupId = Number(data.groupId ?? data.groupID ?? data.group_id);
+        const active = activeChatRef.current;
+
+        if (!active) return false;
+        if (active.type === 'private' && senderId && senderId === active.id) return true;
+        if (active.type === 'group' && groupId && groupId === active.id) return true;
+
+        return false;
+    };
 
     // Fetch initial notification count
     useEffect(() => {
@@ -58,7 +76,9 @@ const Navbar = () => {
                 const data = await res.json();
                 if (!data) return;
                 const notifs = Array.isArray(data) ? data : data.data || [];
-                setNotificationCount(Array.isArray(notifs) ? notifs.length : 0);
+                const safeList = Array.isArray(notifs) ? notifs : [];
+                const filtered = safeList.filter((n: any) => !shouldIgnoreNotification(n));
+                setNotificationCount(filtered.length);
             } catch (err) {
                 console.error(err);
             }
@@ -66,9 +86,20 @@ const Navbar = () => {
         fetchNotificationCount();
     }, []);
 
+    useEffect(() => {
+        const handler = (e: Event) => {
+            activeChatRef.current = (e as CustomEvent).detail as ActiveChat;
+        };
+
+        window.addEventListener('active-chat', handler);
+        return () => window.removeEventListener('active-chat', handler);
+    }, []);
+
     // Listen for new notifications via WebSocket
     useEffect(() => {
-        const handler = () => {
+        const handler = (e: Event) => {
+            const incoming = (e as CustomEvent).detail;
+            if (shouldIgnoreNotification(incoming)) return;
             setNotificationCount((prev) => prev + 1);
         };
         window.addEventListener('ws-notification', handler);

@@ -37,22 +37,33 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     };
 
     useEffect(() => {
-        const loadMessages = async () => {
+        const active =
+            chatID && Number(chatID) !== 0 ? { type: 'private', id: Number(chatID) } : null;
+        window.dispatchEvent(new CustomEvent('active-chat', { detail: active }));
+        return () => {
+            window.dispatchEvent(new CustomEvent('active-chat', { detail: null }));
+        };
+    }, [chatID]);
 
+    useEffect(() => {
+        const loadMessages = async () => {
             if (!chatID || Number(chatID) === 0) {
                 setMessages([]);
                 return;
             }
 
             try {
-                const res = await fetchWithAuth('http://localhost:8080/api/message/getPrivateMessages', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
+                const res = await fetchWithAuth(
+                    'http://localhost:8080/api/message/getPrivateMessages',
+                    {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ userID: Number(chatID) }),
                     },
-                    body: JSON.stringify({ userID: Number(chatID) }),
-                });
+                );
 
                 const data = await res.json();
 

@@ -206,7 +206,12 @@ export default function SocialFeed() {
                     <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-gray-700">
                         <span className="text-white font-semibold">Messages</span>
                         <button
-                            onClick={() => setIsMobileChatListOpen(false)}
+                            onClick={() => {
+                                setIsMobileChatListOpen(false);
+                                setchatID('');
+                                setChatWith('');
+                                setChatter('');
+                            }}
                             className="text-gray-400 hover:text-white p-2"
                         >
                             ✕
@@ -256,7 +261,12 @@ export default function SocialFeed() {
                             {chatWith || 'Private Chat'}
                         </span>
                         <button
-                            onClick={() => setIsMobilePrivateChatOpen(false)}
+                            onClick={() => {
+                                setIsMobilePrivateChatOpen(false);
+                                setchatID('');
+                                setChatWith('');
+                                setChatter('');
+                            }}
                             className="text-gray-400 hover:text-white p-2"
                         >
                             ✕
@@ -445,7 +455,10 @@ export default function SocialFeed() {
                 onUserClick={() => {}}
             />
 
-            <UserListPopup isOpen={isChatListPopupOpen} onClose={() => setIsChatListPopupOpen(false)} />
+            <UserListPopup
+                isOpen={isChatListPopupOpen}
+                onClose={() => setIsChatListPopupOpen(false)}
+            />
         </div>
     );
 }

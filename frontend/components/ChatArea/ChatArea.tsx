@@ -95,6 +95,8 @@ const ChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         const listener = (e: any) => {
             const data = e.detail;
 
+            if (data?.groupID) return;
+            if (!data?.recieverID && !data?.receiverID) return;
             // if (data.senderID !== chatWith && data.recieverID !== chatter) return;
             if (String(data.senderID) !== chatID) return;
             console.log(chatID);

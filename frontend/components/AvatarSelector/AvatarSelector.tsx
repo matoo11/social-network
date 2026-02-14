@@ -12,20 +12,20 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onAvata
     const avatars = [1, 2, 3, 4];
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Choose Your Avatar
             </label>
-            <div className="grid grid-cols-4 gap-2 sm:gap-4">
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2 max-w-[220px] sm:max-w-[260px] mx-auto">
                 {avatars.map((num) => (
                     <button
                         key={num}
                         type="button"
                         onClick={() => onAvatarSelect(num)}
-                        className={`relative w-full aspect-square rounded-full overflow-hidden border-4 transition-all ${
+                        className={`relative w-full aspect-square rounded-full overflow-hidden border transition-all ${
                             selectedAvatar === num
-                                ? 'border-blue-600 scale-110 shadow-lg'
-                                : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:scale-105'
+                                ? 'border-blue-600 scale-[1.02] shadow-md'
+                                : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                         }`}
                     >
                         <Image

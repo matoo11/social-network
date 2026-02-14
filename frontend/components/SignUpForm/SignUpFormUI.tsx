@@ -34,8 +34,11 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
     onAvatarSelect,
 }) => {
     return (
-        <div className="mx-auto w-full max-w-md p-4 sm:p-6 md:p-8 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 my-2 sm:my-4 max-h-[90dvh] overflow-y-auto overflow-x-hidden">
-            <form onSubmit={onSubmit} className="max-w-md mx-auto space-y-3 text-sm sm:text-base">
+        <div className="mx-auto w-full max-w-md lg:max-w-4xl p-3 sm:p-4 md:p-5 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 my-2 sm:my-3 max-h-[90dvh] overflow-y-auto overflow-x-hidden">
+            <form
+                onSubmit={onSubmit}
+                className="max-w-md lg:max-w-4xl mx-auto space-y-2 text-sm sm:text-[15px]"
+            >
                 <h5 className="font-serif text-xl font-medium text-white text-center">
                     Create your account
                 </h5>
@@ -43,52 +46,51 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                     selectedAvatar={formData.avatarNumber}
                     onAvatarSelect={onAvatarSelect}
                 />
-                <InputField
-                    htmlFor="username"
-                    labelText="Your username"
-                    inputType="text"
-                    inputName="username"
-                    inputID="username"
-                    inputValue={formData.username}
-                    onInputChange={onInputChange('username')}
-                    placeholderText="Username"
-                    isRequired={true}
-                />
-                <InputField
-                    htmlFor="email"
-                    labelText="Your email"
-                    inputType="email"
-                    inputName="email"
-                    inputID="email"
-                    inputValue={formData.email}
-                    onInputChange={onInputChange('email')}
-                    placeholderText="example@company.com"
-                    isRequired={true}
-                />
-
-                <InputField
-                    htmlFor="password"
-                    labelText="Your password"
-                    inputType="password"
-                    inputName="password"
-                    inputID="password"
-                    inputValue={formData.password}
-                    onInputChange={onInputChange('password')}
-                    placeholderText="••••••••"
-                    isRequired={true}
-                />
-                <InputField
-                    htmlFor="confirmPassword"
-                    labelText="Confirm password"
-                    inputType="password"
-                    inputName="confirmPassword"
-                    inputID="confirmPassword"
-                    inputValue={formData.confirmPassword}
-                    onInputChange={onInputChange('confirmPassword')}
-                    placeholderText="••••••••"
-                    isRequired={true}
-                />
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
+                    <InputField
+                        htmlFor="username"
+                        labelText="Your username"
+                        inputType="text"
+                        inputName="username"
+                        inputID="username"
+                        inputValue={formData.username}
+                        onInputChange={onInputChange('username')}
+                        placeholderText="Username"
+                        isRequired={true}
+                    />
+                    <InputField
+                        htmlFor="email"
+                        labelText="Your email"
+                        inputType="email"
+                        inputName="email"
+                        inputID="email"
+                        inputValue={formData.email}
+                        onInputChange={onInputChange('email')}
+                        placeholderText="example@company.com"
+                        isRequired={true}
+                    />
+                    <InputField
+                        htmlFor="password"
+                        labelText="Your password"
+                        inputType="password"
+                        inputName="password"
+                        inputID="password"
+                        inputValue={formData.password}
+                        onInputChange={onInputChange('password')}
+                        placeholderText="••••••••"
+                        isRequired={true}
+                    />
+                    <InputField
+                        htmlFor="confirmPassword"
+                        labelText="Confirm password"
+                        inputType="password"
+                        inputName="confirmPassword"
+                        inputID="confirmPassword"
+                        inputValue={formData.confirmPassword}
+                        onInputChange={onInputChange('confirmPassword')}
+                        placeholderText="••••••••"
+                        isRequired={true}
+                    />
                     <InputField
                         htmlFor="firstName"
                         labelText="First name"
@@ -111,39 +113,7 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                         placeholderText="Last name"
                         isRequired={true}
                     />
-                </div>
-                <InputField
-                    htmlFor="nickname"
-                    labelText="Nickname (optional)"
-                    inputType="text"
-                    inputName="nickname"
-                    inputID="nickname"
-                    inputValue={formData.nickname}
-                    onInputChange={onInputChange('nickname')}
-                    placeholderText="Nickname"
-                    isRequired={false}
-                />
-
-                <div>
-                    <label
-                        htmlFor="aboutMe"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                        About Me (optional)
-                    </label>
-                    <textarea
-                        id="aboutMe"
-                        name="aboutMe"
-                        value={formData.aboutMe}
-                        onChange={onInputChange('aboutMe') as any}
-                        placeholder="Tell us about yourself..."
-                        rows={3}
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 resize-none"
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-                    <div className="mb-4">
+                    <div>
                         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                             Gender
                         </label>
@@ -176,7 +146,6 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                             </label>
                         </div>
                     </div>
-
                     <InputField
                         htmlFor="dateOfBirth"
                         labelText="Date of Birth"
@@ -189,6 +158,36 @@ const SignUpFormUI: React.FC<SignUpFormUIProps> = ({
                         isRequired={true}
                     />
                 </div>
+                <InputField
+                    htmlFor="nickname"
+                    labelText="Nickname (optional)"
+                    inputType="text"
+                    inputName="nickname"
+                    inputID="nickname"
+                    inputValue={formData.nickname}
+                    onInputChange={onInputChange('nickname')}
+                    placeholderText="Nickname"
+                    isRequired={false}
+                />
+
+                <div className="space-y-1">
+                    <label
+                        htmlFor="aboutMe"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                        About Me (optional)
+                    </label>
+                    <textarea
+                        id="aboutMe"
+                        name="aboutMe"
+                        value={formData.aboutMe}
+                        onChange={onInputChange('aboutMe') as any}
+                        placeholder="Tell us about yourself..."
+                        rows={3}
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 resize-none"
+                    />
+                </div>
+
                 {error && (
                     <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400">
                         {error}

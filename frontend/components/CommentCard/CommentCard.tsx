@@ -81,7 +81,7 @@ const CommentCard: React.FC<CommentCardUIProps> = ({
                     )}
 
                     {/* Reactions inside bubble */}
-                    <div className="flex items-center gap-3 mt-1.5 pt-1.5 border-t border-gray-600/30">
+                    {/* <div className="flex items-center gap-3 mt-1.5 pt-1.5 border-t border-gray-600/30">
                         <button
                             onClick={handleCommentLike}
                             className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-emerald-400 transition-colors cursor-pointer"
@@ -98,7 +98,7 @@ const CommentCard: React.FC<CommentCardUIProps> = ({
                                 <span className="tabular-nums">{dislikesCount}</span>
                             )}
                         </button>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>

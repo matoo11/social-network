@@ -95,8 +95,8 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
 
             {/* Reactions Bar */}
             <div className="flex items-center gap-1 px-2 py-1.5 border-t border-gray-700/60">
-                <Reaction onClick={handleLike} type="like" count={likesCount} size="sm" />
-                <Reaction onClick={handleDislike} type="dislike" count={dislikesCount} size="sm" />
+                {/* <Reaction onClick={handleLike} type="like" count={likesCount} size="sm" />
+                <Reaction onClick={handleDislike} type="dislike" count={dislikesCount} size="sm" /> */}
                 {commentsCount !== undefined && (
                     <Reaction
                         onClick={handleComment}

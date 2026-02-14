@@ -24,7 +24,7 @@ const ProfileImage = ({
 
     // Determine the image source
     let imageSrc = imageUrl || 'http://localhost:3000/uploads/default-profile.jpg';
-    
+
     // If avatarNumber is provided (1-4), use the corresponding avatar SVG
     if (avatarNumber && avatarNumber >= 1 && avatarNumber <= 4) {
         imageSrc = `/avatars/avatar${avatarNumber}.svg`;
@@ -32,7 +32,7 @@ const ProfileImage = ({
 
     return (
         <div
-            className={`relative w-full h-full p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500 overflow-hidden flex items-center justify-center ${className}`}
+            className={`relative w-full h-full p-0.5 rounded-full ring-2 ring-gray-600 overflow-hidden flex items-center justify-center ${className}`}
         >
             <a
                 href={link}

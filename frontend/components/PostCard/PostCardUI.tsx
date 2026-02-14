@@ -3,7 +3,6 @@ import CreationTime from '../CreationTime/CreationTime';
 import ProfileImage from '../ProfileImage/ProfileImage';
 import PostImage from '../PostImage/PostImage';
 import Username from '../Username/Username';
-import Title from '../Title/Title';
 import TextElement from '../TextElement/TextElement';
 import Reaction from '../Reaction/Reaction';
 
@@ -53,50 +52,61 @@ const PostCardUI: React.FC<PostCardUIProps> = ({
             postContentPopup(postID);
         }
     };
+
     if (postImageUrl === 'http://localhost:8080/api/image?id=null') {
         postImageUrl = '';
     }
+
     return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 w-full min-w-sm">
-            {/* Profile Section */}
-            <div className="flex items-center gap-3 px-5 py-3">
-                <div className="flex w-10 h-10 rounded-none items-center justify-center">
+        <article className="bg-gray-800 border border-gray-700 rounded-2xl w-full overflow-hidden transition-all duration-200 hover:border-gray-500 hover:shadow-lg hover:shadow-black/20">
+            {/* Author Header */}
+            <div className="flex items-center gap-3 px-4 pt-3.5 pb-2">
+                <div className="w-9 h-9 shrink-0">
                     <ProfileImage
                         imageUrl={posterProfileImageUrl || ''}
                         avatarNumber={posterAvatarNumber}
                         altText={`${posterNickname}'s profile`}
                     />
                 </div>
-
-                <div>
+                <div className="min-w-0 flex-1 flex items-center gap-2">
                     <Username text={posterNickname} />
-                    <CreationTime time={String(createdAt)} />
+                    <span className="text-gray-600 text-xs select-none">·</span>
+                    {createdAt && <CreationTime time={String(createdAt)} />}
                 </div>
             </div>
 
-            {/* Title & Additional Content */}
-            <div className="px-5 mt-2">
-                <Title text={title} />
-                <TextElement text={content} />
+            {/* Post Body */}
+            <div className="px-4 pb-2.5">
+                {title && (
+                    <h3 className="text-[15px] font-semibold text-white leading-snug mb-1">
+                        {title}
+                    </h3>
+                )}
+                {content && (
+                    <TextElement
+                        text={content}
+                        className="line-clamp-4 !text-[14px] !leading-relaxed"
+                    />
+                )}
             </div>
 
             {/* Post Image */}
+            {postImageUrl && <PostImage imageUrl={postImageUrl} />}
 
-            {postImageUrl && (
-                <div className="">
-                    <PostImage imageUrl={postImageUrl} />
-                </div>
-            )}
-
-            {/* Reactions Section */}
-            <div className="flex items-center rounded-b gap-3 px-5 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-                <Reaction onClick={handleLike} type="like" count={likesCount} />
-                <Reaction onClick={handleDislike} type="dislike" count={dislikesCount} />
+            {/* Reactions Bar */}
+            <div className="flex items-center gap-1 px-2 py-1.5 border-t border-gray-700/60">
+                <Reaction onClick={handleLike} type="like" count={likesCount} size="sm" />
+                <Reaction onClick={handleDislike} type="dislike" count={dislikesCount} size="sm" />
                 {commentsCount !== undefined && (
-                    <Reaction onClick={handleComment} type="comment" count={commentsCount} />
+                    <Reaction
+                        onClick={handleComment}
+                        type="comment"
+                        count={commentsCount}
+                        size="sm"
+                    />
                 )}
             </div>
-        </div>
+        </article>
     );
 };
 

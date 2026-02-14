@@ -34,11 +34,15 @@ const PostListUI: React.FC<PostListUIProps> = ({
                     disabled={disableBtn}
                 />
             </div>
-            <div className="flex flex-col items-center flex-1 px-2 sm:px-4 gap-3 sm:gap-5 bg-gray-900 py-3 sm:py-5 overflow-y-auto hide-scrollbar">
+            <div className="flex flex-col items-center flex-1 min-h-0 px-2 sm:px-4 gap-3 sm:gap-5 bg-gray-900 py-3 sm:py-5 overflow-y-auto hide-scrollbar">
                 {!posts || posts.length === 0 ? (
                     <p className="text-gray-400 mt-10">No posts are available</p>
                 ) : (
-                    posts.map((post) => <PostCard key={post.postID} {...post} />)
+                    posts.map((post) => (
+                        <div key={post.postID} className="w-full max-w-2xl shrink-0">
+                            <PostCard {...post} />
+                        </div>
+                    ))
                 )}
             </div>
         </div>

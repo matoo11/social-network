@@ -20,16 +20,14 @@ const PostImage: React.FC<PostImageProps> = ({
         }
     };
     return (
-        <div className={`relative w-full aspect-video ${className}`}>
-            {' '}
-            {/* Define height and relative position */}
+        <div className={`relative w-full aspect-video bg-gray-700/50 ${className || ''}`}>
             <a href={link} onClick={handleClick} className="relative block w-full h-full">
                 <Image
                     className="object-contain"
                     src={imageUrl}
                     alt={altText}
                     fill
-                    sizes="(min-width: 768px) 400px, 100vw"
+                    sizes="(min-width: 768px) 500px, 100vw"
                 />
             </a>
         </div>

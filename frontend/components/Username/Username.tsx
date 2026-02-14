@@ -1,7 +1,13 @@
-import React from "react";
+import React from 'react';
 
-const Username: React.FC<{ text: React.ReactNode }> = ({ text }) => {
-    return <p className="text-sm font-medium text-gray-900 truncate dark:text-white">{text}</p>;
-}
+const Username: React.FC<{ text: React.ReactNode; className?: string }> = ({ text, className }) => {
+    return (
+        <span
+            className={`text-sm font-semibold text-gray-100 truncate leading-tight ${className || ''}`}
+        >
+            {text}
+        </span>
+    );
+};
 
 export default Username;

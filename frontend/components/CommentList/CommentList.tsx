@@ -125,70 +125,100 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
     }
 
     return (
-        <div className="border-2 border-gray-600 rounded-lg h-full bg-gray-900 flex flex-col overflow-hidden">
-            <div className="flex-shrink-0 flex justify-center items-center py-3 px-4 border-b-2 border-gray-600 bg-gray-900">
-                <Title text="Comments" />
+        <div className="rounded-xl h-full bg-gray-900 flex flex-col overflow-hidden border border-gray-700">
+            <div className="flex-shrink-0 flex items-center gap-2 py-3 px-4 border-b border-gray-700">
+                <i className="fa-regular fa-comments text-blue-400 text-sm"></i>
+                <span className="text-sm font-semibold text-white">
+                    Comments{comments && comments.length > 0 ? ` (${comments.length})` : ''}
+                </span>
             </div>
 
             <div className="flex flex-col flex-1 min-h-0">
-                <div className="p-4 flex flex-col items-center gap-4 bg-gray-900 overflow-y-auto hide-scrollbar flex-1">
-                    {comments?.map((comment) => (
-                        <CommentCard
-                            key={comment.commentID}
-                            postID={postID}
-                            commentID={comment.commentID}
-                            commentText={comment.commentText}
-                            commenterNickname={comment.commenterNickname}
-                            commenterAvatarNumber={comment.commenterAvatarNumber}
-                            commenterProfileImageUrl={
-                                comment.commentProfileImageId && comment.commentProfileImageId !== 0
-                                    ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}`
-                                    : undefined
-                            }
-                            commentImageUrl={
-                                comment.commentImageId && comment.commentImageId !== 0
-                                    ? `http://localhost:8080/api/image?id=${comment.commentImageId}`
-                                    : undefined
-                            }
-                            // commenterProfileImageUrl={
-                            //     comment.commentProfileImageId !== 0
-                            //         ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}`
-                            //         : undefined
-                            // }
-                            // commentImageUrl={
-                            //     comment.commentImageId !== 0
-                            //         ? `http://localhost:8080/api/image?id=${comment.commentImageId}`
-                            //         : undefined
-                            // }
-                            createdAt={comment.commentTime}
-                            likesCount={comment.likesCount}
-                            dislikesCount={comment.dislikesCount}
-                        />
-                    ))}
+                <div className="p-3 flex flex-col gap-1 bg-gray-900 overflow-y-auto hide-scrollbar flex-1">
+                    {!comments || comments.length === 0 ? (
+                        <p className="text-gray-500 text-sm text-center py-8">
+                            No comments yet. Be the first to comment!
+                        </p>
+                    ) : (
+                        comments.map((comment) => (
+                            <CommentCard
+                                key={comment.commentID}
+                                postID={postID}
+                                commentID={comment.commentID}
+                                commentText={comment.commentText}
+                                commenterNickname={comment.commenterNickname}
+                                commenterAvatarNumber={comment.commenterAvatarNumber}
+                                commenterProfileImageUrl={
+                                    comment.commentProfileImageId &&
+                                    comment.commentProfileImageId !== 0
+                                        ? `http://localhost:8080/api/image?id=${comment.commentProfileImageId}`
+                                        : undefined
+                                }
+                                commentImageUrl={
+                                    comment.commentImageId && comment.commentImageId !== 0
+                                        ? `http://localhost:8080/api/image?id=${comment.commentImageId}`
+                                        : undefined
+                                }
+                                createdAt={comment.commentTime}
+                                likesCount={comment.likesCount}
+                                dislikesCount={comment.dislikesCount}
+                            />
+                        ))
+                    )}
                 </div>
                 <form
                     onSubmit={(e) => handleCommentSubmit(e)}
-                    className="flex-shrink-0 px-4 py-3 border-t-2 border-gray-600 bg-gray-900"
+                    className="flex-shrink-0 px-3 py-3 border-t border-gray-700 bg-gray-800/60"
                 >
                     {(error || formError) && (
-                        <p className="text-red-500 text-sm mb-2">{formError || error}</p>
+                        <p className="text-rose-400 text-xs mb-2 px-1">{formError || error}</p>
                     )}
-                    <textarea
-                        id="message"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white resize-none"
-                        placeholder="Write a comment..."
-                        rows={2}
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                    ></textarea>
-                    <div className="flex items-center gap-3 mt-2">
-                        <button
-                            type="submit"
-                            className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
-                        >
-                            Comment
-                        </button>
-                        <ImageUploader file={file} setFile={setFile} />
+                    {/* Image preview */}
+                    {file && (
+                        <div className="flex items-center gap-2 mb-2 px-1">
+                            <div className="flex items-center gap-2 bg-gray-700/60 rounded-lg px-2.5 py-1.5 text-xs text-gray-300">
+                                <i className="fa-regular fa-image text-blue-400"></i>
+                                <span className="truncate max-w-[150px]">{file.name}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setFile(null)}
+                                    className="text-gray-400 hover:text-white ml-1 cursor-pointer"
+                                >
+                                    <i className="fa-solid fa-xmark text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    <div className="flex items-end gap-1.5 bg-gray-800 border border-gray-600 rounded-xl px-1 py-1 focus-within:border-blue-500 transition-colors">
+                        <textarea
+                            id="message"
+                            className="flex-1 bg-transparent text-gray-100 text-sm block w-full px-2 py-1.5 placeholder-gray-500 resize-none outline-none max-h-32 overflow-y-auto"
+                            placeholder="Write a comment..."
+                            rows={1}
+                            value={comment}
+                            onChange={(e) => {
+                                setComment(e.target.value);
+                                const el = e.target;
+                                el.style.height = 'auto';
+                                el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    e.currentTarget.form?.requestSubmit();
+                                }
+                            }}
+                        ></textarea>
+                        <div className="flex items-center shrink-0 gap-0.5 pb-0.5">
+                            <ImageUploader file={file} setFile={setFile} />
+                            <button
+                                type="submit"
+                                className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors duration-150"
+                                title="Send"
+                            >
+                                <i className="fa-solid fa-paper-plane text-xs"></i>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

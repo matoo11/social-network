@@ -140,8 +140,8 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
 
             {/* Content Area */}
             <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
-                {/* Post Section */}
-                <div className="lg:w-2/5 p-4 overflow-y-auto hide-scrollbar border-b-2 lg:border-b-0 lg:border-r-2 border-gray-600">
+                {/* Post Section - hidden on mobile */}
+                <div className="hidden lg:block lg:w-3/5 p-4 overflow-y-auto hide-scrollbar lg:border-r-2 border-gray-600">
                     {loading && (
                         <div className="flex items-center justify-center h-full">
                             <p className="text-gray-400">Loading post...</p>
@@ -172,8 +172,8 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
                     )}
                 </div>
 
-                {/* Comments Section */}
-                <div className="lg:w-3/5 flex-1 min-h-0 p-4">
+                {/* Comments Section - full width on mobile */}
+                <div className="flex-1 min-h-0 lg:w-2/5 p-2 lg:p-4">
                     <CommentList
                         postID={postID}
                         comments={currentCommentsData}

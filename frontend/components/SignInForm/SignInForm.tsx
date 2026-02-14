@@ -33,30 +33,29 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
         e.preventDefault();
         setError('');
 
-        try {
-            const user: UserInfo = await loginUser(userIdentifier, password);
-            console.log('Logged in user:', user);
-
-            setUser({
-                userId: user.userID,
-                userName: user.userName,
-                nickName: user.nickName,
-                email: user.email,
-                profileImageID: user.imageID,
-            });
-
-            if (onSuccess) {
-                onSuccess();
-            }
-
-            router.push('/social-feed');
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('Unexpected error occurred');
-            }
+        const result = await loginUser(userIdentifier, password);
+        
+        if ('error' in result) {
+            setError(result.error);
+            return;
         }
+
+        const user: UserInfo = result.data;
+        console.log('Logged in user:', user);
+
+        setUser({
+            userId: user.userID,
+            userName: user.userName,
+            nickName: user.nickName,
+            email: user.email,
+            profileImageID: user.imageID,
+        });
+
+        if (onSuccess) {
+            onSuccess();
+        }
+
+        router.push('/social-feed');
     };
 
     return (

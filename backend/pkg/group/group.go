@@ -1044,6 +1044,11 @@ func CreateGroupEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if eventTime.Before(time.Now()) {
+		http.Error(w, "event time cannot be in the past", http.StatusBadRequest)
+		return
+	}
+
 	event, err := dbConn.CreateGroupEvent(payload.GroupID, creatorID, title, description, eventTime)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

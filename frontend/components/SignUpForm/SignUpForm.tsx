@@ -71,31 +71,29 @@ const SignUpForm: React.FC = () => {
             return;
         }
 
-        try {
-            // Convert dateOfBirth to proper format for backend
-            const signUpData = {
-                ...formData,
-                dateOfBirth: new Date(formData.dateOfBirth).toISOString(),
-            };
+        // Convert dateOfBirth to proper format for backend
+        const signUpData = {
+            ...formData,
+            dateOfBirth: new Date(formData.dateOfBirth).toISOString(),
+        };
 
-            console.log('Submitting sign-up data:', signUpData);
+        console.log('Submitting sign-up data:', signUpData);
 
-            await registerUser(signUpData);
-            await loginUser(formData.username, formData.password);
-            router.push('/social-feed');
-        } catch (err: unknown) {
-            console.error('Registration error:', err);
-            if (err instanceof Error) {
-                // Clean up error message if it's too technical
-                let errorMsg = err.message;
-                if (errorMsg.includes('fetch')) {
-                    errorMsg = 'Unable to connect to server. Please try again.';
-                }
-                setError(errorMsg);
-            } else {
-                setError('Unexpected error occurred during registration');
-            }
+        const registerResult = await registerUser(signUpData);
+        
+        if ('error' in registerResult) {
+            setError(registerResult.error);
+            return;
         }
+
+        const loginResult = await loginUser(formData.username, formData.password);
+        
+        if ('error' in loginResult) {
+            setError(loginResult.error);
+            return;
+        }
+
+        router.push('/social-feed');
     };
 
     return (

@@ -11,18 +11,18 @@ export async function loginUser(username: string, password: string) {
         if (!res.ok) {
             const errorText = await res.json();
             console.log('Error response body:', errorText.Feedback);
-            throw new Error(errorText.Feedback || 'Login failed');
+            return { error: errorText.Feedback || 'Login failed' };
         }
 
         const responseData = await res.json();
 
         console.log('Login response:', responseData.data);
-        return responseData.data;
+        return { data: responseData.data };
     } catch (err: unknown) {
         if (err instanceof Error) {
-            throw new Error(err.message);
+            return { error: err.message };
         } else {
-            throw new Error('Unexpected error occurred');
+            return { error: 'Unexpected error occurred' };
         }
     }
 }
@@ -50,25 +50,16 @@ export async function registerUser(signUpData: {
         });
 
         if (!res.ok) {
-            const errorText = await res.text();
-            
-            // Try to parse as JSON to extract error message
-            try {
-                const errorData = JSON.parse(errorText);
-                const errorMessage = errorData.message || errorData.error || errorData.Feedback || 'Signup failed';
-                throw new Error(errorMessage);
-            } catch {
-                // If not JSON, use the text as is
-                throw new Error(errorText || 'Signup failed');
-            }
+            const errorText = await res.json();
+            return { error: errorText.Feedback || 'Registration failed' };
         }
 
-        return res;
+        return { data: res };
     } catch (err: unknown) {
         if (err instanceof Error) {
-            throw new Error(err.message);
+            return { error: err.message };
         } else {
-            throw new Error('Unexpected error occurred');
+            return { error: 'Unexpected error occurred' };
         }
     }
 }
@@ -118,7 +109,7 @@ export async function fetchUserData() {
         if (!responseData || !responseData.data) {
             throw new Error('Current user is guest');
         }
-        
+
         return responseData.data;
     } catch (err: unknown) {
         if (err instanceof Error) {

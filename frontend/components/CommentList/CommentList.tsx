@@ -38,7 +38,7 @@ type CommentData = {
     postID: number;
 };
 
-const MAX_COMMENT_LENGTH = 500;
+const MAX_COMMENT_LENGTH = 300;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 

@@ -229,7 +229,7 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
                                         </div>
 
                                         {profile.user.aboutMe && (
-                                            <p className="text-gray-300 mb-3 text-sm">{profile.user.aboutMe}</p>
+                                            <p className="text-gray-300 mb-3 text-sm break-all whitespace-pre-wrap">{profile.user.aboutMe}</p>
                                         )}
 
                                         <div className="flex gap-4 mb-3 text-sm">

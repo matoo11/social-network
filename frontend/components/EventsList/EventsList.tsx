@@ -12,11 +12,11 @@ type EventsListProps = {
 
 const EventsList: React.FC<EventsListProps> = ({ groupId }) => {
     const [events, setEvents] = useState<EventData[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    // const [isLoading, setIsLoading] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
 
     const fetchEvents = async () => {
-        setIsLoading(true);
+        // setIsLoading(true);
         try {
             const response = await fetchWithAuth(
                 `http://localhost:8080/api/groups/events?groupId=${groupId}`,
@@ -35,7 +35,7 @@ const EventsList: React.FC<EventsListProps> = ({ groupId }) => {
         } catch (error) {
             console.error('Error fetching events:', error);
         } finally {
-            setIsLoading(false);
+            // setIsLoading(false);
         }
     };
 
@@ -81,7 +81,7 @@ const EventsList: React.FC<EventsListProps> = ({ groupId }) => {
                         onClick={() => setIsCreating(!isCreating)}
                         color="emerald"
                         className="h-8"
-                        disabled={isLoading}
+                        disabled={false}
                         icon={isCreating ? 'minus' : 'plus'}
                     />
                 </div>
@@ -99,7 +99,7 @@ const EventsList: React.FC<EventsListProps> = ({ groupId }) => {
                 )}
 
                 <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1 hide-scrollbar">
-                    {isLoading ? (
+                    {false ? (
                         <div className="text-center text-gray-400 py-8">Loading events...</div>
                     ) : events.length === 0 ? (
                         <div className="text-center text-gray-400 py-8">

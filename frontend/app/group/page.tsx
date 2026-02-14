@@ -17,7 +17,17 @@ import { ChatCardProps } from '@/components/ChatCard/ChatCard';
 import Title from '@/components/Title/Title';
 import AllUsersList from '@/components/AllUsersList/AllUsersList';
 import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
-import { FaUsers, FaHome, FaComments, FaUser, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import {
+    FaUsers,
+    FaHome,
+    FaComments,
+    FaUser,
+    FaChevronLeft,
+    FaChevronRight,
+    FaChevronDown,
+    FaExchangeAlt,
+} from 'react-icons/fa';
+import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ProfilePopup from '@/components/ProfilePopup/ProfilePopup';
 import { useUser } from '../context/UserContext';
@@ -56,6 +66,10 @@ export default function SocialFeed() {
     const [isSignInPopupOpen, setIsSignInPopupOpen] = useState(false);
     const [isGroupListCollapsed, setIsGroupListCollapsed] = useState(false);
     const [isGroupChatCollapsed, setIsGroupChatCollapsed] = useState(false);
+    const [isGroupDropdownOpen, setIsGroupDropdownOpen] = useState(false);
+    const groupDropdownRef = useRef<HTMLDivElement>(null);
+    const mobileGroupDropdownRef = useRef<HTMLDivElement>(null);
+    const [isMobileGroupDropdownOpen, setIsMobileGroupDropdownOpen] = useState(false);
 
     const fetchGroups = async (mode: 'mine' | 'all', isInitial = false) => {
         try {
@@ -274,6 +288,108 @@ export default function SocialFeed() {
         mobilePostListRefreshFn?.();
     };
 
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (groupDropdownRef.current && !groupDropdownRef.current.contains(e.target as Node)) {
+                setIsGroupDropdownOpen(false);
+            }
+            if (
+                mobileGroupDropdownRef.current &&
+                !mobileGroupDropdownRef.current.contains(e.target as Node)
+            ) {
+                setIsMobileGroupDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Filtered groups for the dropdown (only joined groups)
+    const joinedGroups = groupListMode === 'mine' ? chatsData : chatsData.filter((g) => g.joined);
+
+    const GroupSelector = ({ isMobile = false }: { isMobile?: boolean }) => {
+        const isOpen = isMobile ? isMobileGroupDropdownOpen : isGroupDropdownOpen;
+        const setIsOpen = isMobile ? setIsMobileGroupDropdownOpen : setIsGroupDropdownOpen;
+        const ref = isMobile ? mobileGroupDropdownRef : groupDropdownRef;
+
+        return (
+            <div ref={ref} className="relative w-full max-w-md mx-auto px-4">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="w-full flex items-center justify-between gap-2 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-750 hover:border-emerald-600/50 transition-all cursor-pointer group"
+                >
+                    <div className="flex items-center gap-2 min-w-0">
+                        <FaUsers className="text-emerald-500 flex-shrink-0" />
+                        <span className="text-white font-medium truncate">
+                            {chatWith || 'Select a group'}
+                        </span>
+                    </div>
+                    <FaChevronDown
+                        className={`text-gray-400 group-hover:text-emerald-400 text-xs transition-transform duration-200 ${
+                            isOpen ? 'rotate-180' : ''
+                        }`}
+                    />
+                </button>
+
+                {isOpen && (
+                    <div className="absolute top-full left-4 right-4 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-30 max-h-64 overflow-y-auto hide-scrollbar">
+                        {joinedGroups.length === 0 ? (
+                            <div className="px-4 py-3 text-sm text-gray-400">
+                                No groups joined yet
+                            </div>
+                        ) : (
+                            joinedGroups.map((g) => (
+                                <button
+                                    key={g.id}
+                                    onClick={() => {
+                                        setchatID(g.id || '');
+                                        setChatWith(g.username || '');
+                                        setChatter('Me');
+                                        setIsOpen(false);
+                                        if (!isMobile) {
+                                            setIsGroupChatCollapsed(false);
+                                        }
+                                    }}
+                                    className={`w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-gray-700 transition-colors cursor-pointer ${
+                                        g.id === chatID
+                                            ? 'bg-emerald-600/20 border-l-2 border-emerald-500'
+                                            : 'border-l-2 border-transparent'
+                                    }`}
+                                >
+                                    <FaUsers
+                                        className={`flex-shrink-0 ${
+                                            g.id === chatID ? 'text-emerald-400' : 'text-gray-500'
+                                        }`}
+                                    />
+                                    <div className="min-w-0 flex-1">
+                                        <div
+                                            className={`font-medium truncate ${
+                                                g.id === chatID ? 'text-emerald-400' : 'text-white'
+                                            }`}
+                                        >
+                                            {g.username}
+                                        </div>
+                                        {g.lastMessage && (
+                                            <div className="text-xs text-gray-500 truncate">
+                                                {g.lastMessage}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {g.id === chatID && (
+                                        <span className="text-xs text-emerald-400 flex-shrink-0">
+                                            Selected
+                                        </span>
+                                    )}
+                                </button>
+                            ))
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className="flex flex-col w-full h-dvh">
             {/* Header with Navbar */}
@@ -473,6 +589,9 @@ export default function SocialFeed() {
                             </button>
                         </div>
                     </div>
+                    <div className="flex-shrink-0 py-1">
+                        <GroupSelector />
+                    </div>
                     <div className="flex-1 min-h-0">
                         <GroupPostList
                             groupId={Number(chatID)}
@@ -527,6 +646,9 @@ export default function SocialFeed() {
                             Groups
                         </button>
                     </div>
+                </div>
+                <div className="flex-shrink-0 py-1">
+                    <GroupSelector isMobile />
                 </div>
                 <div className="flex-1 min-h-0">
                     <GroupPostList

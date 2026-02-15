@@ -410,6 +410,15 @@ func SaveImage(file multipart.File, filename string, userID int) (int, error) {
 		img.Height = 0
 	}
 
+	// Validate aspect ratio to prevent extremely stretched images
+	if img.Width > 0 && img.Height > 0 {
+		aspectRatio := float64(img.Width) / float64(img.Height)
+		// Reject images with aspect ratio greater than 5:1 or less than 1:5
+		if aspectRatio > 5.0 || aspectRatio < 0.2 {
+			return 0, fmt.Errorf("image aspect ratio is too extreme (width:height must be between 1:5 and 5:1)")
+		}
+	}
+
 	query := `
 	INSERT INTO Images (
 		Image_Reference,

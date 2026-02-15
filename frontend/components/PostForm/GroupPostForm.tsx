@@ -39,8 +39,8 @@ const GroupPostForm: React.FC<GroupPostFormProps> = ({ groupId, onSubmit }) => {
             return;
         }
 
-        if (title.length > 30) {
-            setError('Title must be 30 characters or less');
+        if (title.length > 60) {
+            setError('Title must be 60 characters or less');
             return;
         }
 
@@ -49,8 +49,8 @@ const GroupPostForm: React.FC<GroupPostFormProps> = ({ groupId, onSubmit }) => {
             return;
         }
 
-        if (text.length > 2000) {
-            setError('Post text must be 2000 characters or less');
+        if (text.length > 600) {
+            setError('Post text must be 600 characters or less');
             return;
         }
 

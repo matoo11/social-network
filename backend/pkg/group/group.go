@@ -731,16 +731,16 @@ func CreateGroupPostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "title is required", http.StatusBadRequest)
 		return
 	}
-	if len(title) > 30 {
-		http.Error(w, "title must be 30 characters or fewer", http.StatusBadRequest)
+	if len(title) > 60 {
+		http.Error(w, "title must be 60 characters or fewer", http.StatusBadRequest)
 		return
 	}
 	if text == "" {
 		http.Error(w, "text is required", http.StatusBadRequest)
 		return
 	}
-	if len(text) > 2000 {
-		http.Error(w, "text must be 2000 characters or fewer", http.StatusBadRequest)
+	if len(text) > 600 {
+		http.Error(w, "text must be 600 characters or fewer", http.StatusBadRequest)
 		return
 	}
 

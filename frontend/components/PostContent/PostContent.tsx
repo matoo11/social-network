@@ -114,8 +114,6 @@ const PostContent: React.FC<PostContentProps> = ({ postID }) => {
             }));
 
             setCurrentCommentsData(mappedComments);
-            console.log('Mapped Comments:', mappedComments);
-            console.log('post data', PostData);
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setError(err.message);

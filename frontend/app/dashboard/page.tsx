@@ -45,27 +45,27 @@ const Dashboard = () => {
         e.preventDefault();
         setError('');
 
-        const formData = new FormData()
+        const formData = new FormData();
 
         // Hardcoded post data
         const postData = {
-            title: "Test Post",
-            message: "This is a test post from the frontend.",
-            typeId: 1
-        }
+            title: 'Test Post',
+            message: 'This is a test post from the frontend.',
+            typeId: 1,
+        };
 
-        formData.append("data", JSON.stringify(postData))
+        formData.append('data', JSON.stringify(postData));
 
         // Optional: attach a dummy image file if you have an <input type="file" id="imageInput">
-        const fileInput = document.querySelector<HTMLInputElement>("#imageInput")
+        const fileInput = document.querySelector<HTMLInputElement>('#imageInput');
         if (fileInput && fileInput.files?.length) {
-            formData.append("image", fileInput.files[0])
+            formData.append('image', fileInput.files[0]);
         }
         try {
             const res = await fetchWithAuth('http://localhost:8080/api/createPost', {
                 method: 'POST',
                 credentials: 'include',
-                body: formData
+                body: formData,
             });
 
             if (!res.ok) {
@@ -174,7 +174,6 @@ const Dashboard = () => {
             if (!res.ok) {
                 throw new Error('Failed to logout');
             }
-            console.log(await res.json());
 
             //   router.push('/login');
         } catch (err: unknown) {
@@ -195,7 +194,7 @@ const Dashboard = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ title: "hrar", description: "jawad" }),
+                body: JSON.stringify({ title: 'hrar', description: 'jawad' }),
             });
 
             if (!res.ok) {

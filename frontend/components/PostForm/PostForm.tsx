@@ -108,7 +108,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
             if (!res.ok) {
                 // Try to extract error message from response
                 let errorMessage = 'Failed to create post';
-                
+
                 try {
                     const contentType = res.headers.get('content-type');
                     if (contentType?.includes('application/json')) {
@@ -129,12 +129,11 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
                     } else {
                         const errorText = await res.text();
                         errorMessage = errorText || errorMessage;
-                        console.log("here")
                     }
                 } catch {
                     // If parsing fails, use default message
                 }
-                
+
                 setError(errorMessage);
                 return false;
             }

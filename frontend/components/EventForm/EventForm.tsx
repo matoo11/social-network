@@ -36,10 +36,10 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
             return;
         }
 
-        // Add this validation
+        // Validate event time is in the future (compare in UTC)
         const selectedDate = new Date(eventTime);
-        const now = new Date();
-        if (selectedDate < now) {
+        const nowUTC = new Date();
+        if (selectedDate.getTime() <= nowUTC.getTime()) {
             setError('Event date and time must be in the future');
             return;
         }
@@ -154,8 +154,8 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
                                 type="datetime-local"
                                 value={eventTime}
                                 onChange={(e) => setEventTime(e.target.value)}
-                                min={new Date().toISOString().slice(0, 16)} // Add this line
-                                required
+                                // min={new Date().toISOString().slice(0, 16)} // Add this line
+                                // required
                                 className="w-full px-3 py-2 bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 transition-colors"
                             />
                         </div>

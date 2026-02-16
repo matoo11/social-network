@@ -45,7 +45,7 @@ func CreateGroupMessage(message GroupMessage) error {
 		message.IsActive,
 	)
 	if err != nil {
-		fmt.Println("create error")
+		fmt.Printf("create group message error: %v\n", err)
 		return fmt.Errorf("failed to create chat message: %v", err)
 	}
 	return nil

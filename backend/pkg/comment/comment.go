@@ -86,8 +86,6 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	fmt.Println(commentText)
-
 	// Handle optional image
 	var imageID *int = nil
 	file, handler, err := r.FormFile("image")
@@ -95,7 +93,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 		imgID, err := dbConn.SaveImage(file, handler.Filename, LoggedInUserID)
 		if err != nil {
-			fmt.Println(err)
+
 			http.Error(w, "Image upload failed", http.StatusInternalServerError)
 			return
 		}

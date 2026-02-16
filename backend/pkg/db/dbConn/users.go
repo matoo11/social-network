@@ -39,7 +39,7 @@ type UserDisplay struct {
 }
 
 func CreateUser(user User) error {
-	fmt.Println(user.Gender)
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("failed to hash password: %v", err)
@@ -125,7 +125,7 @@ func GetAllUsers() ([]UserDisplay, error) {
 	First_Name, Last_Name FROM Users`
 	data, err := dbHandler.DB.Query(statement)
 	if err != nil {
-		fmt.Println("fuck2")
+
 		return nil, err
 	}
 	defer data.Close()
@@ -136,13 +136,13 @@ func GetAllUsers() ([]UserDisplay, error) {
 			&user.First_Name,
 			&user.Last_Name)
 		if err != nil {
-			fmt.Println("fuck4")
+
 			return nil, err
 		}
 		users = append(users, user)
 	}
 	if err := data.Err(); err != nil {
-		fmt.Println("fuck3")
+
 		return nil, err
 	}
 	return users, nil

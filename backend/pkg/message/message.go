@@ -72,9 +72,8 @@ func GetChatList(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("here")
+
 	fmt.Println(err)
-	fmt.Println(hrar)
 
 	if err := auth.JsonEncode(w, hrar); err != nil {
 		fmt.Println(err)

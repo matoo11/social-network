@@ -109,8 +109,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		PrivateUsersIDs: payload.PrivateUsers,
 	}
 
-	fmt.Println("Post Data:", post)
-
 	if err := dbConn.CreatePost(post); err != nil {
 		http.Error(w, "Could not create post", http.StatusInternalServerError)
 		return

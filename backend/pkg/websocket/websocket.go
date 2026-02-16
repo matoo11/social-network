@@ -44,7 +44,7 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	} else {
 		LoggedInUserID = session.UserID
-		fmt.Println(LoggedInUserID)
+
 	}
 
 	con, err := upgrader.Upgrade(w, r, nil)
@@ -82,8 +82,7 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			LoggedInUserID = session.UserID
 			User, err := dbConn.GetUserByID(LoggedInUserID)
 			if err != nil {
-				fmt.Println("fuck2")
-				fmt.Println("super fuck error")
+
 				fmt.Println(err)
 				break
 			}
@@ -99,7 +98,6 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 
 			if err := json.Unmarshal(msg.Data, &data); err != nil {
 
-				fmt.Println("unmarshal error 1")
 				continue
 			}
 

@@ -82,7 +82,7 @@ func AddFollow(w http.ResponseWriter, r *http.Request) {
 
 	err = dbConn.CreateFollow(follow)
 	if err != nil {
-		fmt.Println(err)
+
 		if err.Error() == "you already following this user" {
 			http.Error(w, err.Error(), 400)
 		}
@@ -117,31 +117,30 @@ func FollowStatus(w http.ResponseWriter, r *http.Request) {
 		auth.ErrorPage(w, 500)
 		return
 	}
-	fmt.Println(isFollowing)
+
 	if !isFollowing {
 		checkRequest, err := dbConn.RequestStatus(LoggedInUserID, data.FollowedID)
-		fmt.Println("here000")
-		fmt.Println(checkRequest)
+
 		if err != nil {
-			fmt.Println("here555")
+
 			if err != sql.ErrNoRows {
 				auth.ErrorPage(w, 500)
-				fmt.Println("here999")
+
 				return
 			}
-			fmt.Println("here444")
+
 			status = 3
 		} else if checkRequest != 2 {
-			fmt.Println("here111")
+
 			status = checkRequest
 		}
 	} else {
-		fmt.Println("222")
+
 		status = 2
 	}
-	fmt.Println("here333")
+
 	if err := auth.JsonEncode(w, status); err != nil {
-		fmt.Println("encode")
+
 		auth.ErrorPage(w, 500)
 		return
 	}
@@ -180,7 +179,6 @@ func UnFollow(w http.ResponseWriter, r *http.Request) {
 
 func GetFollowers(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("GetFollowers called")
 	session, err := dbConn.GetSessionFromCookie(r)
 
 	if err != nil {
@@ -189,16 +187,13 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// LoggedInUserID = session.UserID
 	}
-	fmt.Println("Session validated")
 
-	fmt.Println(session.UserID)
 	data := struct {
 		FollowedID int `json:"userID"`
 	}{}
 
 	data.FollowedID = session.UserID
 
-	fmt.Println("Fetching followers for user ID:", data.FollowedID)
 	followers, err := dbConn.GetFollowersByUserID(data.FollowedID)
 
 	if err != nil {

@@ -269,7 +269,7 @@ func InviteToGroupHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("error creating invite here")
+		fmt.Printf("Failed to create invite notification: %v\n", err)
 		return
 	}
 
@@ -623,7 +623,7 @@ func RespondToInviteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = dbConn.DeleteNotification(payload.NotificationId, actingUserID)
-	fmt.Println(payload.NotificationId)
+
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)

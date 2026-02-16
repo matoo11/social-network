@@ -65,7 +65,7 @@ func CreateChatMessage(message Message) error {
 		message.IsActive,
 	)
 	if err != nil {
-		fmt.Println("create error")
+		fmt.Printf("create chat message error: %v\n", err)
 		return fmt.Errorf("failed to create chat message: %v", err)
 	}
 	return nil
@@ -171,7 +171,7 @@ func GetChatUsers(userID int) ([]ChatUser, error) {
 		}
 		user1, err := GetUserByID(user.UserID)
 		if err != nil {
-			fmt.Println(err)
+
 			return nil, err
 		}
 		user.Username = user1.User_Name

@@ -73,15 +73,15 @@ func SendNotification(nId int, to int, nType int) {
 			conn.Lock.Lock()
 			conn.Conn.WriteJSON(res)
 			conn.Lock.Unlock()
-			fmt.Println("Follow request notification sent")
+
 		}
-		fmt.Println("here123")
+
 	case 6:
 
 		conn := GetClientConn(to)
 		notification, err := dbConn.GetNotificationByID(nId)
 		if err != nil {
-			fmt.Println("notification error 1")
+			fmt.Printf("notification error getting notification: %v\n", err)
 			return
 		}
 
@@ -89,14 +89,14 @@ func SendNotification(nId int, to int, nType int) {
 		invit, err := dbConn.GetGroupInviteByID(inviteId)
 
 		if err != nil {
-			fmt.Println("notification error 2")
+			fmt.Printf("notification error getting invite: %v\n", err)
 			return
 		}
 
 		group, err := dbConn.GetGroupByID(invit.GroupID)
 
 		if err != nil {
-			fmt.Println("notification error 2")
+			fmt.Printf("notification error getting group: %v\n", err)
 			return
 		}
 		invite := GroupInvite{
@@ -120,7 +120,7 @@ func SendNotification(nId int, to int, nType int) {
 			conn.Lock.Lock()
 			conn.Conn.WriteJSON(res)
 			conn.Lock.Unlock()
-			fmt.Println("sentttt")
+
 		}
 	case 10:
 		conn := GetClientConn(to)

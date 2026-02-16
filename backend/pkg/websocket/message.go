@@ -119,7 +119,7 @@ func SendChatMessage(owner int, ownerUsername string, sento int, message string)
 		Data: chatJson,
 	}
 	if sentoConn != nil {
-		fmt.Println("worked")
+
 		sentoConn.Lock.Lock()
 		sentoConn.Conn.WriteJSON(response)
 		sentoConn.Lock.Unlock()
@@ -129,7 +129,7 @@ func SendChatMessage(owner int, ownerUsername string, sento int, message string)
 func GroupChat(groupID int, message string, conn *Conn, LoggedInUserID int, LoggedInUsername string) {
 	check, err := dbConn.IsGroupMember(groupID, LoggedInUserID)
 	if err != nil {
-		fmt.Println("idk error")
+		fmt.Printf("failed to check group membership: %v\n", err)
 		return
 	}
 	if !check {

@@ -50,18 +50,16 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		userInfo := GenerateNewValidUser(requestBody)
 
 		if err = dbConn.CreateUser(userInfo); err != nil {
-			fmt.Println("here?")
-			fmt.Println(err)
+
 			http.Error(w, http.StatusText(500), 500)
 			return
 		}
 
-		fmt.Println("fuck sign up")
 		feedback := "Registration successful!"
 		RenderSignupFeedback(w, feedback, "success")
 		// updateOnlineUsers()
 	} else {
-		fmt.Println("here2")
+
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }
@@ -119,5 +117,5 @@ func RenderSignupFeedback(w http.ResponseWriter, feedback string, feedbackType s
 	}
 
 	JsonEncode(w, signUpFeedback)
-	fmt.Println(feedback, feedbackType)
+
 }

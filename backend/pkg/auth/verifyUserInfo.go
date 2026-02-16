@@ -59,7 +59,7 @@ func VerifyUserInfo(userInfo SignupRequest) error {
 	}
 
 	// Validate nickname only if provided (optional field)
-	fmt.Println(userInfo.Nickname)
+
 	if userInfo.Nickname != "" {
 		if err := VerifyNickname(userInfo.Nickname); err != nil {
 			return err

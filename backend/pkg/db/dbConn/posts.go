@@ -92,7 +92,7 @@ func CreatePost(post PostData) error {
 		formattedCurrentTime,
 	)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("create post error: %v\n", err)
 		return err
 	}
 

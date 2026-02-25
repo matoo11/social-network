@@ -11,6 +11,7 @@ import FollowersList from '../FollowersList/FollowersList';
 import PostCard from '../PostCard/PostCard';
 import CommentCard from '../CommentCard/CommentCard';
 import ImageUploader from '../ImageUploader/ImageUploader';
+import { validateImage } from '@/lib/validation/imageValidation';
 
 export type Comment = {
     postID: number;
@@ -39,10 +40,8 @@ type CommentData = {
 };
 
 const MAX_COMMENT_LENGTH = 300;
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
-function validateComment(commentText: string, file: File | null): string | null {
+async function validateComment(commentText: string, file: File | null): Promise<string | null> {
     const trimmed = commentText.trim();
 
     if (!trimmed && !file) {
@@ -54,11 +53,10 @@ function validateComment(commentText: string, file: File | null): string | null 
     }
 
     if (file) {
-        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-            return 'Invalid image format. Only JPEG, PNG, GIF, and WebP are allowed.';
-        }
-        if (file.size > MAX_IMAGE_SIZE) {
-            return `Image is too large. Maximum size is ${MAX_IMAGE_SIZE / (1024 * 1024)}MB.`;
+        // Use the centralized image validation
+        const imageError = await validateImage(file);
+        if (imageError) {
+            return imageError;
         }
     }
 
@@ -90,6 +88,18 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
     const [comment, setComment] = useState('');
     const [formError, setFormError] = useState<string | null>(null);
 
+    // Handle image validation errors from ImageUploader
+    const handleImageError = (error: string | null) => {
+        if (error) {
+            setFormError(error);
+        } else {
+            // Clear error if it was an image error
+            if (formError && formError.includes('image')) {
+                setFormError(null);
+            }
+        }
+    };
+
     async function handleCommentSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         const data: CommentData = {
@@ -106,7 +116,7 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
         setFormError(null);
 
         // Frontend validation
-        const validationError = validateComment(comment, file);
+        const validationError = await validateComment(comment, file);
         if (validationError) {
             setFormError(validationError);
             return;
@@ -210,7 +220,7 @@ const CommentList: React.FC<CommentListProps> = ({ postID, error, comments, onCo
                             }}
                         ></textarea>
                         <div className="flex items-center shrink-0 gap-0.5 pb-0.5">
-                            <ImageUploader file={file} setFile={setFile} />
+                            <ImageUploader file={file} setFile={setFile} onError={handleImageError} />
                             <button
                                 type="submit"
                                 className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors duration-150"

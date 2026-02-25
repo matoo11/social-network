@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import GroupPostFormUI from './GroupPostFormUI';
 import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
+import { validateImage } from '@/lib/validation/imageValidation';
 
 type GroupPostFormProps = {
     groupId: number;
@@ -54,6 +55,16 @@ const GroupPostForm: React.FC<GroupPostFormProps> = ({ groupId, onSubmit }) => {
             return;
         }
 
+        // Validate image if present
+        const fileInput = document.querySelector<HTMLInputElement>('#file_input');
+        if (fileInput && fileInput.files?.length) {
+            const imageError = await validateImage(fileInput.files[0]);
+            if (imageError) {
+                setError(imageError);
+                return;
+            }
+        }
+
         const formDataPayload = new FormData();
         const postData = {
             groupId,
@@ -63,7 +74,6 @@ const GroupPostForm: React.FC<GroupPostFormProps> = ({ groupId, onSubmit }) => {
         formDataPayload.append('data', JSON.stringify(postData));
 
         // Handle image upload
-        const fileInput = document.querySelector<HTMLInputElement>('#file_input');
         if (fileInput && fileInput.files?.length) {
             formDataPayload.append('image', fileInput.files[0]);
         }

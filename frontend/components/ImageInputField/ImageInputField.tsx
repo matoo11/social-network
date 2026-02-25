@@ -2,24 +2,44 @@
 
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
+import { validateImage, getMaxFileSizeString } from '@/lib/validation/imageValidation';
 
 interface ImageInputFieldProps {
     showPreview?: boolean; // makes preview optional
+    onError?: (error: string) => void; // callback for validation errors
 }
 
-const ImageInputField: React.FC<ImageInputFieldProps> = ({ showPreview = false }) => {
+const ImageInputField: React.FC<ImageInputFieldProps> = ({ showPreview = false, onError }) => {
     const [preview, setPreview] = useState<string | null>(null);
+    const [validationError, setValidationError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null); // Ref for the file input
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return; // User canceled, do nothing
+
+        // Clear previous errors
+        setValidationError(null);
+
+        // Validate image
+        const error = await validateImage(file);
+        if (error) {
+            setValidationError(error);
+            if (onError) onError(error);
+            // Clear the input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+            return;
+        }
+
         const url = URL.createObjectURL(file);
         setPreview(url);
     };
 
     const handleClear = () => {
         setPreview(null);
+        setValidationError(null);
         if (fileInputRef.current) {
             fileInputRef.current.value = ''; // Reset the input so the same file can be uploaded again
         }
@@ -27,6 +47,13 @@ const ImageInputField: React.FC<ImageInputFieldProps> = ({ showPreview = false }
 
     return (
         <div className="w-full flex flex-col gap-3">
+            {/* Validation Error Display */}
+            {validationError && (
+                <div className="bg-red-900/20 border border-red-500 text-red-400 px-4 py-2 rounded-lg text-sm">
+                    {validationError}
+                </div>
+            )}
+
             {/* File input label */}
             <label
                 htmlFor="file_input"
@@ -50,7 +77,7 @@ const ImageInputField: React.FC<ImageInputFieldProps> = ({ showPreview = false }
                         <span className="font-semibold">Click to upload</span>
                     </p>
                     <p className="text-xs text-gray-400 text-center mt-1">
-                        Max size: 20 MB · Formats: JPEG, PNG, GIF
+                        Max size: {getMaxFileSizeString()} · Formats: JPEG, PNG, GIF
                     </p>
                 </div>
                 <input

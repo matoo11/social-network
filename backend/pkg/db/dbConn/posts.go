@@ -1,14 +1,11 @@
 package dbConn
 
 import (
-	"bytes"
 	"database/sql"
 	"fmt"
-	"image"
-	"io"
 	"mime/multipart"
-	"net/http"
 	"social/backend/pkg/db/dbHandler"
+	"social/backend/pkg/util"
 	"time"
 )
 
@@ -394,29 +391,11 @@ func GetPostsByUserForViewer(ownerID, viewerID int) ([]PostDisplay, error) {
 	return posts, nil
 }
 
-func SaveImage(file multipart.File, filename string, userID int) (int, error) {
-	// Read file bytes
-	data, err := io.ReadAll(file)
+func SaveImage(file multipart.File, handler *multipart.FileHeader, userID int) (int, error) {
+	// Use comprehensive image validation
+	data, contentType, width, height, err := util.ValidateImageFile(file, handler)
 	if err != nil {
 		return 0, err
-	}
-
-	// Detect image type and size
-	contentType := http.DetectContentType(data)
-	img, _, err := image.DecodeConfig(bytes.NewReader(data))
-	if err != nil {
-		// fallback if image.DecodeConfig fails
-		img.Width = 0
-		img.Height = 0
-	}
-
-	// Validate aspect ratio to prevent extremely stretched images
-	if img.Width > 0 && img.Height > 0 {
-		aspectRatio := float64(img.Width) / float64(img.Height)
-		// Reject images with aspect ratio greater than 5:1 or less than 1:5
-		if aspectRatio > 5.0 || aspectRatio < 0.2 {
-			return 0, fmt.Errorf("image aspect ratio is too extreme (width:height must be between 1:5 and 5:1)")
-		}
 	}
 
 	query := `
@@ -443,10 +422,10 @@ func SaveImage(file multipart.File, filename string, userID int) (int, error) {
 		query,
 		"nil", // optional reference string (if you use external path)
 		data,
-		filename,
+		handler.Filename,
 		contentType,
-		img.Width,
-		img.Height,
+		width,
+		height,
 		len(data),
 		2, // Image_Usage_Type_ID — define 2 for “post image”
 		userID,

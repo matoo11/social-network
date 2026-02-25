@@ -4,6 +4,7 @@ import React from 'react';
 import { useState } from 'react';
 import PostFormUI from './PostFormUI';
 import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
+import { validateImage } from '@/lib/validation/imageValidation';
 
 type PostFormProps = {
     onSubmit?: () => void;
@@ -74,6 +75,16 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
             return;
         }
 
+        // Validate image if present
+        const fileInput = document.querySelector<HTMLInputElement>('#file_input');
+        if (fileInput && fileInput.files?.length) {
+            const imageError = await validateImage(fileInput.files[0]);
+            if (imageError) {
+                setError(imageError);
+                return;
+            }
+        }
+
         const formDataa = new FormData();
         const postDataa = {
             title: formData.title,
@@ -83,7 +94,6 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit }) => {
         };
         formDataa.append('data', JSON.stringify(postDataa));
 
-        const fileInput = document.querySelector<HTMLInputElement>('#file_input');
         if (fileInput && fileInput.files?.length) {
             formDataa.append('image', fileInput.files[0]);
         }

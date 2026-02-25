@@ -1,13 +1,15 @@
 'use client';
 import React, { useRef, useState, useEffect } from 'react';
+import { validateImage } from '@/lib/validation/imageValidation';
 
 type ImageUploaderProps = {
     className?: string;
     file: File | null; // parent-controlled file
     setFile: (file: File | null) => void; // callback to parent
+    onError?: (error: string | null) => void; // callback for validation errors
 };
 
-function ImageUploader({ className = '', file, setFile }: ImageUploaderProps) {
+function ImageUploader({ className = '', file, setFile, onError }: ImageUploaderProps) {
     const [fileName, setFileName] = useState<string>('No file chosen');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -20,10 +22,25 @@ function ImageUploader({ className = '', file, setFile }: ImageUploaderProps) {
         }
     }, [file]);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
 
         if (!selectedFile) return;
+
+        // Validate image
+        const error = await validateImage(selectedFile);
+        if (error) {
+            // Pass error to parent
+            if (onError) onError(error);
+            // Clear the input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+            return;
+        }
+
+        // Clear any previous errors
+        if (onError) onError(null);
 
         setFileName(selectedFile.name);
         setIsVisible(true);
@@ -36,6 +53,7 @@ function ImageUploader({ className = '', file, setFile }: ImageUploaderProps) {
         setIsVisible(false);
         setFileName('No file chosen');
         setFile(null); // clear file in parent
+        if (onError) onError(null); // clear any errors
 
         if (fileInputRef.current) {
             fileInputRef.current.value = '';

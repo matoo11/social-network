@@ -86,10 +86,10 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	file, handler, err := r.FormFile("image")
 	if err == nil {
 		defer file.Close()
-		imgID, err := dbConn.SaveImage(file, handler.Filename, LoggedInUserID)
+		imgID, err := dbConn.SaveImage(file, handler, LoggedInUserID)
 		if err != nil {
 			fmt.Println(err)
-			http.Error(w, "Image upload failed", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		imageID = &imgID

@@ -45,7 +45,7 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
                 setIsChecked(newValue);
                 onCheckChange?.(newValue);
             }}
-            className="h-11 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-600 transition duration-200 ease-in-out shadow-sm"
+            className="h-11 bg-slate-700 border border-gray-200 border-slate-600 rounded-lg cursor-pointer hover:bg-gray-50 hover:bg-slate-600 transition duration-200 ease-in-out shadow-sm"
         >
             <div className="flex items-center justify-between h-full px-3">
                 {/* Left: Avatar + Info */}
@@ -54,7 +54,7 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
                         <ProfileImage imageUrl={avatarUrl || ''} avatarNumber={avatarNumber} />
                     </div>
                     <div className="flex flex-col min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">
+                        <p className="text-sm font-medium truncate text-gray-100">
                             {username}
                         </p>
                         {description && (
@@ -71,7 +71,7 @@ const FollowerCard: React.FC<FollowerCardProps> = ({
                     checked={isChecked}
                     onChange={handleCheckboxChange}
                     onClick={(e) => e.stopPropagation()}
-                    className="ml-2 flex-shrink-0 w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 dark:ring-offset-slate-700 dark:bg-slate-600 dark:border-slate-500 cursor-pointer"
+                    className="ml-2 flex-shrink-0 w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 ring-offset-slate-700 bg-slate-600 border-slate-500 cursor-pointer"
                 />
             </div>
         </div>

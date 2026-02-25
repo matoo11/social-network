@@ -30,7 +30,7 @@ const ImageInputField: React.FC<ImageInputFieldProps> = ({ showPreview = false }
             {/* File input label */}
             <label
                 htmlFor="file_input"
-                className="flex flex-col items-center justify-center w-full min-h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:bg-slate-800 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                className="flex flex-col items-center justify-center w-full min-h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 bg-slate-800 border-slate-600 hover:bg-gray-100 hover:bg-slate-700 transition-colors"
             >
                 <div className="flex flex-col items-center justify-center py-4 px-3">
                     <svg
@@ -46,10 +46,10 @@ const ImageInputField: React.FC<ImageInputFieldProps> = ({ showPreview = false }
                             d="M12 4v16m8-8H4"
                         />
                     </svg>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    <p className="text-sm text-gray-400 text-center">
                         <span className="font-semibold">Click to upload</span>
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">
+                    <p className="text-xs text-gray-400 text-center mt-1">
                         Max size: 20 MB · Formats: JPEG, PNG, GIF
                     </p>
                 </div>
@@ -65,7 +65,7 @@ const ImageInputField: React.FC<ImageInputFieldProps> = ({ showPreview = false }
 
             {/* Conditional image preview */}
             {showPreview && (
-                <div className="relative min-h-28 rounded-lg border-2 border-gray-200 dark:border-slate-600 overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-gray-500">
+                <div className="relative min-h-28 rounded-lg border-2 border-gray-200 border-slate-600 overflow-hidden flex items-center justify-center bg-gray-100 bg-slate-800 text-gray-400 text-gray-500">
                     {preview ? (
                         <>
                             <Image
@@ -84,7 +84,7 @@ const ImageInputField: React.FC<ImageInputFieldProps> = ({ showPreview = false }
                             </button>
                         </>
                     ) : (
-                        <span className="text-sm text-gray-500 dark:text-gray-500 font-medium">
+                        <span className="text-sm text-gray-500 font-medium">
                             No image yet
                         </span>
                     )}

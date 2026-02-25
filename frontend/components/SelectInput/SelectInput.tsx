@@ -38,14 +38,14 @@ const SelectInput: React.FC<SelectInputProps> = ({
         <div className={`w-full ${className || ''}`}>
             <label
                 htmlFor={id}
-                className="block mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
+                className="block mb-2 text-sm font-semibold text-gray-300"
             >
                 {selectLabel}
             </label>
 
             <select
                 id={id}
-                className="w-full px-3 py-2 border-2 border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 dark:focus:ring-blue-500 dark:focus:border-blue-500 cursor-pointer"
+                className="w-full px-3 py-2 border-2 border-gray-200 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-slate-800 border-slate-600 text-gray-100 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                 value={currentSelection?.optionValue}
                 onChange={handleChange}
             >

@@ -73,7 +73,7 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-8">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Loading followers...</p>
+                <p className="text-sm text-gray-400">Loading followers...</p>
             </div>
         );
     }
@@ -81,7 +81,7 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
     if (!followersListData || followersListData.length === 0) {
         return (
             <div className="flex items-center justify-center py-8">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-400">
                     You don't have any followers yet.
                 </p>
             </div>
@@ -121,7 +121,7 @@ const FollowersList: React.FC<FollowersListProps> = ({ onSelectionChange }) => {
                         />
                     ))
                 ) : (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm italic py-2">
+                    <p className="text-gray-400 text-sm italic py-2">
                         No followers match your search.
                     </p>
                 )}

@@ -35,6 +35,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
     const messageIdRef = useRef<number>(0);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -129,11 +130,6 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         if (input.length > 300) return;
 
         SendChatMessage(Number(chatID), input, 2);
-        // sendMessage("chat", {
-        //     from: chatter,
-        //     to: chatWith,
-        //     message: input,
-        // });
 
         const newMessage: Message = {
             id: Date.now(),
@@ -188,7 +184,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
             <div className="flex-shrink-0 flex flex-col gap-2 border-t border-gray-400 p-3">
                 {showEmojiPicker && (
                     <div className="flex justify-center">
-                        <EmojiPicker onSelectEmoji={handleEmojiSelect} />
+                        <EmojiPicker onSelectEmoji={handleEmojiSelect} parentRef={inputRef} />
                     </div>
                 )}
                 <div className="flex items-center gap-2">
@@ -202,6 +198,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
                     </button>
                     <div className="flex-1 min-w-0 relative">
                         <input
+                            ref={inputRef}
                             type="text"
                             disabled={!chatID || Number(chatID) === 0}
                             maxLength={300}
@@ -228,7 +225,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
                     <button
                         onClick={handleSend}
                         disabled={!chatID || Number(chatID) === 0 || input.length > 300}
-                        className="flex-shrink-0 cursor-pointer px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg font-semibold text-sm sm:text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-shrink-0 cursor-pointer px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm sm:text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Send
                     </button>
@@ -237,8 +234,6 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         </div>
     );
 };
-
-// export default GroupChatArea;
 
 const GroupChat: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     return (

@@ -115,10 +115,20 @@ const EMOJI_CATEGORIES = {
 
 type EmojiPickerProps = {
     onSelectEmoji: (emoji: string) => void;
+    parentRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
 };
 
-const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelectEmoji }) => {
+const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelectEmoji, parentRef }) => {
     const [activeTab, setActiveTab] = useState<keyof typeof EMOJI_CATEGORIES>('smileys');
+
+    const handleEmojiSelect = (emoji: string) => {
+        onSelectEmoji(emoji);
+        
+        // Focus the parent input/textarea after selecting emoji
+        if (parentRef?.current) {
+            parentRef.current.focus();
+        }
+    };
 
     return (
         <div className="w-72 h-56 bg-gray-800 border border-gray-600 rounded-lg shadow-lg p-2 flex flex-col">
@@ -144,7 +154,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelectEmoji }) => {
                 {EMOJI_CATEGORIES[activeTab].map((emoji, idx) => (
                     <button
                         key={idx}
-                        onClick={() => onSelectEmoji(emoji)}
+                        onClick={() => handleEmojiSelect(emoji)}
                         className="text-2xl hover:bg-gray-700 rounded p-1 transition-colors"
                         title={emoji}
                     >

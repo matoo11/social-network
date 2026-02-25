@@ -122,7 +122,7 @@ const NotificationCenter = ({
     };
 
     return (
-        <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
+        <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden bg-gray-900">
             <div className="flex justify-center items-center h-[7.5%] pt-2 border-b-2 border-gray-600">
                 <Title text="Notifications" />
             </div>

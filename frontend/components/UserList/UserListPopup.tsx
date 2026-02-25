@@ -63,7 +63,7 @@ export default function UserListPopup({ isOpen, onClose }: UserListPopupProps) {
     return (
         <>
             <Popup isOpen={isOpen} onClose={onClose} className="max-w-lg">
-            <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
+            <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden bg-gray-900">
                 {/* Header */}
                 <div className="flex justify-center gap-5 items-center h-16 pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">

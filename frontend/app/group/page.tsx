@@ -719,7 +719,7 @@ export default function SocialFeed() {
                 onClose={() => setIsInviteMembersOpen(false)}
                 className="max-w-3xl"
             >
-                <div className="border-2 border-gray-600 rounded-lg shadow-sm bg-gray-900 dark:bg-gray-900 p-4 h-full flex flex-col gap-4">
+                <div className="border-2 border-gray-600 rounded-lg shadow-sm bg-gray-900 p-4 h-full flex flex-col gap-4">
                     <Title
                         text={
                             actionGroupTitle
@@ -752,7 +752,7 @@ export default function SocialFeed() {
                 onClose={() => setIsSeeMembersOpen(false)}
                 className="max-w-lg"
             >
-                <div className="border-2 border-gray-600 rounded-lg shadow-sm bg-gray-900 dark:bg-gray-900 p-4 h-full flex flex-col gap-4">
+                <div className="border-2 border-gray-600 rounded-lg shadow-sm bg-gray-900 p-4 h-full flex flex-col gap-4">
                     <Title
                         text={actionGroupTitle ? `Members of ${actionGroupTitle}` : 'Group members'}
                     />

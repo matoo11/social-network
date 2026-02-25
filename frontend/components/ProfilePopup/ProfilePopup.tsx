@@ -142,10 +142,10 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
 
     return (
         <Popup isOpen={isOpen} onClose={onClose} className="max-w-5xl">
-            <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden dark:bg-gray-900">
+            <div className="border-2 border-gray-600 rounded-lg h-full shadow-sm overflow-hidden bg-gray-900">
                 {/* Header */}
-                <div className="flex justify-center gap-5 items-center h-16 pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden dark:bg-gray-900">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <div className="flex justify-center gap-5 items-center h-16 pt-2 border-b-2 border-gray-600 shadow-sm overflow-hidden bg-gray-900">
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
                         </svg>
@@ -170,7 +170,7 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
                     {!loading && !error && profile && (
                         <div className="space-y-6">
                             {/* Profile Header */}
-                            <div className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-6">
+                            <div className="bg-gray-800 border border-gray-600 rounded-lg p-6">
                                 <div className="flex flex-col md:flex-row gap-4">
                                     {/* Avatar */}
                                     <div className="flex-shrink-0">
@@ -307,7 +307,7 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
                                             profile.posts.map((post) => (
                                                 <div
                                                     key={post.postID}
-                                                    className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-4"
+                                                    className="bg-gray-800 border border-gray-600 rounded-lg p-4"
                                                 >
                                                     <h4 className="text-lg font-bold text-white mb-2">
                                                         {post.title}
@@ -336,7 +336,7 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
                                             profile.followers.map((follower) => (
                                                 <div
                                                     key={follower.userID}
-                                                    className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                    className="bg-gray-800 border border-gray-600 rounded-lg p-3 flex items-center justify-between hover:bg-gray-700 transition-colors"
                                                 >
                                                     <div className="flex items-center gap-3 flex-1">
                                                         <div className="w-10 h-10 flex-shrink-0">
@@ -377,7 +377,7 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
                                             profile.following.map((following) => (
                                                 <div
                                                     key={following.userID}
-                                                    className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                    className="bg-gray-800 border border-gray-600 rounded-lg p-3 flex items-center justify-between hover:bg-gray-700 transition-colors"
                                                 >
                                                     <div className="flex items-center gap-3 flex-1">
                                                         <div className="w-10 h-10 flex-shrink-0">

@@ -104,7 +104,7 @@ export default function UserListPopup({ isOpen, onClose }: UserListPopupProps) {
                             </div>
                         </div>
 
-                        <ul className="h-[calc(100%-3.5rem)] overflow-y-auto text-gray-200 space-y-1">
+                        <ul className="h-[calc(100%-3.5rem)] overflow-y-auto hide-scrollbar text-gray-200 space-y-1">
                             {filteredUsers.length > 0 ? (
                                 filteredUsers.map((u) => (
                                     <li key={u.User_ID} className="mb-2">

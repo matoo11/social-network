@@ -70,13 +70,11 @@ const EventsList: React.FC<EventsListProps> = ({ groupId }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md border border-gray-200 dark:border-slate-700 overflow-hidden h-full w-full flex flex-col">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 px-6 py-2 border-b border-gray-200 dark:border-slate-700 flex justify-center">
+        <div className="bg-slate-900 rounded-xl shadow-md border border-slate-700 overflow-hidden h-full w-full flex flex-col">
+            <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-2 border-b border-slate-700 flex justify-center">
                 <div className="flex items-center gap-3">
                     <div className="w-1 h-4 sm:h-5 bg-emerald-500 rounded-full"></div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100">
-                        Group Events
-                    </h2>
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-100">Group Events</h2>
                     <PopupBtn
                         onClick={() => setIsCreating(!isCreating)}
                         color="emerald"

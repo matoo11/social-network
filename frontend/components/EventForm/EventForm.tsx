@@ -111,20 +111,16 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-md border border-gray-200 dark:border-slate-700 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 px-4 py-1.5 border-b border-gray-200 dark:border-slate-700 flex justify-center">
-                <h2 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100">
-                    Create Event
-                </h2>
+        <div className="bg-slate-900 rounded-xl shadow-md border border-slate-700 overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-4 py-1.5 border-b border-slate-700 flex justify-center">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-100">Create Event</h2>
             </div>
 
             <div className="p-4">
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
-                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                            <p className="text-red-700 dark:text-red-400 text-sm font-medium">
-                                {error}
-                            </p>
+                        <div className="bg-red-900/20 border border-red-800 rounded-lg p-3">
+                            <p className="text-red-400 text-sm font-medium">{error}</p>
                         </div>
                     )}
 
@@ -147,7 +143,7 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
                         </div>
 
                         <div>
-                            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                            <label className="text-sm font-semibold text-gray-300 mb-2 block">
                                 Date and Time
                             </label>
                             <input
@@ -156,13 +152,13 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
                                 onChange={(e) => setEventTime(e.target.value)}
                                 // min={new Date().toISOString().slice(0, 16)} // Add this line
                                 // required
-                                className="w-full px-3 py-2 bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:text-gray-100 transition-colors"
+                                className="w-full px-3 py-2 bg-slate-800 border-2 border-slate-600 text-gray-100 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                        <label className="text-sm font-semibold text-gray-300 mb-2 block">
                             Description
                         </label>
                         <textarea
@@ -172,24 +168,24 @@ const EventForm: React.FC<EventFormProps> = ({ groupId, onEventCreated, onCancel
                             maxLength={500}
                             required
                             rows={3}
-                            className="w-full px-3 py-2 bg-white border-2 border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:border-slate-600 dark:placeholder-gray-500 dark:text-gray-100 resize-none transition-colors"
+                            className="w-full px-3 py-2 bg-slate-800 border-2 border-slate-600 text-gray-100 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 resize-none transition-colors"
                         />
                         <p className="text-gray-400 text-xs mt-1">{description.length}/500</p>
                     </div>
 
-                    <div className="flex gap-2 justify-end pt-3 border-t border-gray-200 dark:border-slate-700">
+                    <div className="flex gap-2 justify-end pt-3 border-t border-slate-700">
                         <button
                             type="button"
                             onClick={onCancel}
                             disabled={isSubmitting}
-                            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg border border-gray-200 hover:bg-gray-200 disabled:opacity-50 dark:bg-slate-800 dark:text-gray-200 dark:border-slate-600 dark:hover:bg-slate-700"
+                            className="px-4 py-2 bg-slate-800 text-gray-200 rounded-lg border border-slate-600 hover:bg-slate-700 disabled:opacity-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-4 py-2 text-white font-semibold text-sm rounded-lg transition-all duration-200 cursor-pointer bg-blue-600 hover:bg-blue-700 active:scale-95 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-700 dark:hover:bg-blue-600 dark:focus:ring-blue-800 shadow-sm hover:shadow-md disabled:opacity-50"
+                            className="px-4 py-2 text-white font-semibold text-sm rounded-lg transition-all duration-200 cursor-pointer bg-blue-700 hover:bg-blue-600 active:scale-95 focus:ring-4 focus:outline-none focus:ring-blue-800 shadow-sm hover:shadow-md disabled:opacity-50"
                         >
                             {isSubmitting ? 'Creating...' : 'Create Event'}
                         </button>

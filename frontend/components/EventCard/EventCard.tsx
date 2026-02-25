@@ -71,13 +71,13 @@ const EventCard: React.FC<EventCardProps> = ({ event, onResponseUpdated }) => {
     };
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 w-full">
+        <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-sm w-full">
             <div className="flex items-start justify-between gap-3 px-4 pt-2.5 pb-1">
                 <div className="min-w-0">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white break-words">
+                    <h3 className="text-base font-semibold text-white break-words">
                         {event.title}
                     </h3>
-                    <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-xs">
+                    <div className="flex items-center gap-1.5 text-gray-400 text-xs">
                         <FaCalendarAlt className="text-[11px] text-emerald-500" />
                         <span>{formatEventTime(event.eventTime)}</span>
                     </div>
@@ -85,12 +85,12 @@ const EventCard: React.FC<EventCardProps> = ({ event, onResponseUpdated }) => {
             </div>
 
             <div className="px-4 pb-2">
-                <p className="text-gray-700 dark:text-gray-300 text-sm leading-snug break-words">
+                <p className="text-gray-300 text-sm leading-snug break-words">
                     {event.description}
                 </p>
             </div>
 
-            <div className="flex flex-wrap gap-2 px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+            <div className="flex flex-wrap gap-2 px-4 py-2 border-t border-gray-700 bg-gray-700">
                 {event.responses.map((option) => {
                     const isSelected = event.userChoiceId === option.optionId;
                     const normalized = option.optionName.trim().toLowerCase();
@@ -118,7 +118,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onResponseUpdated }) => {
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-50 ${
                                 isSelected
                                     ? selectedClass
-                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700'
+                                    : 'bg-gray-800 text-gray-200 border border-gray-600 hover:bg-gray-700'
                             }`}
                         >
                             <span
@@ -131,7 +131,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onResponseUpdated }) => {
                                 className={`ml-1 inline-flex items-center justify-center min-w-[20px] px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
                                     isSelected
                                         ? 'bg-white/15 text-white'
-                                        : 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-100'
+                                        : 'bg-gray-600 text-gray-100'
                                 }`}
                             >
                                 {option.count}

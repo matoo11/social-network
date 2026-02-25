@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"social/backend/pkg/db/dbConn"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -18,7 +19,102 @@ type ChatData struct {
 	Time             time.Time `json:"time"`
 }
 
+// MessageCooldown tracks the last message time for each user
+type MessageCooldown struct {
+	lastMessageTime map[int]time.Time
+	mu              sync.RWMutex
+}
+
+var messageCooldown = &MessageCooldown{
+	lastMessageTime: make(map[int]time.Time),
+}
+
+func init() {
+	// Start cleanup goroutine to prevent memory leaks
+	go cleanupOldCooldowns()
+}
+
+const (
+	// MessageCooldownDuration is the time users must wait between messages
+	MessageCooldownDuration = 1 * time.Second
+	// CleanupInterval is how often we clean up old cooldown entries
+	CleanupInterval = 5 * time.Minute
+)
+
+// cleanupOldCooldowns removes cooldown entries that haven't been used recently
+func cleanupOldCooldowns() {
+	ticker := time.NewTicker(CleanupInterval)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		messageCooldown.mu.Lock()
+		now := time.Now()
+		for userID, lastTime := range messageCooldown.lastMessageTime {
+			// Remove entries older than 10 minutes
+			if now.Sub(lastTime) > 10*time.Minute {
+				delete(messageCooldown.lastMessageTime, userID)
+			}
+		}
+		messageCooldown.mu.Unlock()
+	}
+}
+
+// CheckCooldown checks if a user can send a message (returns true if allowed)
+func (mc *MessageCooldown) CheckCooldown(userID int) bool {
+	mc.mu.Lock()
+	defer mc.mu.Unlock()
+
+	lastTime, exists := mc.lastMessageTime[userID]
+	if !exists {
+		mc.lastMessageTime[userID] = time.Now()
+		return true
+	}
+
+	timeSinceLastMessage := time.Since(lastTime)
+	if timeSinceLastMessage < MessageCooldownDuration {
+		return false
+	}
+
+	mc.lastMessageTime[userID] = time.Now()
+	return true
+}
+
+// GetRemainingCooldown returns how much time is left on cooldown
+func (mc *MessageCooldown) GetRemainingCooldown(userID int) time.Duration {
+	mc.mu.RLock()
+	defer mc.mu.RUnlock()
+
+	lastTime, exists := mc.lastMessageTime[userID]
+	if !exists {
+		return 0
+	}
+
+	elapsed := time.Since(lastTime)
+	if elapsed >= MessageCooldownDuration {
+		return 0
+	}
+
+	return MessageCooldownDuration - elapsed
+}
+
 func ChatHandler(sento int, message string, conn *Conn, LoggedInUserID int, LoggedInUsername string, Type int) {
+	// Check cooldown before processing message
+	if !messageCooldown.CheckCooldown(LoggedInUserID) {
+		remaining := messageCooldown.GetRemainingCooldown(LoggedInUserID)
+		chat := ChatData{
+			Message: fmt.Sprintf("Please wait %.1f seconds before sending another message", remaining.Seconds()),
+		}
+		chatJson, _ := json.Marshal(chat)
+		response := Response{
+			Type: "chat",
+			Data: chatJson,
+		}
+		conn.Lock.Lock()
+		conn.Conn.WriteJSON(response)
+		conn.Lock.Unlock()
+		return
+	}
+	fmt.Println("Received message:", message, "from user:", LoggedInUserID, "to:", sento, "type:", Type)
 	switch Type {
 	case 1:
 		PrivateChat(sento, message, conn, LoggedInUserID, LoggedInUsername)

@@ -33,9 +33,12 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [cooldownActive, setCooldownActive] = useState(false);
+    const [cooldownMessage, setCooldownMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
     const messageIdRef = useRef<number>(0);
     const inputRef = useRef<HTMLInputElement>(null);
+    const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -106,6 +109,26 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
             // Ignore private chat messages (they have receiverID)
             if (data?.recieverID) return;
 
+            // Check if it's a cooldown message (no senderID means system message)
+            if (!data.senderID && data.message && data.message.includes('wait')) {
+                setCooldownActive(true);
+                setCooldownMessage(data.message);
+                
+                // Extract seconds from message and auto-clear after that time
+                const match = data.message.match(/([0-9.]+)\s*seconds/);
+                if (match) {
+                    const seconds = parseFloat(match[1]);
+                    if (cooldownTimerRef.current) {
+                        clearTimeout(cooldownTimerRef.current);
+                    }
+                    cooldownTimerRef.current = setTimeout(() => {
+                        setCooldownActive(false);
+                        setCooldownMessage('');
+                    }, seconds * 1000);
+                }
+                return;
+            }
+
             // Only add messages that belong to this group
             if (data?.groupID && String(data.groupID) !== chatID) return;
 
@@ -122,12 +145,18 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 
         window.addEventListener('ws-chat', listener);
 
-        return () => window.removeEventListener('ws-chat', listener);
+        return () => {
+            window.removeEventListener('ws-chat', listener);
+            if (cooldownTimerRef.current) {
+                clearTimeout(cooldownTimerRef.current);
+            }
+        };
     }, [chatWith, chatter, chatID]);
 
     const handleSend = () => {
         if (!input.trim() || !chatID || Number(chatID) === 0) return;
         if (input.length > 300) return;
+        if (cooldownActive) return; // Prevent sending during cooldown
 
         SendChatMessage(Number(chatID), input, 2);
 
@@ -145,6 +174,15 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
         window.dispatchEvent(new CustomEvent('message-sent'));
 
         setInput('');
+        
+        // Set local cooldown to prevent rapid clicking
+        setCooldownActive(true);
+        if (cooldownTimerRef.current) {
+            clearTimeout(cooldownTimerRef.current);
+        }
+        cooldownTimerRef.current = setTimeout(() => {
+            setCooldownActive(false);
+        }, 1000);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -182,6 +220,12 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
 
             {/* Input Area */}
             <div className="flex-shrink-0 flex flex-col gap-2 border-t border-gray-400 p-3">
+                {/* Cooldown warning */}
+                {cooldownActive && cooldownMessage && (
+                    <div className="px-3 py-2 bg-amber-900 border border-amber-700 rounded-lg text-amber-200 text-sm">
+                        ⚠️ {cooldownMessage}
+                    </div>
+                )}
                 {showEmojiPicker && (
                     <div className="flex justify-center">
                         <EmojiPicker onSelectEmoji={handleEmojiSelect} parentRef={inputRef} />
@@ -224,7 +268,7 @@ const GroupChatArea: React.FC<ChatProps> = ({ chatWith, chatter, chatID }) => {
                     </div>
                     <button
                         onClick={handleSend}
-                        disabled={!chatID || Number(chatID) === 0 || input.length > 300}
+                        disabled={!chatID || Number(chatID) === 0 || input.length > 300 || cooldownActive}
                         className="flex-shrink-0 cursor-pointer px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm sm:text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Send

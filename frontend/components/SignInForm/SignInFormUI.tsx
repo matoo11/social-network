@@ -19,9 +19,9 @@ const SignInFormUI: React.FC<SignInFormUIProps> = ({
     onSubmit,
 }) => {
     return (
-        <div className="mx-auto w-full max-w-sm p-5 sm:p-6 md:p-8 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
+        <div className="mx-auto w-full max-w-sm p-5 sm:p-6 md:p-8 bg-gray-800 border border-gray-700 rounded-lg shadow-sm overflow-hidden">
             <form className="space-y-6" onSubmit={onSubmit}>
-                <h5 className="font-serif text-xl font-medium text-gray-900 text-white text-center">
+                <h5 className="font-serif text-xl font-medium text-white text-center">
                     Sign in to our platform
                 </h5>
                 {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
@@ -49,16 +49,13 @@ const SignInFormUI: React.FC<SignInFormUIProps> = ({
                 />
                 <button
                     type="submit"
-                    className="cursor-pointer w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    className="cursor-pointer w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 >
                     Login to your account
                 </button>
-                <div className="text-sm font-medium text-gray-500 dark:text-gray-300">
+                <div className="text-sm font-medium text-gray-300">
                     Not registered?{' '}
-                    <a
-                        href="/register"
-                        className="text-blue-700 hover:underline dark:text-blue-500"
-                    >
+                    <a href="/register" className="text-blue-500 hover:underline">
                         Create account
                     </a>
                 </div>

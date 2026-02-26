@@ -24,6 +24,10 @@ type FollowDisplay struct {
 
 func CreateFollow(follow Follow) error {
 
+	if follow.FollowerID == follow.FollowedID {
+		return fmt.Errorf("you cannot follow yourself")
+	}
+
 	check, _ := IsFollowing(follow.FollowerID, follow.FollowedID)
 	if check {
 		return fmt.Errorf("you already following this user")

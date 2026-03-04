@@ -46,9 +46,11 @@ export default function UserListPopup({ isOpen, onClose }: UserListPopupProps) {
 
     const filteredUsers = useMemo(() => {
         const term = search.trim().toLowerCase();
-        if (!term) return users;
-        return users.filter((u) => (u.User_Name || '').toLowerCase().includes(term));
-    }, [users, search]);
+        // Remove the current logged-in user from the list
+        const filtered = users.filter((u) => u.User_ID !== user.userId);
+        if (!term) return filtered;
+        return filtered.filter((u) => (u.User_Name || '').toLowerCase().includes(term));
+    }, [users, search, user.userId]);
 
     const handleUserClick = (userId: number) => {
         setSelectedUserId(userId);

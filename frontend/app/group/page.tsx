@@ -1,21 +1,21 @@
 'use client';
 
-import GroupList from '@/components/ChatList/GroupList';
-import Popup from '@/components/Popup/Popup';
+import GroupList from '@/components/Chat/GroupList';
+import Popup from '@/components/General/Popup';
 import { useState } from 'react';
-import PostForm from '@/components/PostForm/PostForm';
-import EventsList from '@/components/EventsList/EventsList';
-import ChatArea from '@/components/ChatArea/ChatArea';
-import PostContent from '@/components/PostContent/PostContent';
+import PostForm from '@/components/Post/PostForm';
+import EventsList from '@/components/Chat/EventsList';
+import ChatArea from '@/components/Chat/ChatArea';
+import PostContent from '@/components/Post/PostContent';
 import { useEffect } from 'react';
-import CreateGroup from '@/components/CreateGroupForm/CreateGroup';
-import GroupPostForm from '@/components/PostForm/GroupPostForm';
-import GroupPostList from '@/components/PostList/GroupPostList';
-import Navbar from '@/components/Navbar/Navbar';
-import GroupChat from '@/components/ChatArea/GroupChatArea';
-import { ChatCardProps } from '@/components/ChatCard/ChatCard';
-import Title from '@/components/Title/Title';
-import AllUsersList from '@/components/AllUsersList/AllUsersList';
+import CreateGroup from '@/components/Form/CreateGroup';
+import GroupPostForm from '@/components/Post/GroupPostForm';
+import GroupPostList from '@/components/Post/GroupPostList';
+import Navbar from '@/components/General/Navbar';
+import GroupChat from '@/components/Chat/GroupChatArea';
+import { ChatCardProps } from '@/components/Chat/ChatCard';
+import Title from '@/components/General/Title';
+import AllUsersList from '@/components/Chat/AllUsersList';
 import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 import {
     FaUsers,
@@ -29,9 +29,9 @@ import {
 } from 'react-icons/fa';
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import ProfilePopup from '@/components/ProfilePopup/ProfilePopup';
+import ProfilePopup from '@/components/General/ProfilePopup';
 import { useUser } from '../context/UserContext';
-import SignInForm from '@/components/SignInForm/SignInForm';
+import SignInForm from '@/components/Form/SignInForm';
 
 type GroupListItem = ChatCardProps & { joined?: boolean };
 

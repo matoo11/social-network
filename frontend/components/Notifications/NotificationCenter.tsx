@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Title from '../Title/Title';
+import Title from '../General/Title';
 import NotificationRenderer from './NotificationRenderer';
 import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 

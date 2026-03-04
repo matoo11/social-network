@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
-import PostList from '@/components/PostList/PostList';
-import FollowButton from '@/components/FollowButton/FollowButton';
-import PostImage from '@/components/PostImage/PostImage';
-import ProfileImage from '@/components/ProfileImage/ProfileImage';
-import ChatPopup from '@/components/ChatPopup/ChatPopup';
+import PostList from '@/components/Post/PostList';
+import FollowButton from '@/components/General/FollowButton';
+import PostImage from '@/components/Post/PostImage';
+import ProfileImage from '@/components/General/ProfileImage';
+import ChatPopup from '@/components/Chat/ChatPopup';
 import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 import { title } from 'process';
-import Navbar from '@/components/Navbar/Navbar';
+import Navbar from '@/components/General/Navbar';
 
 const Dashboard = () => {
     const router = useRouter();

@@ -1,21 +1,21 @@
 'use client';
 
-import ChatList from '@/components/ChatList/ChatList';
-import PostList from '@/components/PostList/PostList';
-import Popup from '@/components/Popup/Popup';
+import ChatList from '@/components/Chat/ChatList';
+import PostList from '@/components/Post/PostList';
+import Popup from '@/components/General/Popup';
 import { useEffect, useState } from 'react';
-import PostForm from '@/components/PostForm/PostForm';
-import ChatArea from '@/components/ChatArea/ChatArea';
-import PostContent from '@/components/PostContent/PostContent';
+import PostForm from '@/components/Post/PostForm';
+import ChatArea from '@/components/Chat/ChatArea';
+import PostContent from '@/components/Post/PostContent';
 import { useUser } from '../context/UserContext';
-import SignInForm from '@/components/SignInForm/SignInForm';
-import Navbar from '@/components/Navbar/Navbar';
-import PrivateChatArea from '@/components/ChatArea/PrivateChatArea';
+import SignInForm from '@/components/Form/SignInForm';
+import Navbar from '@/components/General/Navbar';
+import PrivateChatArea from '@/components/Chat/PrivateChatArea';
 import { fetchWithAuth } from '@/lib/api/fetchWithAuth';
 import { FaComments, FaHome, FaUsers, FaUser, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
-import ProfilePopup from '@/components/ProfilePopup/ProfilePopup';
-import UserListPopup from '@/components/UserList/UserListPopup';
+import ProfilePopup from '@/components/General/ProfilePopup';
+import UserListPopup from '@/components/Chat/UserListPopup';
 
 type ChatItem = {
     id: string;

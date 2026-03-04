@@ -169,6 +169,7 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
         window.dispatchEvent(new CustomEvent('message-sent'));
 
         setInput('');
+        inputRef.current?.focus();
 
         // Set local cooldown to prevent rapid clicking
         setCooldownActive(true);
@@ -177,7 +178,7 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
         }
         cooldownTimerRef.current = setTimeout(() => {
             setCooldownActive(false);
-        }, 1000);
+        }, 500);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

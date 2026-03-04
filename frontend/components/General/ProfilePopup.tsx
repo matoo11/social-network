@@ -330,22 +330,37 @@ export default function ProfilePopup({ isOpen, onClose, userId, onUserClick }: P
                                             profile.posts.map((post) => (
                                                 <div
                                                     key={post.postID}
-                                                    className="bg-gray-800 border border-gray-600 rounded-lg p-4"
+                                                    className="bg-gray-800 border border-gray-600 rounded-lg p-4 flex gap-4"
                                                 >
-                                                    <h4 className="text-lg font-bold text-white mb-2">
-                                                        {post.title}
-                                                    </h4>
-                                                    <p className="text-gray-300 mb-2 text-sm">
-                                                        {post.content}
-                                                    </p>
-                                                    <div className="flex gap-3 text-xs text-gray-400">
-                                                        <span>
-                                                            {new Date(
-                                                                post.createdAt,
-                                                            ).toLocaleDateString()}
-                                                        </span>
-                                                        <span>•</span>
-                                                        <span>{post.commentsCount} comments</span>
+                                                    <div className="flex flex-col flex-1 min-h-0">
+                                                        <div className="flex-1">
+                                                            <h4 className="text-lg font-bold text-white mb-2">
+                                                                {post.title}
+                                                            </h4>
+                                                            <p className="text-gray-300 text-sm line-clamp-3">
+                                                                {post.content}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex gap-3 text-xs text-gray-400 mt-2">
+                                                            <span>
+                                                                {new Date(
+                                                                    post.createdAt,
+                                                                ).toLocaleDateString()}
+                                                            </span>
+                                                            <span>•</span>
+                                                            <span>
+                                                                {post.commentsCount} comments
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-shrink-0 w-24 h-24">
+                                                        {post.imageID && post.imageID !== 0 && (
+                                                            <img
+                                                                src={`http://localhost:8080/api/image?id=${post.imageID}`}
+                                                                alt="Post"
+                                                                className="w-full h-full object-cover rounded-lg"
+                                                            />
+                                                        )}
                                                     </div>
                                                 </div>
                                             ))

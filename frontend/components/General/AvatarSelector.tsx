@@ -16,16 +16,16 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onAvata
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Choose Your Avatar
             </label>
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2 max-w-[220px] sm:max-w-[260px] mx-auto">
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2.5 max-w-[220px] sm:max-w-[260px] mx-auto">
                 {avatars.map((num) => (
                     <button
                         key={num}
                         type="button"
                         onClick={() => onAvatarSelect(num)}
-                        className={`relative w-full aspect-square rounded-full overflow-hidden border transition-all ${
+                        className={`cursor-pointer relative w-full aspect-square rounded-full overflow-hidden transition-all ${
                             selectedAvatar === num
-                                ? 'border-blue-600 scale-[1.02] shadow-md'
-                                : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
+                                ? 'border-4 border-blue-500 scale-[1.05] shadow-lg'
+                                : 'border-4 border-gray-600 hover:border-blue-400 opacity-60 hover:opacity-100'
                         }`}
                     >
                         <Image

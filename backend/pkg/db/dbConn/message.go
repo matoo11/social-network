@@ -31,6 +31,7 @@ type ChatUser struct {
 	UserID          int
 	Username        string
 	LastMessageTime string
+	AvatarNumber    int
 }
 
 func CreateChatMessage(message Message) error {
@@ -64,7 +65,7 @@ func CreateChatMessage(message Message) error {
 		message.IsActive,
 	)
 	if err != nil {
-		fmt.Println("create error")
+		fmt.Printf("create chat message error: %v\n", err)
 		return fmt.Errorf("failed to create chat message: %v", err)
 	}
 	return nil
@@ -119,7 +120,7 @@ func GetChatMessagesBetweenUsers(user1ID, user2ID int) ([]Message, error) {
 }
 
 func GetChatUsers(userID int) ([]ChatUser, error) {
-    statement := `
+	statement := `
         SELECT
             otherUser.User_ID,
             MAX(m.Creation_Time) AS LastMessageTime
@@ -148,35 +149,35 @@ func GetChatUsers(userID int) ([]ChatUser, error) {
         ORDER BY LastMessageTime DESC;
     `
 
-    rows, err := dbHandler.DB.Query(statement, userID, userID, userID, userID)
-    if err != nil {
-        return nil, fmt.Errorf("failed to get chat users: %v", err)
-    }
-    defer rows.Close()
+	rows, err := dbHandler.DB.Query(statement, userID, userID, userID, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat users: %v", err)
+	}
+	defer rows.Close()
 
-    var users []ChatUser
+	var users []ChatUser
 
-    for rows.Next() {
-        var user ChatUser
-        var lastMsg sql.NullString
+	for rows.Next() {
+		var user ChatUser
+		var lastMsg sql.NullString
 
-        err := rows.Scan(&user.UserID, &lastMsg)
-        if err != nil {
-            return nil, fmt.Errorf("failed to scan chat users: %v", err)
-        }
+		err := rows.Scan(&user.UserID, &lastMsg)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan chat users: %v", err)
+		}
 
-        if lastMsg.Valid {
-            user.LastMessageTime = lastMsg.String
-        }
+		if lastMsg.Valid {
+			user.LastMessageTime = lastMsg.String
+		}
 		user1, err := GetUserByID(user.UserID)
 		if err != nil {
-			fmt.Println(err)
+
 			return nil, err
 		}
 		user.Username = user1.User_Name
-        users = append(users, user)
-    }
+		user.AvatarNumber = user1.Image_ID
+		users = append(users, user)
+	}
 
-    return users, nil
+	return users, nil
 }
-

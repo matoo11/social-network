@@ -30,6 +30,10 @@ input[type="search"]::-webkit-search-cancel-button {
   appearance: none;
 }
 
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 /* Hide vertical scrollbar, but allow scrolling */
 .hide-scrollbar {
   scrollbar-width: none; /* Firefox */
@@ -38,5 +42,10 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+}
+
+/* Safe area for iOS devices with notches */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 

@@ -6,14 +6,50 @@ import (
 	"net/http"
 	"social/backend/pkg/auth"
 	"social/backend/pkg/db/dbConn"
+	"social/backend/pkg/util"
 	"strconv"
-	"strings"
+	"time"
 )
+
+type displayedCommentDTO struct {
+	PostID                int       `json:"postId"`
+	CommentID             int       `json:"commentId"`
+	CommentText           string    `json:"commentText"`
+	CommenterNickname     string    `json:"commenterNickname"`
+	CommenterAvatarNumber int       `json:"commenterAvatarNumber"`
+	CommentProfileImageID int       `json:"commentProfileImageId"`
+	CommentImageID        int       `json:"commentImageId"`
+	CommentTime           time.Time `json:"commentTime"`
+	NumberOfLikes         int       `json:"numberOfLikes"`
+	NumberOfDislikes      int       `json:"numberOfDislikes"`
+}
+
+type displayedPostDTO struct {
+	PostID             int                   `json:"postId"`
+	PostTitle          string                `json:"postTitle"`
+	PostText           string                `json:"postText"`
+	PostType           string                `json:"postType"`
+	PosterNickname     string                `json:"posterNickname"`
+	PosterAvatarNumber int                   `json:"posterAvatarNumber"`
+	PostImageID        int                   `json:"postImageId"`
+	PostTime           time.Time             `json:"postTime"`
+	NumberOfLikes      int                   `json:"numberOfLikes"`
+	NumberOfDislikes   int                   `json:"numberOfDislikes"`
+	NumberOfComments   int                   `json:"numberOfComments"`
+	Comments           []displayedCommentDTO `json:"comments"`
+}
+
+type PostPayload struct {
+	Message      *string `json:"message"`
+	Title        *string `json:"title"`
+	PostTypeID   *int    `json:"typeId"`
+	PrivateUsers []int   `json:"privateUsers"`
+}
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := dbConn.GetSessionFromCookie(r)
 	if err != nil {
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
 	LoggedInUserID := session.UserID
@@ -26,30 +62,22 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Decode the JSON string from "data" field
 	jsonData := r.FormValue("data")
-	var payload struct {
-		Message    string `json:"message"`
-		Title      string `json:"title"`
-		PostTypeID int    `json:"typeId"`
-	}
+	var payload PostPayload
+
 	if err := json.Unmarshal([]byte(jsonData), &payload); err != nil {
 		http.Error(w, "Invalid JSON data", http.StatusBadRequest)
 		return
 	}
 
-	message := payload.Message
-	title := payload.Title
-	typeID := payload.PostTypeID
-
-	if len(strings.TrimSpace(message)) == 0 {
-		http.Error(w, "Message is required", http.StatusBadRequest)
-		return
-	}
-	if len(message) >= 600 {
-		http.Error(w, "The post length exceeded 600 characters", http.StatusBadRequest)
-		return
-	}
-	if len(title) >= 60 {
-		http.Error(w, "The post title length exceeded 60 characters", http.StatusBadRequest)
+	// validate required fields
+	validationErrors := ValidatePostPayload(&payload)
+	if len(validationErrors) > 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		// json.NewEncoder(w).Encode(map[string]any{
+		// 	"error":  "Validation failed",
+		// 	"fields": validationErrors,
+		// })
+		auth.JsonEncode(w, validationErrors)
 		return
 	}
 
@@ -58,10 +86,10 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	file, handler, err := r.FormFile("image")
 	if err == nil {
 		defer file.Close()
-		imgID, err := dbConn.SaveImage(file, handler.Filename, LoggedInUserID)
+		imgID, err := dbConn.SaveImage(file, handler, LoggedInUserID)
 		if err != nil {
 			fmt.Println(err)
-			http.Error(w, "Image upload failed", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		imageID = &imgID
@@ -70,14 +98,15 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post := dbConn.Post{
-		PostText:        message,
+	post := dbConn.PostData{
+		PostText:        *payload.Message,
 		UserID:          LoggedInUserID,
-		PostTitle:       title,
-		PostTypeID:      typeID,
+		PostTitle:       *payload.Title,
+		PostTypeID:      *payload.PostTypeID,
 		ImageID:         imageID,
 		CreatedByID:     LoggedInUserID,
 		LastUpdatedByID: LoggedInUserID,
+		PrivateUsersIDs: payload.PrivateUsers,
 	}
 
 	if err := dbConn.CreatePost(post); err != nil {
@@ -191,15 +220,53 @@ func GetImageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := strconv.Atoi(ids)
 	if err != nil {
-		fmt.Println("error 1")
+		http.Error(w, "Invalid image id", http.StatusBadRequest)
 		return
+	}
+
+	session, err := dbConn.GetSessionFromCookie(r)
+	if err != nil {
+		auth.ErrorPage(w, http.StatusUnauthorized)
+		return
+	}
+	loggedInUserID := session.UserID
+
+	postID, err := dbConn.GetPostIDByImageID(id)
+	if err == nil && postID > 0 {
+		groupID, err := dbConn.GetGroupIDByPostID(postID)
+		if err == nil && groupID > 0 {
+			isMember, err := dbConn.IsGroupMember(groupID, loggedInUserID)
+			if err != nil || !isMember {
+				http.Error(w, "Forbidden: You don't have access to this image", http.StatusForbidden)
+				return
+			}
+		} else {
+			post, err := dbConn.GetPostByID(postID)
+			if err == nil {
+				if post.UserID != loggedInUserID {
+					if post.PostTypeID == 2 {
+						isFollower, err := dbConn.IsFollowing(loggedInUserID, post.UserID)
+						if err != nil || !isFollower {
+							http.Error(w, "Forbidden: You don't have access to this image", http.StatusForbidden)
+							return
+						}
+					} else if post.PostTypeID == 3 {
+						hasAccess, err := dbConn.HasPrivatePostAccess(postID, loggedInUserID)
+						if err != nil || !hasAccess {
+							http.Error(w, "Forbidden: You don't have access to this image", http.StatusForbidden)
+							return
+						}
+					}
+				}
+			}
+		}
 	}
 
 	var data []byte
 	var mimeType string
 	data, mimeType, err = dbConn.GetPostImage(id)
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, "Image not found", http.StatusNotFound)
 		return
 	}
 
@@ -219,10 +286,17 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	session, err := dbConn.GetSessionFromCookie(r)
+	if err != nil {
+		auth.ErrorPage(w, http.StatusUnauthorized)
+		return
+	}
+	loggedInUserID := session.UserID
+
 	var req PostIDRequest
 
 	// Decode JSON body
-	err := json.NewDecoder(r.Body).Decode(&req)
+	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
@@ -234,6 +308,16 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	groupID, err := dbConn.GetGroupIDByPostID(req.ID)
+	if err == nil && groupID > 0 {
+
+		isMember, err := dbConn.IsGroupMember(groupID, loggedInUserID)
+		if err != nil || !isMember {
+			http.Error(w, "Forbidden: You are not a member of this group", http.StatusForbidden)
+			return
+		}
+	}
+
 	// Fetch post
 	postData, err := dbConn.GetPostByID(req.ID)
 	if err != nil {
@@ -241,9 +325,136 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if groupID == 0 {
+
+		if postData.UserID != loggedInUserID {
+
+			if postData.PostTypeID == 2 {
+
+				isFollower, err := dbConn.IsFollowing(loggedInUserID, postData.UserID)
+				if err != nil || !isFollower {
+					http.Error(w, "Forbidden: This post is only visible to followers", http.StatusForbidden)
+					return
+				}
+			} else if postData.PostTypeID == 3 {
+
+				hasAccess, err := dbConn.HasPrivatePostAccess(req.ID, loggedInUserID)
+				if err != nil || !hasAccess {
+					http.Error(w, "Forbidden: You don't have access to this private post", http.StatusForbidden)
+					return
+				}
+			}
+		}
+	}
+
 	// Return JSON
 	if err := auth.JsonEncode(w, postData); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
+}
+
+// func FetchAllPostsHandler(w http.ResponseWriter, r *http.Request) {
+// 	user, authenticated := auth.Authenticator(w, r)
+// 	if !authenticated {
+// 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+// 		return
+// 	}
+
+// 	posts, err := fetchAllVisiblePostsForUser(user.User_ID)
+// 	if err != nil {
+// 		util.Respond(w, r, http.StatusInternalServerError, nil, err.Error())
+// 		return
+// 	}
+// 	util.Respond(w, r, http.StatusOK, posts, "Fetch all posts successful")
+// }
+
+func FetchPostByIDHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		util.Respond(w, r, http.StatusMethodNotAllowed, nil, "Method not allowed")
+		return
+	}
+
+	user, authenticated := auth.Authenticator(w, r)
+	if !authenticated {
+		util.Respond(w, r, http.StatusUnauthorized, nil, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+
+	loggedInUserID := user.User_ID
+
+	var req PostIDRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		util.Respond(w, r, http.StatusBadRequest, nil, "Invalid JSON")
+		return
+	}
+	if req.ID == 0 {
+		util.Respond(w, r, http.StatusBadRequest, nil, "Missing post id")
+		return
+	}
+
+	groupID, err := dbConn.GetGroupIDByPostID(req.ID)
+	if err == nil && groupID > 0 {
+		isMember, err := dbConn.IsGroupMember(groupID, loggedInUserID)
+		if err != nil || !isMember {
+			http.Error(w, "Forbidden: You are not a member of this group", http.StatusForbidden)
+			return
+		}
+	}
+
+	postData, err := dbConn.GetPostByID(req.ID)
+	if err != nil {
+		util.Respond(w, r, http.StatusNotFound, nil, "Post not found")
+		return
+	}
+
+	if groupID == 0 {
+
+		if postData.UserID != loggedInUserID {
+
+			if postData.PostTypeID == 2 {
+
+				isFollower, err := dbConn.IsFollowing(loggedInUserID, postData.UserID)
+				if err != nil || !isFollower {
+					http.Error(w, "Forbidden: This post is only visible to followers", http.StatusForbidden)
+					return
+				}
+			} else if postData.PostTypeID == 3 {
+
+				hasAccess, err := dbConn.HasPrivatePostAccess(req.ID, loggedInUserID)
+				if err != nil || !hasAccess {
+					http.Error(w, "Forbidden: You don't have access to this private post", http.StatusForbidden)
+					return
+				}
+			}
+		}
+	}
+
+	dto, err := buildDisplayedPost(postData)
+	if err != nil {
+		util.Respond(w, r, http.StatusInternalServerError, nil, "Failed to build post")
+		return
+	}
+
+	util.Respond(w, r, http.StatusOK, dto, "Fetch post successful")
+}
+
+func FetchPosts(w http.ResponseWriter, r *http.Request) {
+	user, authenticated := auth.Authenticator(w, r)
+	if !authenticated {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	posts, err := fetchAllVisiblePostsForUser(user.User_ID)
+	if err != nil {
+		util.Respond(w, r, http.StatusInternalServerError, nil, err.Error())
+		return
+	}
+
+	util.Respond(w, r, http.StatusOK, posts, "Fetch posts by user ID successful")
 }

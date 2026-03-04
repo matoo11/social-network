@@ -44,7 +44,7 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	} else {
 		LoggedInUserID = session.UserID
-		fmt.Println(LoggedInUserID)
+
 	}
 
 	con, err := upgrader.Upgrade(w, r, nil)
@@ -82,8 +82,7 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			LoggedInUserID = session.UserID
 			User, err := dbConn.GetUserByID(LoggedInUserID)
 			if err != nil {
-				fmt.Println("fuck2")
-				fmt.Println("super fuck error")
+
 				fmt.Println(err)
 				break
 			}
@@ -99,22 +98,21 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 
 			if err := json.Unmarshal(msg.Data, &data); err != nil {
 
-				fmt.Println("unmarshal error 1")
 				continue
 			}
-			// fmt.Println("sento: " + sentom)
-			fmt.Println(data)
+
 			sento := data.ChatID
 			message := data.Message
-			fmt.Println(message)
 			ChatHandler(sento, message, conn, LoggedInUserID, LoggedInUsername, data.Type)
+
+		case "get_userlist":
+			SendUserList(conn)
 
 		case "notification":
 
 		}
 	}
 
-	// log.Printf("Received: %+v", msg.Data)
 	clientsLock.Lock()
 	if storedConn, ok := clients[LoggedInUserID]; ok && storedConn == conn {
 		delete(clients, LoggedInUserID)
@@ -124,6 +122,25 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Client disconnected")
 	conn.Lock.Lock()
 	conn.Conn.Close()
+	conn.Lock.Unlock()
+}
+
+func SendUserList(conn *Conn) {
+	users, err := dbConn.GetAllUsers()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	response := struct {
+		Type  string               `json:"type"`
+		Users []dbConn.UserDisplay `json:"users"`
+	}{
+		Type:  "userlist",
+		Users: users,
+	}
+
+	conn.Lock.Lock()
+	_ = conn.Conn.WriteJSON(response)
 	conn.Lock.Unlock()
 }
 
@@ -149,8 +166,8 @@ func UpdateUserList() {
 		return
 	}
 	response := struct {
-		Type  string
-		Users []dbConn.UserDisplay
+		Type  string               `json:"type"`
+		Users []dbConn.UserDisplay `json:"users"`
 	}{
 		Type:  "userlist",
 		Users: users,

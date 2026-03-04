@@ -1,0 +1,18 @@
+CREATE TABLE Post_Likes
+(
+  Post_Like_ID INTEGER NOT NULL,
+  Post_Like    BOOL    NULL    ,
+  User_ID      INTEGER NOT NULL,
+  Post_ID      INTEGER NOT NULL,
+  Created_By_ID      INTEGER  NOT NULL,
+  Creation_Time      DATETIME NOT NULL,
+  Last_Updated_By_ID INTEGER  NOT NULL,
+  Last_Updated_Time  DATETIME NOT NULL,
+  Is_Active          BOOL     NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (Post_Like_ID AUTOINCREMENT),
+  FOREIGN KEY (User_ID) REFERENCES Users (User_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT unique_user_post UNIQUE (User_ID, Post_ID)
+);

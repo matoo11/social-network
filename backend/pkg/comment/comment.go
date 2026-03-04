@@ -2,6 +2,7 @@ package comment
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"social/backend/pkg/auth"
 	"social/backend/pkg/db/dbConn"
@@ -10,9 +11,8 @@ import (
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	var LoggedInUserID int
-	// fmt.Println("ok")
+
 	session, err := dbConn.GetSessionFromCookie(r)
-	// fmt.Println("ok")
 	if err != nil {
 		auth.ErrorPage(w, 401)
 		return
@@ -53,29 +53,68 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	groupID, err := dbConn.GetGroupIDByPostID(postID)
+	if err == nil && groupID > 0 {
+		isMember, err := dbConn.IsGroupMember(groupID, LoggedInUserID)
+		if err != nil || !isMember {
+			http.Error(w, "Forbidden: You are not a member of this group", http.StatusForbidden)
+			return
+		}
+	}
+
+	post, err := dbConn.GetPostByID(postID)
+	if err != nil {
+		http.Error(w, "Post not found", http.StatusNotFound)
+		return
+	}
+
+	if groupID == 0 {
+		if post.UserID != LoggedInUserID {
+			if post.PostTypeID == 2 {
+				isFollower, err := dbConn.IsFollowing(LoggedInUserID, post.UserID)
+				if err != nil || !isFollower {
+					http.Error(w, "Forbidden: This post is only visible to followers", http.StatusForbidden)
+					return
+				}
+			} else if post.PostTypeID == 3 {
+				hasAccess, err := dbConn.HasPrivatePostAccess(postID, LoggedInUserID)
+				if err != nil || !hasAccess {
+					http.Error(w, "Forbidden: You don't have access to this private post", http.StatusForbidden)
+					return
+				}
+			}
+		}
+	}
+
 	// Handle optional image
-	// var imageID *int = nil
-	// file, handler, err := r.FormFile("image")
-	// if err == nil {
-	// 	defer file.Close()
-	// 	imgID, err := dbConn.SaveImage(file, handler.Filename, LoggedInUserID)
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		http.Error(w, "Image upload failed", http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// 	imageID = &imgID
-	// } else if err != http.ErrMissingFile {
-	// 	http.Error(w, "Failed to read image", http.StatusBadRequest)
-	// 	return
-	// }
+	var imageID *int = nil
+	file, handler, err := r.FormFile("image")
+	if err == nil {
+		defer file.Close()
+		imgID, err := dbConn.SaveImage(file, handler, LoggedInUserID)
+		if err != nil {
+
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		imageID = &imgID
+	} else if err != http.ErrMissingFile {
+		http.Error(w, "Failed to read image", http.StatusBadRequest)
+		return
+	}
 
 	newComment := dbConn.Comment{
 		CommentText:     commentText,
 		PostID:          postID,
 		CreatedByID:     LoggedInUserID,
 		LastUpdatedByID: LoggedInUserID,
-		// ImageID: imageID,
+		CommentImageID:  imageID,
+	}
+
+	if imageID == nil {
+		fmt.Println("no image attached to comment")
+	} else {
+		fmt.Println("comment image id:", *imageID)
 	}
 
 	err = dbConn.CreateComment(newComment)

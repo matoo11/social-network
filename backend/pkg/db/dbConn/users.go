@@ -10,18 +10,23 @@ import (
 )
 
 type User struct {
-	User_ID                                                      int
-	User_Name, Nick_Name, Password, Email, First_Name, Last_Name string
-	Date_Of_Birth                                                *time.Time
-	Gender                                                       string
-	Image_ID                                                     int
-	About_Me                                                     string
-	Profile_Type_ID                                              int
-	Created_By_ID                                                int
-	Creation_Time                                                time.Time
-	Last_Updated_By_ID                                           int
-	Last_Updated_Time                                            time.Time
-	Is_Active                                                    bool
+	User_ID            int        `json:"userId"`
+	User_Name          string     `json:"userName"`
+	Nick_Name          string     `json:"nickName"`
+	Password           string     `json:"password"`
+	Email              string     `json:"email"`
+	First_Name         string     `json:"firstName"`
+	Last_Name          string     `json:"lastName"`
+	Date_Of_Birth      *time.Time `json:"dateOfBirth"`
+	Gender             string     `json:"gender"`
+	Image_ID           int        `json:"imageId"`
+	About_Me           string     `json:"aboutMe"`
+	Profile_Type_ID    int        `json:"profileTypeId"`
+	Created_By_ID      int        `json:"createdById"`
+	Creation_Time      time.Time  `json:"creationTime"`
+	Last_Updated_By_ID int        `json:"lastUpdatedById"`
+	Last_Updated_Time  time.Time  `json:"lastUpdatedTime"`
+	Is_Active          bool       `json:"isActive"`
 }
 
 type UserDisplay struct {
@@ -34,7 +39,7 @@ type UserDisplay struct {
 }
 
 func CreateUser(user User) error {
-	fmt.Println(user.Gender)
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("failed to hash password: %v", err)
@@ -58,7 +63,7 @@ func CreateUser(user User) error {
 		Last_Updated_Time)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
-	currentTime := time.Now().Format("2006-01-02 15:04:05")
+	currentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	_, err = dbHandler.DB.Exec(statement, user.User_Name, user.User_Name, hashedPassword, user.Email, user.First_Name, user.Last_Name, user.Date_Of_Birth, user.Gender, user.Image_ID, user.About_Me, 1, 1, currentTime, 1, currentTime)
 	if err != nil {
@@ -120,7 +125,7 @@ func GetAllUsers() ([]UserDisplay, error) {
 	First_Name, Last_Name FROM Users`
 	data, err := dbHandler.DB.Query(statement)
 	if err != nil {
-		fmt.Println("fuck2")
+
 		return nil, err
 	}
 	defer data.Close()
@@ -131,13 +136,13 @@ func GetAllUsers() ([]UserDisplay, error) {
 			&user.First_Name,
 			&user.Last_Name)
 		if err != nil {
-			fmt.Println("fuck4")
+
 			return nil, err
 		}
 		users = append(users, user)
 	}
 	if err := data.Err(); err != nil {
-		fmt.Println("fuck3")
+
 		return nil, err
 	}
 	return users, nil

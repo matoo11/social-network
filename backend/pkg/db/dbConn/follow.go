@@ -15,13 +15,18 @@ type Follow struct {
 }
 
 type FollowDisplay struct {
-	FollowerID int
-	FollowerUsername string
-	FollowerAvatarURL  string
-	FollowedID int
+	FollowerID           int
+	FollowerUsername     string
+	FollowerAvatarURL    string
+	FollowerAvatarNumber int
+	FollowedID           int
 }
 
 func CreateFollow(follow Follow) error {
+
+	if follow.FollowerID == follow.FollowedID {
+		return fmt.Errorf("you cannot follow yourself")
+	}
 
 	check, _ := IsFollowing(follow.FollowerID, follow.FollowedID)
 	if check {
@@ -41,7 +46,7 @@ func CreateFollow(follow Follow) error {
 	VALUES
 	(?, ?, ?, ?, ?, ?, ?)`
 
-	formattedCurrentTime := time.Now().Format("2006-01-02 15:04:05")
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
 
 	_, err := dbHandler.DB.Exec(
 		statement,
@@ -54,7 +59,7 @@ func CreateFollow(follow Follow) error {
 		true,
 	)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("create follow error: %v\n", err)
 		return err
 	}
 
@@ -108,7 +113,7 @@ func RequestStatus(requesterID int, requestedID int) (int, error) {
         WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1`,
 		requesterID, requestedID).Scan(&status)
 	if err != nil {
-		// fmt.Println(err)
+		//
 		return 0, err
 	}
 	return status, nil
@@ -122,6 +127,157 @@ func DeleteFollow(followerID int, followedID int) error {
 	if err != nil {
 		log.Println("Error deleting follower:", err)
 		return fmt.Errorf("failed to delete follow")
+	}
+
+	return nil
+}
+
+func CreateFollowRequest(requesterID int, receiverID int) error {
+	// Check if request already exists
+	var exists bool
+	err := dbHandler.DB.QueryRow(`
+		SELECT EXISTS(
+			SELECT 1 FROM Follow_Requests
+			WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1
+		)`, requesterID, receiverID).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("failed to check existing request: %v", err)
+	}
+	if exists {
+		return fmt.Errorf("follow request already sent")
+	}
+
+	// Status_ID = 1 for pending request (you may need to adjust this based on your Statuses table)
+	statement := `INSERT INTO Follow_Requests
+	(
+		Requester_ID,
+		Receiver_ID,
+		Status_ID,
+		Created_By_ID,
+		Creation_Time,
+		Last_Updated_By_ID,
+		Last_Updated_Time,
+		Is_Active
+	)
+	VALUES
+	(?, ?, ?, ?, ?, ?, ?, ?)`
+
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
+
+	_, err = dbHandler.DB.Exec(
+		statement,
+		requesterID,
+		receiverID,
+		1, // Status_ID = 1 for pending
+		requesterID,
+		formattedCurrentTime,
+		requesterID,
+		formattedCurrentTime,
+		true,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create follow request: %v", err)
+	}
+
+	return nil
+}
+func AcceptFollowRequest(requesterID int, receiverID int) error {
+	// First verify the request exists and is pending
+	var statusID int
+	err := dbHandler.DB.QueryRow(`
+		SELECT Status_ID FROM Follow_Requests
+		WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1`,
+		requesterID, receiverID).Scan(&statusID)
+	if err != nil {
+		return fmt.Errorf("follow request not found")
+	}
+	if statusID != 1 {
+		return fmt.Errorf("request is not pending")
+	}
+
+	// Create the follow relationship
+	follow := Follow{
+		FollowerID: requesterID,
+		FollowedID: receiverID,
+	}
+	err = CreateFollow(follow)
+	if err != nil {
+		return fmt.Errorf("failed to create follow: %v", err)
+	}
+
+	// Update the request status to accepted (Status_ID = 2)
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
+	statement := `UPDATE Follow_Requests
+		SET Status_ID = 2,
+			Last_Updated_By_ID = ?,
+			Last_Updated_Time = ?,
+			Is_Active = 0
+		WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1`
+
+	_, err = dbHandler.DB.Exec(statement, receiverID, formattedCurrentTime, requesterID, receiverID)
+	if err != nil {
+		return fmt.Errorf("failed to update request status: %v", err)
+	}
+
+	return nil
+}
+
+func CancelFollowRequest(requesterID int, receiverID int) error {
+	// Verify the request exists and is pending
+	var statusID int
+	err := dbHandler.DB.QueryRow(`
+		SELECT Status_ID FROM Follow_Requests
+		WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1`,
+		requesterID, receiverID).Scan(&statusID)
+	if err != nil {
+		return fmt.Errorf("follow request not found")
+	}
+	if statusID != 1 {
+		return fmt.Errorf("request is not pending")
+	}
+
+	// Deactivate the follow request
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
+	statement := `UPDATE Follow_Requests
+		SET Last_Updated_By_ID = ?,
+			Last_Updated_Time = ?,
+			Is_Active = 0
+		WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1`
+
+	_, err = dbHandler.DB.Exec(statement, requesterID, formattedCurrentTime, requesterID, receiverID)
+	if err != nil {
+		return fmt.Errorf("failed to cancel request: %v", err)
+	}
+
+	return nil
+}
+
+func RejectFollowRequest(requesterID int, receiverID int) error {
+	// Verify the request exists and is pending
+	var statusID int
+	err := dbHandler.DB.QueryRow(`
+		SELECT Status_ID FROM Follow_Requests
+		WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1`,
+		requesterID, receiverID).Scan(&statusID)
+	if err != nil {
+		return fmt.Errorf("follow request not found")
+	}
+	if statusID != 1 {
+		return fmt.Errorf("request is not pending")
+	}
+
+	// Update the request status to rejected (Status_ID = 3) and set Is_Active to 0
+	formattedCurrentTime := time.Now().UTC().Format("2006-01-02 15:04:05")
+	statement := `UPDATE Follow_Requests
+		SET Status_ID = 3,
+			Last_Updated_By_ID = ?,
+			Last_Updated_Time = ?,
+			Is_Active = 0
+		WHERE Requester_ID = ? AND Receiver_ID = ? AND Is_Active = 1`
+
+	_, err = dbHandler.DB.Exec(statement, receiverID, formattedCurrentTime, requesterID, receiverID)
+	if err != nil {
+		return fmt.Errorf("failed to update request status: %v", err)
 	}
 
 	return nil

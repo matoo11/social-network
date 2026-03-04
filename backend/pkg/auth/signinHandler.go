@@ -2,7 +2,6 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"social/backend/pkg/db/dbConn"
 	"strings"
@@ -31,36 +30,37 @@ func SigninHandler(w http.ResponseWriter, r *http.Request, data Login) {
 		UnauthorizedAccessHandler(w, r)
 		return
 	}
-	
+
 	if r.Method == http.MethodPost {
-		fmt.Println("here")
+
 		username := data.Username
 		password := data.Password
-		fmt.Println(username)
-		fmt.Println(password)
+
 		username = strings.TrimSpace(username)
 
 		if username == "" || password == "" {
 			feedBack := "username or password cannot be empty"
+			w.WriteHeader(http.StatusBadRequest)
 			RenderSigninFeedback(w, feedBack)
 			return
 		}
 
 		user, err := dbConn.VerifyUserPassword(username, password)
 		if err != nil {
-			fmt.Println(err)
+
 			feedBack := "wrong username or password"
-			fmt.Println((feedBack))
-			ErrorPage(w, http.StatusUnauthorized)
+
+			// ErrorPage(w, http.StatusUnauthorized)
+			w.WriteHeader(http.StatusUnauthorized)
 			RenderSigninFeedback(w, feedBack)
 			return
 		}
-		
-		SessionHandler(w, r, user.User_ID)
-		
-		} else {
-			ErrorPage(w, http.StatusMethodNotAllowed)
-		}
+
+		SessionHandler(w, r, user)
+
+	} else {
+		ErrorPage(w, http.StatusMethodNotAllowed)
+	}
 }
 
 func UnauthorizedAccessHandler(w http.ResponseWriter, r *http.Request) {
@@ -109,8 +109,6 @@ func ErrorPage(w http.ResponseWriter, status int) {
 func JsonDecode(w http.ResponseWriter, r *http.Request, data interface{}) error {
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		fmt.Println("here")
-		fmt.Println(err)
 
 		return err
 	}

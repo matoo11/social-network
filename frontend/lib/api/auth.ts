@@ -9,16 +9,20 @@ export async function loginUser(username: string, password: string) {
         });
 
         if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(errorText || 'Login failed');
+            const errorText = await res.json();
+            console.log('Error response body:', errorText.Feedback);
+            return { error: errorText.Feedback || 'Login failed' };
         }
 
-        return res;
+        const responseData = await res.json();
+
+        console.log('Login response:', responseData.data);
+        return { data: responseData.data };
     } catch (err: unknown) {
         if (err instanceof Error) {
-            throw new Error(err.message);
+            return { error: err.message };
         } else {
-            throw new Error('Unexpected error occurred');
+            return { error: 'Unexpected error occurred' };
         }
     }
 }
@@ -33,10 +37,11 @@ export async function registerUser(signUpData: {
     firstName: string;
     lastName: string;
     gender: string;
+    avatarNumber: number;
+    aboutMe: string;
 }) {
     try {
         console.log('Registering user with data:', signUpData);
-        debugger;
         const res = await fetch('http://localhost:8080/api/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -45,16 +50,16 @@ export async function registerUser(signUpData: {
         });
 
         if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(errorText || 'Signup failed');
+            const errorText = await res.json();
+            return { error: errorText.Feedback || 'Registration failed' };
         }
 
-        return res;
+        return { data: res };
     } catch (err: unknown) {
         if (err instanceof Error) {
-            throw new Error(err.message);
+            return { error: err.message };
         } else {
-            throw new Error('Unexpected error occurred');
+            return { error: 'Unexpected error occurred' };
         }
     }
 }
@@ -73,6 +78,39 @@ export async function logoutUser() {
         }
 
         return res;
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            throw new Error(err.message);
+        } else {
+            throw new Error('Unexpected error occurred');
+        }
+    }
+}
+
+export async function fetchUserData() {
+    try {
+        const res = await fetch('http://localhost:8080/api/getUserData', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (res.status === 401) {
+            throw new Error('unauthorized user');
+        }
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(errorText || 'Fetching user data failed');
+        }
+
+        const responseData = await res.json();
+
+        if (!responseData || !responseData.data) {
+            throw new Error('Current user is guest');
+        }
+
+        return responseData.data;
     } catch (err: unknown) {
         if (err instanceof Error) {
             throw new Error(err.message);

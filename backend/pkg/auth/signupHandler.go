@@ -8,21 +8,22 @@ import (
 )
 
 type SignupRequest struct {
-	Username        string `json:"username"`
-	Nickname        string `json:"nickname"`
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirmPassword"`
-	FirstName       string `json:"firstName"`
-	LastName        string `json:"lastName"`
+	Username        string     `json:"username"`
+	Nickname        string     `json:"nickname"`
+	Email           string     `json:"email"`
+	Password        string     `json:"password"`
+	ConfirmPassword string     `json:"confirmPassword"`
+	FirstName       string     `json:"firstName"`
+	LastName        string     `json:"lastName"`
 	DateOfBirth     *time.Time `json:"dateOfBirth"`
-	Gender          string `json:"gender"`
+	Gender          string     `json:"gender"`
+	AvatarNumber    int        `json:"avatarNumber"`
+	AboutMe         string     `json:"aboutMe"`
 }
 
 // ============================================================
 //                   Main Functions
 // ============================================================
-
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var data SignupRequest
@@ -30,7 +31,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorPage(w, 400)
 		return
 	}
-	
+
 	if r.Method == http.MethodGet {
 		return
 	}
@@ -47,20 +48,18 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		userInfo := GenerateNewValidUser(requestBody)
-		
+
 		if err = dbConn.CreateUser(userInfo); err != nil {
-			fmt.Println("here?")
-			fmt.Println(err)
+
 			http.Error(w, http.StatusText(500), 500)
 			return
 		}
 
-		fmt.Println("fuck sign up")
 		feedback := "Registration successful!"
 		RenderSignupFeedback(w, feedback, "success")
 		// updateOnlineUsers()
 	} else {
-		fmt.Println("here2")
+
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }
@@ -70,14 +69,29 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 // ============================================================
 
 func GenerateNewValidUser(requestInfo SignupRequest) dbConn.User {
+	// Default to avatar 1 if avatarNumber is 0 or invalid
+	avatarNumber := requestInfo.AvatarNumber
+	if avatarNumber < 1 || avatarNumber > 4 {
+		avatarNumber = 1
+	}
+
+	// If nickname is empty, use username
+	nickname := requestInfo.Nickname
+	if nickname == "" {
+		nickname = requestInfo.Username
+	}
+
 	user := dbConn.User{
-		User_Name:    requestInfo.Username,
-		Password:    requestInfo.Password,
-		Email:       requestInfo.Email,
-		First_Name:   requestInfo.FirstName,
-		Last_Name:    requestInfo.LastName,
+		User_Name:     requestInfo.Username,
+		Nick_Name:     nickname,
+		Password:      requestInfo.Password,
+		Email:         requestInfo.Email,
+		First_Name:    requestInfo.FirstName,
+		Last_Name:     requestInfo.LastName,
 		Date_Of_Birth: requestInfo.DateOfBirth,
-		Gender: requestInfo.Gender,
+		Gender:        requestInfo.Gender,
+		Image_ID:      avatarNumber,
+		About_Me:      requestInfo.AboutMe,
 	}
 	return user
 }
@@ -103,5 +117,5 @@ func RenderSignupFeedback(w http.ResponseWriter, feedback string, feedbackType s
 	}
 
 	JsonEncode(w, signUpFeedback)
-	fmt.Println(feedback, feedbackType)
+
 }

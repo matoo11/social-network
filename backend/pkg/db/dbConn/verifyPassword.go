@@ -46,7 +46,7 @@ func VerifyUserPassword(username, password string) (*User, error) {
 				)
 			if errr != nil {
 				if err == sql.ErrNoRows {
-					fmt.Println("verify1")
+
 					return nil, fmt.Errorf("invalid username or password")
 				}
 				return nil, fmt.Errorf("error querying database: %v", err)
@@ -58,7 +58,7 @@ func VerifyUserPassword(username, password string) (*User, error) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		fmt.Println("verify")
+
 		return nil, fmt.Errorf("invalid username or password")
 	}
 

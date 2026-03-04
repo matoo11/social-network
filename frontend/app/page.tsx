@@ -1,18 +1,21 @@
+import Navbar from '@/components/General/Navbar';
+
 export default function Home() {
     return (
-        <section className="min-h-screen bg-white dark:bg-gray-900">
-            <div className="mt-[10vh] py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
-                <h1 className="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-                    We invest in the world’s potential
+        <section className="min-h-screen bg-gray-900 flex flex-col">
+            <div className="flex-1 flex flex-col items-center justify-center py-12 px-5 sm:px-8 text-center">
+                <h1 className="mb-4 text-3xl sm:text-4xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white">
+                    Social Network Platform
                 </h1>
-                <p className="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 lg:px-48 dark:text-gray-400">
-                    Here at Flowbite we focus on markets where technology, innovation, and capital
-                    can unlock long-term value and drive economic growth.
+                <p className="mb-8 text-base sm:text-lg lg:text-xl font-normal text-gray-400 max-w-2xl">
+                    Welcome to a place where connections come alive. Our social network makes it
+                    easy to share moments, discover new ideas, and stay close to the people who
+                    matter most—all in one simple, friendly space.
                 </p>
-                <div className="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 gap-10">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
                     <a
                         href="/register"
-                        className="inline-flex justify-center items-center w-40 py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900"
+                        className="inline-flex justify-center items-center w-40 py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors"
                     >
                         Get started
                         <svg
@@ -33,9 +36,9 @@ export default function Home() {
                     </a>
                     <a
                         href="/login"
-                        className="inline-flex w-40 justify-center items-center py-3 px-5 sm:ms-4 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                        className="inline-flex w-40 justify-center items-center py-3 px-5 text-sm font-medium text-gray-400 rounded-lg border border-gray-600 hover:text-white hover:bg-gray-800 transition-colors"
                     >
-                        login
+                        Login
                     </a>
                 </div>
             </div>

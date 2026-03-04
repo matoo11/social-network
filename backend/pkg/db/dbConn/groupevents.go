@@ -4,11 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"social/backend/pkg/db/dbHandler"
-	"sync"
 	"time"
 )
-
-var ensureGroupEventTableOnce sync.Once
 
 type GroupEvent struct {
 	EventID      int
@@ -27,32 +24,7 @@ type EventResponseCount struct {
 	Count      int
 }
 
-func ensureGroupEventTable() error {
-	var err error
-	ensureGroupEventTableOnce.Do(func() {
-		statement := `CREATE TABLE IF NOT EXISTS Group_Events (
-			Group_Event_ID INTEGER NOT NULL,
-			Group_ID INTEGER NOT NULL,
-			Event_ID INTEGER NOT NULL,
-			Created_By_ID INTEGER NOT NULL,
-			Creation_Time DATETIME NOT NULL,
-			Last_Updated_By_ID INTEGER NOT NULL,
-			Last_Updated_Time DATETIME NOT NULL,
-			Is_Active BOOL NOT NULL DEFAULT TRUE,
-			PRIMARY KEY (Group_Event_ID AUTOINCREMENT),
-			FOREIGN KEY (Group_ID) REFERENCES User_Groups (Group_ID) ON UPDATE CASCADE ON DELETE CASCADE,
-			FOREIGN KEY (Event_ID) REFERENCES Events (Event_ID) ON UPDATE CASCADE ON DELETE CASCADE
-		)`
-		_, err = dbHandler.DB.Exec(statement)
-	})
-	return err
-}
-
 func CreateGroupEvent(groupID, creatorID int, title, description string, eventTime time.Time) (GroupEvent, error) {
-	if err := ensureGroupEventTable(); err != nil {
-		return GroupEvent{}, err
-	}
-
 	eventStatement := `INSERT INTO Events (
 		Event_Title,
 		Event_Description,
@@ -102,10 +74,6 @@ func CreateGroupEvent(groupID, creatorID int, title, description string, eventTi
 }
 
 func GetGroupEvents(groupID int) ([]GroupEvent, error) {
-	if err := ensureGroupEventTable(); err != nil {
-		return nil, err
-	}
-
 	statement := `
 		SELECT e.Event_ID,
 		       ge.Group_ID,
@@ -127,14 +95,13 @@ func GetGroupEvents(groupID int) ([]GroupEvent, error) {
 	var events []GroupEvent
 	for rows.Next() {
 		var evt GroupEvent
-		var eventTimeStr string
+		var eventTimeStr time.Time
 		err := rows.Scan(&evt.EventID, &evt.GroupID, &evt.Title, &evt.Description, &eventTimeStr, &evt.CreatorID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan group event: %w", err)
 		}
-		if parsed, parseErr := time.Parse("2006-01-02 15:04:05", eventTimeStr); parseErr == nil {
-			evt.EventTime = parsed
-		}
+		
+		evt.EventTime = eventTimeStr
 		counts, err := GetEventResponseCounts(evt.EventID)
 		if err != nil {
 			return nil, err
@@ -143,6 +110,46 @@ func GetGroupEvents(groupID int) ([]GroupEvent, error) {
 		events = append(events, evt)
 	}
 	return events, nil
+}
+
+func GetGroupEventByID(eventID int) (GroupEvent, error) {
+	statement := `
+		SELECT e.Event_ID,
+		       ge.Group_ID,
+		       e.Event_Title,
+		       e.Event_Description,
+		       e.Event_Time,
+		       e.User_ID
+		FROM Group_Events ge
+		JOIN Events e ON ge.Event_ID = e.Event_ID
+		WHERE e.Event_ID = ? AND ge.Is_Active = 1 AND e.Is_Active = 1
+		LIMIT 1`
+
+	var evt GroupEvent
+	var eventTimeStr string
+	err := dbHandler.DB.QueryRow(statement, eventID).Scan(
+		&evt.EventID,
+		&evt.GroupID,
+		&evt.Title,
+		&evt.Description,
+		&eventTimeStr,
+		&evt.CreatorID,
+	)
+	if err != nil {
+		return GroupEvent{}, fmt.Errorf("failed to fetch group event: %w", err)
+	}
+
+	if parsed, parseErr := time.Parse("2006-01-02 15:04:05", eventTimeStr); parseErr == nil {
+		evt.EventTime = parsed
+	}
+
+	counts, err := GetEventResponseCounts(evt.EventID)
+	if err != nil {
+		return GroupEvent{}, err
+	}
+	evt.Responses = counts
+
+	return evt, nil
 }
 
 func GetUserEventResponse(eventID, userID int) (*int, error) {
@@ -202,10 +209,6 @@ func GetEventResponseCounts(eventID int) ([]EventResponseCount, error) {
 }
 
 func SetEventResponse(eventID, userID, optionID int) error {
-	if err := ensureGroupEventTable(); err != nil {
-		return err
-	}
-
 	statement := `INSERT INTO Events_Users_Options (
 		Event_ID,
 		User_ID,
@@ -231,10 +234,6 @@ func SetEventResponse(eventID, userID, optionID int) error {
 }
 
 func GetGroupIDForEvent(eventID int) (int, error) {
-	if err := ensureGroupEventTable(); err != nil {
-		return 0, err
-	}
-
 	var groupID int
 	err := dbHandler.DB.QueryRow(`SELECT Group_ID FROM Group_Events WHERE Event_ID = ? AND Is_Active = 1`, eventID).Scan(&groupID)
 	if err != nil {
@@ -257,4 +256,3 @@ func GetEventOptionByID(optionID int) (string, error) {
 	}
 	return optionName, nil
 }
-

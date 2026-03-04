@@ -3,8 +3,8 @@ package auth
 import (
 	"fmt"
 	"net"
-	"social/backend/pkg/db/dbHandler"
 	re "regexp"
+	"social/backend/pkg/db/dbHandler"
 	"strconv"
 	"strings"
 	"time"
@@ -30,6 +30,9 @@ const (
 	MinNameLength = 2
 	MaxNameLength = 50
 
+	// about me constants
+	MaxAboutMeLength = 300
+
 	// age constant
 	MinAge = 13
 	MaxAge = 120
@@ -42,7 +45,7 @@ const (
 // VerifyUserInfo - Verifies the provided user details, ensuring they meet validation criteria.
 func VerifyUserInfo(userInfo SignupRequest) error {
 	verifications := []func() error{
-		func() error { return VerifyNickname(userInfo.Username) },
+		func() error { return VerifyUsername(userInfo.Username) },
 		func() error { return VerifyEmail(userInfo.Email) },
 		func() error { return VerifyPassword(userInfo.Password) },
 		func() error { return VerifyConfirmPassword(userInfo.ConfirmPassword, userInfo.Password) },
@@ -54,6 +57,21 @@ func VerifyUserInfo(userInfo SignupRequest) error {
 
 	for _, verify := range verifications {
 		if err := verify(); err != nil {
+			return err
+		}
+	}
+
+	// Validate nickname only if provided (optional field)
+
+	if userInfo.Nickname != "" {
+		if err := VerifyNickname(userInfo.Nickname); err != nil {
+			return err
+		}
+	}
+
+	// Validate about me only if provided (optional field)
+	if userInfo.AboutMe != "" {
+		if err := VerifyAboutMe(userInfo.AboutMe); err != nil {
 			return err
 		}
 	}
@@ -81,11 +99,36 @@ func VerifyDateOfBirth(dob *time.Time) error {
 	return nil
 }
 
+func VerifyUsername(username string) error {
+	if len(username) < MinNicknameLength {
+		return fmt.Errorf("username must be at least %d characters long", MinNicknameLength)
+	}
+	if len(username) >= MaxNicknameLength {
+		return fmt.Errorf("username must not exceed max length of %d characters", MaxNicknameLength)
+	}
+
+	re1 := re.MustCompile(nicknameRegex)
+	if !re1.MatchString(username) {
+		return fmt.Errorf("username must only contain letters, numbers, and underscores")
+	}
+
+	exists, err := IsUsernameExists(username)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return fmt.Errorf("username already exists")
+	}
+
+	return nil
+}
+
 func VerifyNickname(nickname string) error {
 	if len(nickname) < MinNicknameLength {
 		return fmt.Errorf("nickname must be at least %d characters long", MinNicknameLength)
 	}
-	if len(nickname) > MaxNicknameLength {
+	if len(nickname) >= MaxNicknameLength {
 		return fmt.Errorf("nickname must not exceed max length of %d characters", MaxNicknameLength)
 	}
 
@@ -94,13 +137,12 @@ func VerifyNickname(nickname string) error {
 		return fmt.Errorf("nickname must only contain letters, numbers, and underscores")
 	}
 
-	exists, err := IsNicknameExists(nickname)
-	if err != nil {
-		return err
-	}
+	return nil
+}
 
-	if exists {
-		return fmt.Errorf("nickname already exists")
+func VerifyAboutMe(aboutMe string) error {
+	if len(aboutMe) > MaxAboutMeLength {
+		return fmt.Errorf("about me must not exceed max length of %d characters", MaxAboutMeLength)
 	}
 
 	return nil
@@ -117,11 +159,11 @@ func VerifyEmail(email string) error {
 
 	domain, err := GetEmailDomain(email)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not extract domain from email")
 	}
 
 	if err := VerifyDomainRecords(domain); err != nil {
-		return err
+		return fmt.Errorf("email domain validation failed")
 	}
 
 	exists, err := IsEmailExists(email)
@@ -252,6 +294,15 @@ func CalculateAge(dob *time.Time) (int, error) {
 	age := int(ageDuration.Hours() / 24 / 365.25)
 
 	return age, nil
+}
+
+func IsUsernameExists(username string) (bool, error) {
+	var exists bool
+	err := dbHandler.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE User_Name = ?)", username).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("error checking username: %v", err)
+	}
+	return exists, nil
 }
 
 func IsNicknameExists(nickname string) (bool, error) {

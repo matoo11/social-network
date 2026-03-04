@@ -1,0 +1,18 @@
+CREATE TABLE Comments
+(
+  Comment_ID   INTEGER NOT NULL,
+  Comment_Text TEXT NOT NULL CHECK (length(Comment_Text) <= 1000),
+  Post_ID      INTEGER NOT NULL,
+  Image_ID     INTEGER DEFAULT NULL,
+  Created_By_ID      INTEGER  NOT NULL,
+  Creation_Time      DATETIME NOT NULL,
+  Last_Updated_By_ID INTEGER  NOT NULL,
+  Last_Updated_Time  DATETIME NOT NULL,
+  Is_Active          BOOL     NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (Comment_ID AUTOINCREMENT),
+  FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Image_ID) REFERENCES Images (Image_ID)
+    ON UPDATE CASCADE ON DELETE SET DEFAULT
+  CHECK (length(Comment_Text) <= 1000)
+);

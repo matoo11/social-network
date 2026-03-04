@@ -174,6 +174,7 @@ CREATE TABLE Comments
   Comment_ID   INTEGER NOT NULL,
   Comment_Text TEXT NOT NULL CHECK (length(Comment_Text) <= 1000),
   Post_ID      INTEGER NOT NULL,
+  Image_ID     INTEGER DEFAULT NULL,
   Created_By_ID      INTEGER  NOT NULL,
   Creation_Time      DATETIME NOT NULL,
   Last_Updated_By_ID INTEGER  NOT NULL,
@@ -182,6 +183,8 @@ CREATE TABLE Comments
   PRIMARY KEY (Comment_ID AUTOINCREMENT),
   FOREIGN KEY (Post_ID) REFERENCES Posts (Post_ID)
     ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (Image_ID) REFERENCES Images (Image_ID)
+    ON UPDATE CASCADE ON DELETE SET DEFAULT
   CHECK (length(Comment_Text) <= 1000)
 );
 
@@ -284,7 +287,7 @@ CREATE TABLE Group_Invite_Requests
 CREATE TABLE Events
 (
   Event_ID   INTEGER NOT NULL,
-  Event_Title VARCHAR(100) NOT NULL UNIQUE CHECK (length(Event_Title) <= 100),
+  Event_Title VARCHAR(100) NOT NULL CHECK (length(Event_Title) <= 100),
   Event_Description TEXT CHECK (length(Event_Description) <= 500),
   Event_Time DATETIME NOT NULL,
   User_ID     INTEGER NOT NULL,
@@ -425,9 +428,6 @@ CREATE TABLE Notifications
   Last_Updated_Time  DATETIME NOT NULL,
   Is_Active          BOOL     NOT NULL DEFAULT TRUE,
   PRIMARY KEY (Notification_ID AUTOINCREMENT),
-  FOREIGN KEY (Source_ID) REFERENCES Users (User_ID)
-    ON UPDATE CASCADE
-    ON DELETE CASCADE,
   FOREIGN KEY (Target_ID) REFERENCES Users (User_ID)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
@@ -457,7 +457,8 @@ INSERT INTO Profile_Types (Profile_Type_Name, Created_By_ID, Creation_Time, Last
 INSERT INTO Post_Types (Post_Type_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
 ('Public', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
 ('Almost Private', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
-('Private', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);
+('Private', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Group', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);
 
 INSERT INTO Image_Usage_Types (Image_Usage_Type_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
 ('Profile Image', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
@@ -479,7 +480,8 @@ INSERT INTO Notification_Types (Notification_Type_Name, Created_By_ID, Creation_
 ('Group Invite', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
 ('Group Invite Accepted', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
 ('Group Invite Rejected', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
-('Event Invitation', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);   
+('Event Invitation', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),
+('Join Group Request', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);   
 
 INSERT INTO EVENT_OPTIONS (Event_Option_Name, Created_By_ID, Creation_Time, Last_Updated_By_ID, Last_Updated_Time, Is_Active) VALUES
 ('Going', 1, CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1),

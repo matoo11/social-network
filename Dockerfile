@@ -15,7 +15,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go binary with CGO enabled (needed for go-sqlite3)
-RUN GOOS=linux GOARCH=amd64 go build -o app
+RUN GOOS=linux CGO_ENABLED=1 go build -o app
 
 # ---------- Runtime Stage ----------
 FROM alpine:latest

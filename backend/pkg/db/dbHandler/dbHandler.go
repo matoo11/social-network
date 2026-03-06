@@ -22,14 +22,31 @@ func OpenDB() error {
 	migrationsPath := "file://backend/pkg/db/migrations/sqlite"
 	var err error
 
-	DB, err = sql.Open("sqlite3", dbFilePath)
+	DB, err = sql.Open("sqlite3", dbFilePath+"?_journal_mode=WAL&_busy_timeout=5000")
 	if err != nil {
 		return fmt.Errorf("failed to open DB: %v", err)
 	}
 
+	// Set connection pool settings for better concurrency
+	DB.SetMaxOpenConns(25)
+	DB.SetMaxIdleConns(5)
+	DB.SetConnMaxLifetime(0)
+
 	_, err = DB.Exec("PRAGMA foreign_keys = ON;")
 	if err != nil {
 		return fmt.Errorf("failed to enable foreign key constraints: %v", err)
+	}
+
+	// Verify WAL mode is enabled
+	var journalMode string
+	err = DB.QueryRow("PRAGMA journal_mode;").Scan(&journalMode)
+	if err != nil {
+		return fmt.Errorf("failed to check journal mode: %v", err)
+	}
+	if journalMode != "wal" {
+		logs.LogError(fmt.Sprintf("Warning: WAL mode not enabled, current mode: %s", journalMode))
+	} else {
+		logs.LogInfo("WAL mode enabled for concurrent write support")
 	}
 
 	if err := runMigrations(DB, migrationsPath); err != nil {

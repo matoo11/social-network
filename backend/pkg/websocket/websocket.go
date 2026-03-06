@@ -59,7 +59,11 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 
 	time.Sleep(100 * time.Millisecond)
 	conn := &Conn{Conn: con}
+
+	clientsLock.Lock()
 	clients[LoggedInUserID] = conn
+	clientsLock.Unlock()
+
 	log.Println("Client connected")
 
 	UpdateUserList()
@@ -152,7 +156,16 @@ func GetClientConn(userID int) *Conn {
 }
 
 func BroadCast(response any) {
+	clientsLock.Lock()
+
+	clientSnapshot := make([]*Conn, 0, len(clients))
 	for _, value := range clients {
+		clientSnapshot = append(clientSnapshot, value)
+	}
+	
+	clientsLock.Unlock()
+
+	for _, value := range clientSnapshot {
 		value.Lock.Lock()
 		value.Conn.WriteJSON(response)
 		value.Lock.Unlock()

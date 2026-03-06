@@ -24,6 +24,9 @@ func InitializeLogger(logFilePath string) error {
 	termLogger = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 	fileLogger = log.New(logFile, "", log.LstdFlags|log.Lshortfile)
 
+	// logToTerminal = true
+	// logToFile = true
+
 	return nil
 }
 

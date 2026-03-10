@@ -178,7 +178,7 @@ const PrivateChatAreaContent: React.FC<ChatProps> = ({ chatWith, chatter, chatID
         }
         cooldownTimerRef.current = setTimeout(() => {
             setCooldownActive(false);
-        }, 500);
+        }, 1100);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
